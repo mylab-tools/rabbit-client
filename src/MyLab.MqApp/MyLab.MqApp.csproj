@@ -9,6 +9,7 @@
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>1.0.0.1404</AssemblyVersion>
     <FileVersion>1.0.0.1404</FileVersion>
+    <Description>Message Queue client application. Contains client and server abilities based on RabbitMQ implementation.</Description>
   </PropertyGroup>
 
 </Project>
