@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MyLab.MqApp
+namespace MyLab.Mq
 {
     /// <summary>
     /// Provides abilities to integrate MqApp login into application
@@ -13,7 +13,7 @@ namespace MyLab.MqApp
         /// </summary>
         public static IServiceCollection AddMqPublisher(this IServiceCollection services)
         {
-            return services.AddSingleton<IMqPublisher>(new DefaultMqPublisher());
+            return services.AddSingleton<IMqPublisher, DefaultMqPublisher>();
         }
 
         /// <summary>

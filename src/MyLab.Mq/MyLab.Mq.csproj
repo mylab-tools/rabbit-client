@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Andrey O.</Authors>
+    <Company>Andrey O.</Company>
+    <Copyright>Copyright (c) 2019 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <PackageProjectUrl>https://github.com/ozzy-ext-mylab/mq</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ozzy-ext-mylab/mq.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.0.0.1604</AssemblyVersion>
+    <FileVersion>1.0.0.1604</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MyLab.StatusProvider" Version="1.2.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.2" />
+  </ItemGroup>
+
+</Project>

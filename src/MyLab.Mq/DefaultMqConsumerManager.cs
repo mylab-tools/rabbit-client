@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MyLab.MqApp
+namespace MyLab.Mq
 {
     class DefaultMqConsumerManager : IMqConsumerManager
     {

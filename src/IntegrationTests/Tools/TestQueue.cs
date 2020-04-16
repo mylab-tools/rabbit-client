@@ -5,8 +5,6 @@ namespace IntegrationTests.Tools
 {
     static class TestQueue
     {
-        public static readonly string Name = "mylab:mq-app:test";
-        
         public static ConnectionFactory CreateConnectionFactory()
         {
             var mqTestServer = Environment.GetEnvironmentVariable("MYLAB_TEST_MQ");
@@ -29,22 +27,17 @@ namespace IntegrationTests.Tools
             };
         }
 
-        public static void Create()
+        public static QueueTestCtx Create(string queueName = null)
         {
             var factory = CreateConnectionFactory();
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            channel.QueueDeclare(Name, autoDelete:false, exclusive:false);
-        }
+            string resName = queueName ?? ("mylab:mq-app:test:" + Guid.NewGuid().ToString("N"));
 
-        public static void Delete()
-        {
-            var factory = CreateConnectionFactory();
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
+            channel.QueueDeclare(resName, autoDelete:false, exclusive:false);
 
-            channel.QueueDelete(Name);
+            return new QueueTestCtx(resName);
         }
     }
 }

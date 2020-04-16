@@ -1,14 +1,21 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
-using MyLab.MqApp;
+using MyLab.Mq;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
 namespace IntegrationTests.Tools
 {
-    static class TestMqSender
+    class TestMqSender
     {
-        public static void Queue(object message)
+        private readonly string _queue;
+
+        public TestMqSender(string queue)
+        {
+            _queue = queue;
+        }
+
+        public void Queue(object message)
         {
             var factory = TestQueue.CreateConnectionFactory();
             using var connection = factory.CreateConnection();
@@ -21,7 +28,7 @@ namespace IntegrationTests.Tools
 
             channel.BasicPublish(
                 exchange: string.Empty,
-                routingKey:TestQueue.Name,
+                routingKey: _queue,
                 body: messageBin);
         }
     }

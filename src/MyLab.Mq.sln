@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLab.MqApp", "MyLab.MqApp\MyLab.MqApp.csproj", "{1C51010A-FD7E-4095-8FC9-EBA2FD5F81C3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestServer", "TestServer\TestServer.csproj", "{B6AF42FC-EE11-41E4-A96A-86CD7082B6F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{6194CB98-54A8-419C-8C9B-BA339B24E1F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{6194CB98-54A8-419C-8C9B-BA339B24E1F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{A9DC4FF9-3153-4947-B73E-D5AB17271C6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{A9DC4FF9-3153-4947-B73E-D5AB17271C6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLab.Mq", "MyLab.Mq\MyLab.Mq.csproj", "{3602E2F6-1B2F-4CC1-88AD-186F95B020C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1C51010A-FD7E-4095-8FC9-EBA2FD5F81C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C51010A-FD7E-4095-8FC9-EBA2FD5F81C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C51010A-FD7E-4095-8FC9-EBA2FD5F81C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C51010A-FD7E-4095-8FC9-EBA2FD5F81C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6AF42FC-EE11-41E4-A96A-86CD7082B6F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6AF42FC-EE11-41E4-A96A-86CD7082B6F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6AF42FC-EE11-41E4-A96A-86CD7082B6F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{A9DC4FF9-3153-4947-B73E-D5AB17271C6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9DC4FF9-3153-4947-B73E-D5AB17271C6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9DC4FF9-3153-4947-B73E-D5AB17271C6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3602E2F6-1B2F-4CC1-88AD-186F95B020C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3602E2F6-1B2F-4CC1-88AD-186F95B020C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3602E2F6-1B2F-4CC1-88AD-186F95B020C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3602E2F6-1B2F-4CC1-88AD-186F95B020C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

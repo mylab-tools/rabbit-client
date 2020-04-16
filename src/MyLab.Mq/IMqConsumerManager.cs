@@ -1,4 +1,4 @@
-﻿namespace MyLab.MqApp
+﻿namespace MyLab.Mq
 {
     /// <summary>
     /// Manages consumers and incoming messages

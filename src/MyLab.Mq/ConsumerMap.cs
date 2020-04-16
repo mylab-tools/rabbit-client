@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MyLab.MqApp
+namespace MyLab.Mq
 {
     class ConsumerMap
     {

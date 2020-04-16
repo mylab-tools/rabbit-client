@@ -1,5 +1,5 @@
 using System;
-using MyLab.MqApp;
+using MyLab.Mq;
 using Xunit;
 
 namespace UnitTests
@@ -17,25 +17,28 @@ namespace UnitTests
         public void ShouldFailWhenModelNotMarkedByQueueAttr()
         {
             //Arrange
-            var msg = new TestModelWithoutAttr();
+            var msgType = typeof(TestModelWithoutAttr);
 
-            //Act & Assert
-            Assert.Throws<InvalidOperationException>(() => MqMsgModelDesc.GetFromModel(msg));
+            //Act
+            var desc = MqMsgModelDesc.GetFromModel(msgType);
 
+            //Assert
+            Assert.Null(desc);
         }
 
         [Fact]
         public void ShouldProvideDesc()
         {
             //Arrange
-            var msg = new TestModelWithAttr();
+            var msgType = typeof(TestModelWithAttr);
 
             //Act 
-            var desc = MqMsgModelDesc.GetFromModel(msg);
+            var desc = MqMsgModelDesc.GetFromModel(msgType);
 
             //Assert
             Assert.NotNull(desc);
-            Assert.Equal("foo", desc.QueueName);
+            Assert.Equal("foo", desc.Routing);
+            Assert.Equal("bar", desc.Exchange);
         }
 
         class TestModelWithoutAttr
@@ -43,7 +46,7 @@ namespace UnitTests
 
         }
 
-        [Queue("foo")]
+        [Mq(Routing = "foo", Exchange = "bar")]
         class TestModelWithAttr
         {
 

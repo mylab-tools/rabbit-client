@@ -1,32 +1,38 @@
 ﻿using System;
+using System.Diagnostics;
 using IntegrationTests.Tools;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
     public class ToolsBehavior : IDisposable
     {
-        public ToolsBehavior()
+        private readonly ITestOutputHelper _output;
+        private readonly QueueTestCtx _queueCtx;
+
+        public ToolsBehavior(ITestOutputHelper output)
         {
-            TestQueue.Create();    
+            _output = output;
+            _queueCtx = TestQueue.Create();    
         }
 
         [Fact]
         public void ShouldSendAndReceiveMessage()
         {
             //Arrange
-            TestMqSender.Queue("foo");
+            _queueCtx.CreateSender().Queue("foo");
 
             //Act
-            var received = TestMqConsumer.Listen<string>();
+            var received = _queueCtx.CreateListener().Listen<string>();
 
             //Assert
-            Assert.Equal("foo", received);
+            Assert.Equal("foo", received.Payload);
         }
 
         public void Dispose()
         {
-            TestQueue.Delete();
+            _queueCtx.Dispose();
         }
     }
 }

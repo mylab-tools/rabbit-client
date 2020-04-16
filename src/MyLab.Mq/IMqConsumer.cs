@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MyLab.MqApp
+namespace MyLab.Mq
 {
     /// <summary>
     /// Represent message queue consumer
