@@ -24,11 +24,14 @@ namespace MyLab.Mq
             this IServiceCollection services,
             Action<IMqConsumerRegistrar> consumerRegistration)
         {
-            var map = new ConsumerMap();
-            consumerRegistration(map.CreateRegistrar());
-            var manager = new DefaultMqConsumerManager(map);
+            if (consumerRegistration == null) throw new ArgumentNullException(nameof(consumerRegistration));
 
-            return services.AddSingleton<IMqConsumerManager>(manager);
+            var registry = new DefaultMqConsumerRegistry();
+            consumerRegistration(registry.CreateRegistrar());
+
+            return services.AddSingleton<IMqConsumerRegistry>(registry)
+                .AddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>()
+                .AddSingleton<DefaultMqConsumerManager>();
         }
     }
 

@@ -7,10 +7,10 @@ namespace MyLab.Mq
 {
     class MqChannelProvider : IDisposable
     {
-        private readonly MqConnectionProvider _connectionProvider;
+        private readonly IMqConnectionProvider _connectionProvider;
         private readonly Dictionary<int, IModel> _channels = new Dictionary<int, IModel>();
 
-        public MqChannelProvider(MqConnectionProvider connectionProvider)
+        public MqChannelProvider(IMqConnectionProvider connectionProvider)
         {
             _connectionProvider = connectionProvider;
         }

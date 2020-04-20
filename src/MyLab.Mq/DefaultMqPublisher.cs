@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using Microsoft.Extensions.Options;
 using MyLab.StatusProvider;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -11,28 +10,14 @@ namespace MyLab.Mq
     class DefaultMqPublisher : IMqPublisher, IDisposable
     {
         private readonly IAppStatusService _statusService;
-        private readonly MqConnectionProvider _connectionProvider;
+        private readonly IMqConnectionProvider _connectionProvider;
         private readonly MqChannelProvider _channelProvider;
-
-        public DefaultMqPublisher(IOptions<MqOptions> options)
-            : this(options.Value, null)
-        {
-        }
-        public DefaultMqPublisher(IOptions<MqOptions> options, IAppStatusService statusService)
-            :this(options.Value, statusService)
-        {
-        }
-
-        public DefaultMqPublisher(MqOptions options, IAppStatusService statusService)
-            : this(OptionToConnectionFactory(options), statusService)
-        {
-        }
-
-        public DefaultMqPublisher(ConnectionFactory connectionFactory, IAppStatusService statusService)
+        
+        public DefaultMqPublisher(IMqConnectionProvider connectionProvider, IAppStatusService statusService)
         {
             _statusService = statusService;
 
-            _connectionProvider = new MqConnectionProvider(connectionFactory);
+            _connectionProvider = connectionProvider;
             _channelProvider = new MqChannelProvider(_connectionProvider);
         }
 

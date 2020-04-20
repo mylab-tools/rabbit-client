@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines a Message Queue publisher
     /// </summary>
-    public interface IMqPublisher
+    public interface IMqPublisher 
     {
         /// <summary>
         /// Publish message into queue
