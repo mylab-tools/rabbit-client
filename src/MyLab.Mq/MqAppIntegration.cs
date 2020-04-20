@@ -1,12 +1,13 @@
 ﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MyLab.Mq
 {
     /// <summary>
-    /// Provides abilities to integrate MqApp login into application
+    /// Contains extensions to integrate Mq abilities into application
     /// </summary>
-    public static class MqAppIntegration
+    public static class MqIntegration
     {
         /// <summary>
         /// Add MQ publisher <see cref="IMqPublisher"/> in application dependency container
@@ -28,6 +29,22 @@ namespace MyLab.Mq
             var manager = new DefaultMqConsumerManager(map);
 
             return services.AddSingleton<IMqConsumerManager>(manager);
+        }
+    }
+
+    public static class MqConfig
+    {
+        public const string DefaultConfigSectionName = "Mq";
+
+        /// <summary>
+        /// Loads configuration for MessageQueue connection
+        /// </summary>
+        public static IServiceCollection LoadMqConfig(
+            this IServiceCollection services, 
+            IConfiguration configuration, 
+            string sectionName = DefaultConfigSectionName)
+        {
+            return services.Configure<MqOptions>(configuration.GetSection(sectionName));
         }
     }
 }
