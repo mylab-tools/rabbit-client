@@ -11,6 +11,11 @@
         public string Host { get; set; }
 
         /// <summary>
+        /// Virtual host
+        /// </summary>
+        public string VHost { get; set; }
+
+        /// <summary>
         /// Port
         /// </summary>
         public int Port { get; set; } = 5672;

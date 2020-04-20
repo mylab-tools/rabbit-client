@@ -42,6 +42,7 @@ namespace MyLab.Mq
             return new ConnectionFactory
             {
                 HostName = options.Host,
+                VirtualHost = options.VHost,
                 Port = options.Port,
                 UserName = options.User,
                 Password = options.Password
