@@ -1,12 +1,10 @@
 ﻿using System.Text;
-using System.Threading.Tasks;
-using MyLab.Mq;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace IntegrationTests.Tools
+namespace Tests.Common
 {
-    class TestMqSender
+    public class TestMqSender
     {
         private readonly string _queue;
 

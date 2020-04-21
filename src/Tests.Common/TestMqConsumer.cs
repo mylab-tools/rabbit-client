@@ -8,9 +8,9 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace IntegrationTests.Tools
+namespace Tests.Common
 {
-    class TestMqConsumer
+    public class TestMqConsumer
     {
         private readonly string _queue;
 

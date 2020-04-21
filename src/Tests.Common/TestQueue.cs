@@ -1,9 +1,9 @@
 ﻿using System;
 using RabbitMQ.Client;
 
-namespace IntegrationTests.Tools
+namespace Tests.Common
 {
-    static class TestQueue
+    public static class TestQueue
     {
         public static ConnectionFactory CreateConnectionFactory()
         {
@@ -35,7 +35,7 @@ namespace IntegrationTests.Tools
 
             string resName = queueName ?? ("mylab:mq-app:test:" + Guid.NewGuid().ToString("N"));
 
-            channel.QueueDeclare(resName, autoDelete:false, exclusive:false);
+            channel.QueueDeclare(resName, autoDelete: false, exclusive: false);
 
             return new QueueTestCtx(resName);
         }

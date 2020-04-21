@@ -1,9 +1,9 @@
 ﻿using System;
 using RabbitMQ.Client;
 
-namespace IntegrationTests.Tools
+namespace Tests.Common
 {
-    class QueueTestCtx : IDisposable
+    public class QueueTestCtx : IDisposable
     {
         private readonly string _name;
 
