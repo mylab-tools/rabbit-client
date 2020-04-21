@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace MyLab.Mq
 {
     /// <summary>
-    /// Represent message queue consumer
+    /// Represent messages queue consumer
     /// </summary>
     public interface IMqConsumerLogic<in TMsg>
     {
@@ -12,10 +12,10 @@ namespace MyLab.Mq
     }
 
     /// <summary>
-    /// Represent batch message queue consumer
+    /// Represent batch messages queue consumer
     /// </summary>
     public interface IMqBatchConsumerLogic<in TMsg>
     {
-        Task Consume(IEnumerable<TMsg> message);
+        Task Consume(IEnumerable<TMsg> messages);
     }
 }

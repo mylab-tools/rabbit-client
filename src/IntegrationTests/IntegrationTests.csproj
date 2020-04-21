@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyLab.Mq\MyLab.Mq.csproj" />
+    <ProjectReference Include="..\Tests.Common\Tests.Common.csproj" />
   </ItemGroup>
 
 </Project>

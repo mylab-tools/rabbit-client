@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
-using IntegrationTests.Tools;
+using Tests.Common;
 using Xunit;
 using Xunit.Abstractions;
 

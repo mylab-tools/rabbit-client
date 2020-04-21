@@ -5,21 +5,21 @@ namespace Tests.Common
 {
     public class QueueTestCtx : IDisposable
     {
-        private readonly string _name;
+        public string QueueName { get; }
 
-        public QueueTestCtx(string name)
+        public QueueTestCtx(string queueName)
         {
-            _name = name;
+            QueueName = queueName;
         }
 
         public TestMqConsumer CreateListener()
         {
-            return new TestMqConsumer(_name);
+            return new TestMqConsumer(QueueName);
         }
 
         public TestMqSender CreateSender()
         {
-            return new TestMqSender(_name);
+            return new TestMqSender(QueueName);
         }
 
         public void Dispose()
@@ -28,7 +28,7 @@ namespace Tests.Common
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            channel.QueueDelete(_name);
+            channel.QueueDelete(QueueName);
         }
     }
 }

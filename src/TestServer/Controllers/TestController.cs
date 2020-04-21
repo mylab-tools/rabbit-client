@@ -12,9 +12,15 @@ namespace TestServer.Controllers
     public class TestController : ControllerBase
     {
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult GetSimple()
         {
-            
+            return Ok(TestSimpleMqLogic.LastMsg);
+        }
+
+        [HttpGet]
+        public IActionResult GetBatch()
+        {
+            return Ok(TestBatchMqLogic.LastMsgs);
         }
     }
 }

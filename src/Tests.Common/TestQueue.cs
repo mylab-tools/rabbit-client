@@ -27,13 +27,13 @@ namespace Tests.Common
             };
         }
 
-        public static QueueTestCtx Create(string queueName = null)
+        public static QueueTestCtx Create(string queueId = null)
         {
             var factory = CreateConnectionFactory();
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            string resName = queueName ?? ("mylab:mq-app:test:" + Guid.NewGuid().ToString("N"));
+            string resName = "mylab:mq-app:test:" + (queueId ?? Guid.NewGuid().ToString("N"));
 
             channel.QueueDeclare(resName, autoDelete: false, exclusive: false);
 

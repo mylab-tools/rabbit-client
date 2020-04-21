@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
-using IntegrationTests.Tools;
 using Moq;
 using MyLab.Mq;
 using MyLab.StatusProvider;
+using Tests.Common;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +30,9 @@ namespace IntegrationTests
         public void ShouldFailIfPublishTargetNotDefined()
         {
             //Arrange
-            var publisher = new DefaultMqPublisher(TestQueue.CreateConnectionFactory(), null);
+            var publisher = new DefaultMqPublisher(
+                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
+                null);
             var outgoingMessage = new OutgoingMqEnvelop<string>
             {
                 PublishTarget = new PublishTarget
@@ -50,7 +51,9 @@ namespace IntegrationTests
         public void ShouldSendMessageWhenPublishTargetSpecified()
         {
             //Arrange
-            var publisher = new DefaultMqPublisher(TestQueue.CreateConnectionFactory(), null);
+            var publisher = new DefaultMqPublisher(
+                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
+                null);
             var outgoingMessage = new OutgoingMqEnvelop<string>
             {
                 PublishTarget = new PublishTarget
@@ -75,7 +78,9 @@ namespace IntegrationTests
         public void ShouldSendMessageWhenPublishTargetSpecifiedByPayloadType()
         {
             //Arrange
-            var publisher = new DefaultMqPublisher(TestQueue.CreateConnectionFactory(), null);
+            var publisher = new DefaultMqPublisher(
+                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
+                null);
             var outgoingMessage = new OutgoingMqEnvelop<Msg>
             {
                 PublishTarget = new PublishTarget
@@ -106,7 +111,10 @@ namespace IntegrationTests
                 {
                     Name = "FooApp"
                 });
-            var publisher = new DefaultMqPublisher(TestQueue.CreateConnectionFactory(), statusServiceMock.Object);
+            var publisher = new DefaultMqPublisher(
+                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
+                statusServiceMock.Object);
+
             var correlationId = Guid.NewGuid();
             var messageId = Guid.NewGuid();
             var mgsPayload = new Msg

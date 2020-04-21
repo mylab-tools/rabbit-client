@@ -9,13 +9,13 @@ using RabbitMQ.Client.Events;
 
 namespace MyLab.Mq
 {
-    class DefaultMqConsumerManager
+    class DefaultMqConsumerManager : IDisposable
     {
         private readonly IAppStatusService _statusService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDictionary<string, MqConsumer> _consumers;
         private readonly DslLogger _logger;
-        private IModel _curChannel;
+        private readonly IModel _curChannel;
 
         /// <summary>
         /// Initializes a new instance of <see cref="DefaultMqConsumerManager"/>
@@ -70,6 +70,19 @@ namespace MyLab.Mq
             var ctx = new ConsumingContext(args.DeliveryTag, _serviceProvider, _curChannel, _statusService);
 
             await consumer.Consume(args.Body, ctx);
+        }
+
+        public void Dispose()
+        {
+            _curChannel?.Dispose();
+
+            if (_consumers != null)
+            {
+                foreach (var mqConsumer in _consumers.Values)
+                {
+                    mqConsumer.Dispose();
+                }
+            }
         }
     }
 }
