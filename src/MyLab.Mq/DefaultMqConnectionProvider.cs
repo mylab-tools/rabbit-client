@@ -56,7 +56,6 @@ namespace MyLab.Mq
                 UserName = options.User,
                 Password = options.Password,
                 DispatchConsumersAsync = true 
-
             };
         }
     }

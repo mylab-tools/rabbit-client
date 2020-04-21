@@ -8,10 +8,10 @@ namespace TestServer
 {
     public class TestMqMsg
     {
-
+        public string Content { get; set; }
     }
 
-    class TestSimpleMqConsumer : MqConsumer<TestMqMsg, TestSimpleMqLogic>
+    public class TestSimpleMqConsumer : MqConsumer<TestMqMsg, TestSimpleMqLogic>
     {
         private readonly QueueTestCtx _ctx;
 
@@ -43,7 +43,7 @@ namespace TestServer
         }
     }
 
-    class TestBatchMqConsumer : MqBatchConsumer<TestMqMsg, TestBatchMqLogic>
+    public class TestBatchMqConsumer : MqBatchConsumer<TestMqMsg, TestBatchMqLogic>
     {
         private readonly QueueTestCtx _ctx;
 

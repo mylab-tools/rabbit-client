@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyLab.LogDsl;
 using MyLab.StatusProvider;
@@ -9,17 +11,17 @@ using RabbitMQ.Client.Events;
 
 namespace MyLab.Mq
 {
-    class DefaultMqConsumerManager : IDisposable
+    class DefaultMqConsumerManager : IHostedService, IDisposable
     {
+        private readonly IMqConnectionProvider _connectionProvider;
+        private readonly IMqConsumerRegistry _consumerRegistry;
         private readonly IAppStatusService _statusService;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IDictionary<string, MqConsumer> _consumers;
         private readonly DslLogger _logger;
-        private readonly IModel _curChannel;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="DefaultMqConsumerManager"/>
-        /// </summary>
+        private IDictionary<string, MqConsumer> _consumers;
+        private IModel _curChannel;
+
         public DefaultMqConsumerManager(
             IMqConnectionProvider connectionProvider, 
             IMqConsumerRegistry consumerRegistry,
@@ -27,31 +29,48 @@ namespace MyLab.Mq
             IServiceProvider serviceProvider,
             ILogger<DefaultMqConsumerManager> logger)
         {
-            if (connectionProvider == null) throw new ArgumentNullException(nameof(connectionProvider));
-            if (consumerRegistry == null) throw new ArgumentNullException(nameof(consumerRegistry));
+            _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
+            _consumerRegistry = consumerRegistry ?? throw new ArgumentNullException(nameof(consumerRegistry));
             _statusService = statusService ?? throw new ArgumentNullException(nameof(statusService));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _logger = logger.Dsl();
+        }
 
-            var cp = connectionProvider.Provide();
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            var cp = _connectionProvider.Provide();
             _curChannel = cp.CreateModel();
+            _curChannel.CallbackException += ChannelExceptionReceived;
+
             var systemConsumer = new AsyncEventingBasicConsumer(_curChannel);
 
             systemConsumer.Received += ConsumerReceivedAsync;
 
-            _consumers = new Dictionary<string, MqConsumer>(consumerRegistry.GetConsumers());
+            _consumers = new Dictionary<string, MqConsumer>(_consumerRegistry.GetConsumers());
 
             foreach (var logicConsumer in _consumers.Values)
             {
                 _curChannel.BasicConsume(
-                    logicConsumer.Queue, 
-                    false, 
-                    logicConsumer.Queue, 
-                    true, 
-                    false, 
-                    null, 
-                    systemConsumer);
+                    queue: logicConsumer.Queue,
+                    consumerTag: logicConsumer.Queue,
+                    consumer: systemConsumer);
             }
+
+            return Task.CompletedTask;
+        }
+
+        private void ChannelExceptionReceived(object sender, CallbackExceptionEventArgs e)
+        {
+            _logger
+                .Error(e.Exception)
+                .Write();
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            ClosesAll();
+
+            return Task.CompletedTask;
         }
 
         private async Task ConsumerReceivedAsync(object sender, BasicDeliverEventArgs args)
@@ -74,7 +93,13 @@ namespace MyLab.Mq
 
         public void Dispose()
         {
+            ClosesAll();
+        }
+
+        void ClosesAll()
+        {
             _curChannel?.Dispose();
+            _curChannel = null;
 
             if (_consumers != null)
             {
@@ -82,6 +107,8 @@ namespace MyLab.Mq
                 {
                     mqConsumer.Dispose();
                 }
+                _consumers.Clear();
+                _consumers = null;
             }
         }
     }

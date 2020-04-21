@@ -33,7 +33,7 @@ namespace MyLab.Mq
 
             return services.AddSingleton<IMqConsumerRegistry>(registry)
                 .AddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>()
-                .AddSingleton<DefaultMqConsumerManager>()
+                .AddHostedService<DefaultMqConsumerManager>()
                 .AddMqConsumerStatusProviding();
         }
 

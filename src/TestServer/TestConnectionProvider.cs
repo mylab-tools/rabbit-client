@@ -4,7 +4,7 @@ using Tests.Common;
 
 namespace TestServer
 {
-    class TestConnectionProvider : IMqConnectionProvider
+    public class TestConnectionProvider : IMqConnectionProvider
     {
         private readonly IConnection _connection;
 
@@ -13,7 +13,7 @@ namespace TestServer
         /// </summary>
         public TestConnectionProvider()
         {
-            _connection = TestQueue.CreateConnectionFactory().CreateConnection();
+            _connection = TestQueue.CreateConnectionFactory(true).CreateConnection();
         }
 
         public void Dispose()

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace TestServer.Controllers
 {
@@ -11,13 +6,13 @@ namespace TestServer.Controllers
     [Route("[controller]")]
     public class TestController : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("single")]
         public IActionResult GetSimple()
         {
             return Ok(TestSimpleMqLogic.LastMsg);
         }
 
-        [HttpGet]
+        [HttpGet("batch")]
         public IActionResult GetBatch()
         {
             return Ok(TestBatchMqLogic.LastMsgs);

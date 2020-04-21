@@ -5,7 +5,7 @@ namespace Tests.Common
 {
     public static class TestQueue
     {
-        public static ConnectionFactory CreateConnectionFactory()
+        public static ConnectionFactory CreateConnectionFactory(bool async = false)
         {
             var mqTestServer = Environment.GetEnvironmentVariable("MYLAB_TEST_MQ");
             if (string.IsNullOrEmpty(mqTestServer))
@@ -23,7 +23,8 @@ namespace Tests.Common
             {
                 Endpoint = AmqpTcpEndpoint.Parse(mqTestServer),
                 UserName = mqTestUser,
-                Password = mqTestPass
+                Password = mqTestPass,
+                DispatchConsumersAsync = async
             };
         }
 
@@ -39,7 +40,7 @@ namespace Tests.Common
 
             string resName = queueName ?? ("mylab:mq-app:test:" + Guid.NewGuid().ToString("N"));
 
-            channel.QueueDeclare(resName, autoDelete: false, exclusive: false);
+            channel.QueueDeclare(resName, autoDelete: true, exclusive: false);
 
             return new QueueTestCtx(resName);
         }
