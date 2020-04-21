@@ -23,7 +23,7 @@ namespace TestServer
 
         public static TestSimpleMqConsumer Create(string queueId)
         {
-            return new TestSimpleMqConsumer(TestQueue.Create(queueId));
+            return new TestSimpleMqConsumer(TestQueue.CreateWithId(queueId));
         }
 
         public override void Dispose()
@@ -55,7 +55,7 @@ namespace TestServer
 
         public static TestBatchMqConsumer Create(string queueId)
         {
-            return new TestBatchMqConsumer(TestQueue.Create(queueId));
+            return new TestBatchMqConsumer(TestQueue.CreateWithId(queueId));
         }
 
         public override void Dispose()

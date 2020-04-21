@@ -21,19 +21,6 @@ namespace MyLab.Mq
             _channelProvider = new MqChannelProvider(_connectionProvider);
         }
 
-        static ConnectionFactory OptionToConnectionFactory(MqOptions options)
-        {
-            if (options == null) throw new ArgumentNullException(nameof(options));
-            return new ConnectionFactory
-            {
-                HostName = options.Host,
-                VirtualHost = options.VHost,
-                Port = options.Port,
-                UserName = options.User,
-                Password = options.Password
-            };
-        }
-
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class
         {
             if (envelop == null) throw new ArgumentNullException(nameof(envelop));
@@ -58,8 +45,8 @@ namespace MyLab.Mq
             var payloadBin = Encoding.UTF8.GetBytes(payloadStr);
 
             channel.BasicPublish(
-                resExchange ?? string.Empty,
-                resRouting ?? string.Empty,
+                resExchange,
+                resRouting,
                 basicProperties,
                 payloadBin
                 );
