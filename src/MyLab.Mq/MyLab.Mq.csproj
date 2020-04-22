@@ -9,8 +9,9 @@
     <PackageProjectUrl>https://github.com/ozzy-ext-mylab/mq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ozzy-ext-mylab/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.0.0.1604</AssemblyVersion>
-    <FileVersion>1.0.0.1604</FileVersion>
+    <AssemblyVersion>1.1.0.2204</AssemblyVersion>
+    <FileVersion>1.1.0.2204</FileVersion>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
