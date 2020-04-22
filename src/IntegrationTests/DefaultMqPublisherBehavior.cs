@@ -129,11 +129,7 @@ namespace IntegrationTests
                 },
                 Message = new MqMessage<Msg>(mgsPayload)
                 {
-                    ReplyTo = new PublishTarget
-                    {
-                        Exchange = "FooExchange",
-                        Routing = "FooRouting"
-                    },
+                    ReplyTo = "foo-queue",
                     CorrelationId = correlationId,
                     MessageId = messageId,
                     Headers = new[]
@@ -150,8 +146,7 @@ namespace IntegrationTests
 
             //Assert
             Assert.NotNull(incoming.ReplyTo);
-            Assert.Equal("FooExchange", incoming.ReplyTo.Exchange);
-            Assert.Equal("FooRouting", incoming.ReplyTo.Routing);
+            Assert.Equal("foo-queue", incoming.ReplyTo);
             Assert.Equal(correlationId, incoming.CorrelationId);
             Assert.Equal(messageId, incoming.MessageId);
             Assert.NotNull(incoming.Payload);

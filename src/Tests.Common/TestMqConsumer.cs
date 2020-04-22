@@ -42,9 +42,7 @@ namespace Tests.Common
 
                     result = new MqMessage<T>(payload)
                     {
-                        ReplyTo = !string.IsNullOrEmpty(ea.BasicProperties.ReplyTo) 
-                            ? new PublishTarget(ea.BasicProperties.ReplyToAddress)
-                            : null,
+                        ReplyTo = ea.BasicProperties.ReplyTo,
                         CorrelationId = !string.IsNullOrEmpty(ea.BasicProperties.CorrelationId)
                             ? new Guid(ea.BasicProperties.CorrelationId)
                             : Guid.Empty,

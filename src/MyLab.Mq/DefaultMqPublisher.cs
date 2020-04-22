@@ -67,7 +67,7 @@ namespace MyLab.Mq
             basicProperties.MessageId = msg.MessageId.ToString("N");
 
             if (msg.ReplyTo != null)
-                basicProperties.ReplyToAddress = msg.ReplyTo.ToPubAddr();
+                basicProperties.ReplyTo = msg.ReplyTo;
 
             if (envelop.Expiration != TimeSpan.Zero)
                 basicProperties.Expiration = envelop.Expiration.TotalMilliseconds.ToString("F0");

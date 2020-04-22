@@ -10,7 +10,7 @@ namespace TestServer
     {
         public static readonly SingleMessageTestBox Box = new SingleMessageTestBox();
 
-        public Task Consume(TestMqMsg message)
+        public Task Consume(MqMessage<TestMqMsg> message)
         {
             Box.AckMsg = message;
             return Task.CompletedTask;
@@ -21,7 +21,7 @@ namespace TestServer
     {
         public static readonly SingleMessageTestBox Box = new SingleMessageTestBox();
 
-        public Task Consume(TestMqMsg message)
+        public Task Consume(MqMessage<TestMqMsg> message)
         {
             if (Box.RejectedMsg == null)
             {
@@ -38,7 +38,7 @@ namespace TestServer
     {
         public static readonly BatchMessageTestBox Box = new BatchMessageTestBox();
 
-        public Task Consume(IEnumerable<TestMqMsg> messages)
+        public Task Consume(IEnumerable<MqMessage<TestMqMsg>> messages)
         {
             Box.AckMsgs = messages.ToArray();
             return Task.CompletedTask;
@@ -49,7 +49,7 @@ namespace TestServer
     {
         public static readonly BatchMessageTestBox Box = new BatchMessageTestBox();
 
-        public Task Consume(IEnumerable<TestMqMsg> messages)
+        public Task Consume(IEnumerable<MqMessage<TestMqMsg>> messages)
         {
             if (Box.RejectedMsgs == null)
             {
@@ -64,13 +64,13 @@ namespace TestServer
 
     public class SingleMessageTestBox
     {
-        public TestMqMsg RejectedMsg { get; set; }
-        public TestMqMsg AckMsg { get; set; }
+        public MqMessage<TestMqMsg> RejectedMsg { get; set; }
+        public MqMessage<TestMqMsg> AckMsg { get; set; }
     }
 
     public class BatchMessageTestBox
     {
-        public TestMqMsg[] RejectedMsgs { get; set; }
-        public TestMqMsg[] AckMsgs { get; set; }
+        public MqMessage<TestMqMsg>[] RejectedMsgs { get; set; }
+        public MqMessage<TestMqMsg>[] AckMsgs { get; set; }
     }
 }

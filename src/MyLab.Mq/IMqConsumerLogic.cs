@@ -6,16 +6,16 @@ namespace MyLab.Mq
     /// <summary>
     /// Represent messages queue consumer
     /// </summary>
-    public interface IMqConsumerLogic<in TMsg>
+    public interface IMqConsumerLogic<TMsgPayload>
     {
-        Task Consume(TMsg message);
+        Task Consume(MqMessage<TMsgPayload> message);
     }
 
     /// <summary>
     /// Represent batch messages queue consumer
     /// </summary>
-    public interface IMqBatchConsumerLogic<in TMsg>
+    public interface IMqBatchConsumerLogic<TMsgPayload>
     {
-        Task Consume(IEnumerable<TMsg> messages);
+        Task Consume(IEnumerable<MqMessage<TMsgPayload>> messages);
     }
 }

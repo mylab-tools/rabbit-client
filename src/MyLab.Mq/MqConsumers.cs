@@ -2,12 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MyLab.StatusProvider;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
 
 namespace MyLab.Mq
 {
@@ -37,7 +32,7 @@ namespace MyLab.Mq
         /// <summary>
         /// Override to implement message consuming
         /// </summary>
-        public abstract Task Consume(ReadOnlyMemory<byte> messageBin, ConsumingContext consumingContext);
+        public abstract Task Consume(ConsumingContext consumingContext);
 
 
         /// <inheritdoc />
@@ -49,10 +44,10 @@ namespace MyLab.Mq
     /// <summary>
     /// Describes simple MQ consumer
     /// </summary>
-    /// <typeparam name="TMsg">message type</typeparam>
+    /// <typeparam name="TMsgPayload">message payload type</typeparam>
     /// <typeparam name="TLogic">consuming logic type</typeparam>
-    public class MqConsumer<TMsg, TLogic> : MqConsumer
-        where TLogic : IMqConsumerLogic<TMsg>
+    public class MqConsumer<TMsgPayload, TLogic> : MqConsumer
+        where TLogic : IMqConsumerLogic<TMsgPayload>
     {
         /// <summary>
         /// Initializes a new instance of <see cref="MqConsumer{TMsg, TLogic}"/>
@@ -64,11 +59,11 @@ namespace MyLab.Mq
 
 
         /// <inheritdoc />
-        public override async Task Consume(ReadOnlyMemory<byte> messageBin, ConsumingContext consumingContext)
+        public override async Task Consume(ConsumingContext consumingContext)
         {
             try
             {
-                var msgObj = JsonConvert.DeserializeObject<TMsg>(Encoding.UTF8.GetString(messageBin.ToArray()));
+                var msgObj = consumingContext.GetMessage<TMsgPayload>();
                 await consumingContext.CreateLogic<TLogic>().Consume(msgObj);
 
                 consumingContext.Ack();
@@ -83,12 +78,12 @@ namespace MyLab.Mq
     /// <summary>
     /// Describes MQ consumer which consumes a batch of messages
     /// </summary>
-    /// <typeparam name="TMsg">message type</typeparam>
+    /// <typeparam name="TMsgPayload">message payload type</typeparam>
     /// <typeparam name="TLogic">consuming logic type</typeparam>
-    public class MqBatchConsumer<TMsg, TLogic> : MqConsumer
-        where TLogic : IMqBatchConsumerLogic<TMsg>
+    public class MqBatchConsumer<TMsgPayload, TLogic> : MqConsumer
+        where TLogic : IMqBatchConsumerLogic<TMsgPayload>
     {
-        readonly List<ReadOnlyMemory<byte>> _messages = new List<ReadOnlyMemory<byte>>();
+        readonly List<MqMessage<TMsgPayload>> _messages = new List<MqMessage<TMsgPayload>>();
 
         /// <summary>
         /// Initializes a new instance of <see cref="MqBatchConsumer{TMsg, TLogic}"/>
@@ -100,9 +95,9 @@ namespace MyLab.Mq
         }
 
         /// <inheritdoc />
-        public override async Task Consume(ReadOnlyMemory<byte> messageBin, ConsumingContext consumingContext)
+        public override async Task Consume(ConsumingContext consumingContext)
         {
-            _messages.Add(messageBin);
+            _messages.Add(consumingContext.GetMessage<TMsgPayload>());
 
             if (_messages.Count >= BatchSize)
             {
@@ -110,9 +105,7 @@ namespace MyLab.Mq
 
                 try
                 {
-                    var msgs = msgCache
-                        .Select(m => JsonConvert.DeserializeObject<TMsg>(Encoding.UTF8.GetString(m.ToArray())))
-                        .ToArray();
+                    var msgs = msgCache.ToArray();
                     await consumingContext.CreateLogic<TLogic>().Consume(msgs);
 
                     consumingContext.Ack();
@@ -126,64 +119,6 @@ namespace MyLab.Mq
                     _messages.RemoveAll(m => msgCache.Contains(m));
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Contains dependencies for consuming
-    /// </summary>
-    public class ConsumingContext
-    {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IModel _channel;
-        private readonly IAppStatusService _statusService;
-
-        /// <summary>
-        /// Gets delivery identifier
-        /// </summary>
-        public ulong DeliveryTag { get; }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="ConsumingContext"/>
-        /// </summary>
-        public ConsumingContext(
-            ulong deliveryTag,
-            IServiceProvider serviceProvider,
-            IModel channel,
-            IAppStatusService statusService)
-        {
-            DeliveryTag = deliveryTag;
-            _serviceProvider = serviceProvider;
-            _channel = channel;
-            _statusService = statusService;
-        }
-
-        /// <summary>
-        /// Creates consuming logic
-        /// </summary>
-        public T CreateLogic<T>()
-        {
-            return (T)ActivatorUtilities.CreateInstance(
-                _serviceProvider,
-                typeof(T));
-        }
-
-        /// <summary>
-        /// Acknowledgement delivery 
-        /// </summary>
-        public void Ack()
-        {
-            _channel.BasicAck(DeliveryTag, true);
-            _statusService.IncomingMqMessageProcessed();
-        }
-
-        /// <summary>
-        /// Reject delivery 
-        /// </summary>
-        public void RejectOnError(Exception exception)
-        {
-            _channel.BasicNack(DeliveryTag, true, true);
-            _statusService.IncomingMqMessageError(exception);
         }
     }
 }

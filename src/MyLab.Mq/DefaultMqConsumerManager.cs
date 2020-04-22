@@ -86,9 +86,9 @@ namespace MyLab.Mq
 
             _statusService.IncomingMqMessageReceived(args.ConsumerTag);
 
-            var ctx = new ConsumingContext(args.DeliveryTag, _serviceProvider, _curChannel, _statusService);
+            var ctx = new ConsumingContext(args, _serviceProvider, _curChannel, _statusService);
 
-            await consumer.Consume(args.Body, ctx);
+            await consumer.Consume(ctx);
         }
 
         public void Dispose()

@@ -22,7 +22,7 @@ namespace MyLab.Mq
         /// <summary>
         /// Gets response publish parameters
         /// </summary>
-        public PublishTarget ReplyTo { get; set; }
+        public string ReplyTo { get; set; }
         /// <summary>
         /// Headers
         /// </summary>

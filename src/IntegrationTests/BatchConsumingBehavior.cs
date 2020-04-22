@@ -60,8 +60,8 @@ namespace IntegrationTests
             Assert.Null(testBox.RejectedMsgs);
             Assert.NotNull(testBox.AckMsgs);
             Assert.Equal(2, testBox.AckMsgs.Length);
-            Assert.Contains(testBox.AckMsgs, m => m.Content == "foo");
-            Assert.Contains(testBox.AckMsgs, m => m.Content == "bar");
+            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
+            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
         }
 
         [Fact]
@@ -100,12 +100,12 @@ namespace IntegrationTests
             //Assert
             Assert.NotNull(testBox.AckMsgs);
             Assert.Equal(2, testBox.AckMsgs.Length);
-            Assert.Contains(testBox.AckMsgs, m => m.Content == "foo");
-            Assert.Contains(testBox.AckMsgs, m => m.Content == "bar");
+            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
+            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
             Assert.NotNull(testBox.RejectedMsgs);
             Assert.Equal(2, testBox.RejectedMsgs.Length);
-            Assert.Contains(testBox.RejectedMsgs, m => m.Content == "foo");
-            Assert.Contains(testBox.RejectedMsgs, m => m.Content == "bar");
+            Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "foo");
+            Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "bar");
         }
     }
 }
