@@ -106,9 +106,11 @@ namespace MyLab.Mq
 
             if (_messages.Count >= BatchSize)
             {
+                var msgCache = _messages.ToArray();
+
                 try
                 {
-                    var msgs = _messages
+                    var msgs = msgCache
                         .Select(m => JsonConvert.DeserializeObject<TMsg>(Encoding.UTF8.GetString(m.ToArray())))
                         .ToArray();
                     await consumingContext.CreateLogic<TLogic>().Consume(msgs);
@@ -121,7 +123,7 @@ namespace MyLab.Mq
                 }
                 finally
                 {
-                    _messages.Clear();
+                    _messages.RemoveAll(m => msgCache.Contains(m));
                 }
             }
         }

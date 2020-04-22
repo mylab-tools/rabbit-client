@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,12 +12,12 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class SimpleConsumingBehavior : IClassFixture<WebApplicationFactory<Startup>>
+    public class BatchConsumingBehavior : IClassFixture<WebApplicationFactory<Startup>>
     {
         private readonly WebApplicationFactory<Startup> _appFactory;
         private readonly ITestOutputHelper _output;
 
-        public SimpleConsumingBehavior(WebApplicationFactory<Startup> appFactory, ITestOutputHelper output)
+        public BatchConsumingBehavior(WebApplicationFactory<Startup> appFactory, ITestOutputHelper output)
         {
             _appFactory = appFactory;
             _output = output;
@@ -33,7 +34,7 @@ namespace IntegrationTests
                 {
                     services.AddMqConsuming(registrar =>
                     {
-                        registrar.RegisterConsumer(TestSimpleMqConsumer<TestSimpleMqLogic>.Create(queueId));
+                        registrar.RegisterConsumer(TestBatchMqConsumer<TestBatchMqLogic>.Create(queueId));
                     })
                         .AddSingleton<IMqConnectionProvider, TestConnectionProvider>();
                 });
@@ -44,19 +45,23 @@ namespace IntegrationTests
 
             //Act
             sender.Queue(new TestMqMsg { Content = "foo" });
+            sender.Queue(new TestMqMsg { Content = "bar" });
             await Task.Delay(500);
 
-            var resp = await client.GetAsync("test/single");
+            var resp = await client.GetAsync("test/batch");
             var respStr = await resp.Content.ReadAsStringAsync();
 
             _output.WriteLine(respStr);
             resp.EnsureSuccessStatusCode();
 
-            var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
-
+            var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
+            
             //Assert
-            Assert.Equal("foo", testBox.AckMsg.Content);
-            Assert.Null(testBox.RejectedMsg);
+            Assert.Null(testBox.RejectedMsgs);
+            Assert.NotNull(testBox.AckMsgs);
+            Assert.Equal(2, testBox.AckMsgs.Length);
+            Assert.Contains(testBox.AckMsgs, m => m.Content == "foo");
+            Assert.Contains(testBox.AckMsgs, m => m.Content == "bar");
         }
 
         [Fact]
@@ -70,7 +75,7 @@ namespace IntegrationTests
                 {
                     services.AddMqConsuming(registrar =>
                         {
-                            registrar.RegisterConsumer(TestSimpleMqConsumer<TestSimpleMqLogicWithReject>.Create(queueId));
+                            registrar.RegisterConsumer(TestBatchMqConsumer<TestBatchMqLogicWithReject>.Create(queueId));
                         })
                         .AddSingleton<IMqConnectionProvider, TestConnectionProvider>();
                 });
@@ -81,21 +86,26 @@ namespace IntegrationTests
 
             //Act
             sender.Queue(new TestMqMsg { Content = "foo" });
+            sender.Queue(new TestMqMsg { Content = "bar" });
             await Task.Delay(500);
 
-            var resp = await client.GetAsync("test/single-with-reject");
+            var resp = await client.GetAsync("test/batch-with-reject");
             var respStr = await resp.Content.ReadAsStringAsync();
 
             _output.WriteLine(respStr);
             resp.EnsureSuccessStatusCode();
 
-            var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
+            var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
 
             //Assert
-            Assert.NotNull(testBox.AckMsg);
-            Assert.Equal("foo", testBox.AckMsg.Content);
-            Assert.NotNull(testBox.RejectedMsg);
-            Assert.Equal("foo", testBox.RejectedMsg.Content);
+            Assert.NotNull(testBox.AckMsgs);
+            Assert.Equal(2, testBox.AckMsgs.Length);
+            Assert.Contains(testBox.AckMsgs, m => m.Content == "foo");
+            Assert.Contains(testBox.AckMsgs, m => m.Content == "bar");
+            Assert.NotNull(testBox.RejectedMsgs);
+            Assert.Equal(2, testBox.RejectedMsgs.Length);
+            Assert.Contains(testBox.RejectedMsgs, m => m.Content == "foo");
+            Assert.Contains(testBox.RejectedMsgs, m => m.Content == "bar");
         }
     }
 }

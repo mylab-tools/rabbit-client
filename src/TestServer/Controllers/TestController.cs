@@ -7,15 +7,27 @@ namespace TestServer.Controllers
     public class TestController : ControllerBase
     {
         [HttpGet("single")]
-        public IActionResult GetSimple()
+        public IActionResult GetSingleTestBox()
         {
-            return Ok(TestSimpleMqLogic.LastMsg);
+            return Ok(TestSimpleMqLogic.Box);
+        }
+
+        [HttpGet("single-with-reject")]
+        public IActionResult GetSimpleWithReject()
+        {
+            return Ok(TestSimpleMqLogicWithReject.Box);
         }
 
         [HttpGet("batch")]
         public IActionResult GetBatch()
         {
-            return Ok(TestBatchMqLogic.LastMsgs);
+            return Ok(TestBatchMqLogic.Box);
+        }
+
+        [HttpGet("batch-with-reject")]
+        public IActionResult GetBatchWithReject()
+        {
+            return Ok(TestBatchMqLogicWithReject.Box);
         }
     }
 }

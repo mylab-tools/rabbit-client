@@ -11,7 +11,8 @@ namespace TestServer
         public string Content { get; set; }
     }
 
-    public class TestSimpleMqConsumer : MqConsumer<TestMqMsg, TestSimpleMqLogic>
+    public class TestSimpleMqConsumer<TLogic> : MqConsumer<TestMqMsg, TLogic>
+        where TLogic : IMqConsumerLogic<TestMqMsg>
     {
         private readonly QueueTestCtx _ctx;
 
@@ -21,9 +22,9 @@ namespace TestServer
             _ctx = ctx;
         }
 
-        public static TestSimpleMqConsumer Create(string queueId)
+        public static TestSimpleMqConsumer<TLogic> Create(string queueId)
         {
-            return new TestSimpleMqConsumer(TestQueue.CreateWithId(queueId));
+            return new TestSimpleMqConsumer<TLogic>(TestQueue.CreateWithId(queueId));
         }
 
         public override void Dispose()
@@ -32,18 +33,8 @@ namespace TestServer
         }
     }
 
-    public class TestSimpleMqLogic : IMqConsumerLogic<TestMqMsg>
-    {
-        public static TestMqMsg LastMsg { get; private set; }
-
-        public Task Consume(TestMqMsg message)
-        {
-            LastMsg = message;
-            return Task.CompletedTask;
-        }
-    }
-
-    public class TestBatchMqConsumer : MqBatchConsumer<TestMqMsg, TestBatchMqLogic>
+    public class TestBatchMqConsumer<TLogic> : MqBatchConsumer<TestMqMsg, TLogic>
+        where TLogic : IMqBatchConsumerLogic<TestMqMsg>
     {
         private readonly QueueTestCtx _ctx;
 
@@ -53,25 +44,14 @@ namespace TestServer
             _ctx = ctx;
         }
 
-        public static TestBatchMqConsumer Create(string queueId)
+        public static TestBatchMqConsumer<TLogic> Create(string queueId)
         {
-            return new TestBatchMqConsumer(TestQueue.CreateWithId(queueId));
+            return new TestBatchMqConsumer<TLogic>(TestQueue.CreateWithId(queueId));
         }
 
         public override void Dispose()
         {
             _ctx.Dispose();
-        }
-    }
-
-    public class TestBatchMqLogic : IMqBatchConsumerLogic<TestMqMsg>
-    {
-        public static TestMqMsg[] LastMsgs { get; private set; }
-        
-        public Task Consume(IEnumerable<TestMqMsg> messages)
-        {
-            LastMsgs = messages.ToArray();
-            return Task.CompletedTask;
         }
     }
 }
