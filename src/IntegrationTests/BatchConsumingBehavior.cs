@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +63,8 @@ namespace IntegrationTests
             Assert.Equal(2, testBox.AckMsgs.Length);
             Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
             Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
+
+            await PrintStatus(client);
         }
 
         [Fact]
@@ -106,6 +109,26 @@ namespace IntegrationTests
             Assert.Equal(2, testBox.RejectedMsgs.Length);
             Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "foo");
             Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "bar");
+
+            await PrintStatus(client);
+        }
+
+        async Task PrintStatus(HttpClient client)
+        {
+            var resp = await client.GetAsync("status");
+            var respStr = await resp.Content.ReadAsStringAsync();
+
+            _output.WriteLine("");
+            if (!resp.IsSuccessStatusCode)
+            {
+                _output.WriteLine("Get status error: " + resp.StatusCode);
+            }
+            else
+            {
+                _output.WriteLine("STATUS: ");
+            }
+
+            _output.WriteLine(respStr);
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyLab.Mq;
+using MyLab.StatusProvider;
 using Tests.Common;
 
 namespace TestServer
@@ -35,6 +36,7 @@ namespace TestServer
 
             app.UseRouting();
 
+            app.AddStatusApi();
             //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
