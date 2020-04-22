@@ -23,22 +23,39 @@ namespace MyLab.Mq
 
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class
         {
+            _statusService?.OutgoingMessageStartSending(envelop.PublishTarget.Exchange ?? envelop.PublishTarget.Routing);
+
+            try
+            {
+                PublishCore(envelop);
+            }
+            catch (Exception e)
+            {
+                _statusService?.OutgoingMessageSendingError(e);
+                throw;
+            }
+
+            _statusService?.OutgoingMessageSent();
+        }
+
+        void PublishCore<T>(OutgoingMqEnvelop<T> envelop) where T : class
+        {
             if (envelop == null) throw new ArgumentNullException(nameof(envelop));
 
             var msgTypeDesc = MqMsgModelDesc.GetFromModel(typeof(T));
 
-            var resExchange = envelop.PublishTarget?.Exchange ?? 
-                              msgTypeDesc?.Exchange ?? 
+            var resExchange = envelop.PublishTarget?.Exchange ??
+                              msgTypeDesc?.Exchange ??
                               string.Empty;
-            var resRouting = envelop.PublishTarget?.Routing ?? 
+            var resRouting = envelop.PublishTarget?.Routing ??
                              msgTypeDesc?.Routing ??
                              string.Empty;
 
-            if(string.IsNullOrEmpty(resRouting) && string.IsNullOrEmpty(resExchange))
+            if (string.IsNullOrEmpty(resRouting) && string.IsNullOrEmpty(resExchange))
                 throw new InvalidOperationException($"Publishing target not defined. Payload type '{typeof(T).FullName}'");
 
             var channel = _channelProvider.Provide();
-            
+
             var basicProperties = CreateBasicProperties<T>(envelop, channel);
 
             var payloadStr = JsonConvert.SerializeObject(envelop.Message.Payload);
@@ -49,7 +66,7 @@ namespace MyLab.Mq
                 resRouting,
                 basicProperties,
                 payloadBin
-                );
+            );
         }
 
         private IBasicProperties CreateBasicProperties<T>(OutgoingMqEnvelop<T> envelop, IModel channel) where T : class
