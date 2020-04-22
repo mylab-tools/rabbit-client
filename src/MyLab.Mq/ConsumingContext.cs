@@ -25,6 +25,11 @@ namespace MyLab.Mq
         public ulong DeliveryTag { get; }
 
         /// <summary>
+        /// Determines that consumer events do not affect the state of the app
+        /// </summary>
+        public bool StatusIgnore { get; set; } = false;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="ConsumingContext"/>
         /// </summary>
         public ConsumingContext(
@@ -88,7 +93,9 @@ namespace MyLab.Mq
         public void Ack()
         {
             _channel.BasicAck(DeliveryTag, true);
-            _statusService.IncomingMqMessageProcessed();
+
+            if(!StatusIgnore)
+                _statusService.IncomingMqMessageProcessed();
         }
 
         /// <summary>
@@ -97,7 +104,9 @@ namespace MyLab.Mq
         public void RejectOnError(Exception exception)
         {
             _channel.BasicNack(DeliveryTag, true, true);
-            _statusService.IncomingMqMessageError(exception);
+
+            if (!StatusIgnore)
+                _statusService.IncomingMqMessageError(exception);
         }
     }
 }

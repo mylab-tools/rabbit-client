@@ -21,6 +21,11 @@ namespace MyLab.Mq
         public int BatchSize { get; }
 
         /// <summary>
+        /// Determines that consumer events do not affect the state of the app
+        /// </summary>
+        public bool StatusIgnore { get; set; } = false;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="MqConsumer"/>
         /// </summary>
         protected MqConsumer(string queue, int batchSize)
@@ -71,6 +76,7 @@ namespace MyLab.Mq
             catch (Exception e)
             {
                 consumingContext.RejectOnError(e);
+                throw;
             }
         }
     }

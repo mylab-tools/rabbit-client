@@ -78,17 +78,32 @@ namespace MyLab.Mq
             if (!_consumers.TryGetValue(args.ConsumerTag, out var consumer))
             {
                 _logger.Error("Consumer not found")
-                    .AndFactIs("Consumer tag", args.ConsumerTag)
+                    .AndFactIs("consumer-tag", args.ConsumerTag)
                     .Write();
 
                 return;
             }
 
-            _statusService.IncomingMqMessageReceived(args.ConsumerTag);
+            if(!consumer.StatusIgnore)
+                _statusService.IncomingMqMessageReceived(args.ConsumerTag);
 
-            var ctx = new ConsumingContext(args, _serviceProvider, _curChannel, _statusService);
+            var ctx = new ConsumingContext(
+                args, 
+                _serviceProvider, 
+                _curChannel, 
+                _statusService)
+            {
+                StatusIgnore = consumer.StatusIgnore
+            };
 
-            await consumer.Consume(ctx);
+            try
+            {
+                await consumer.Consume(ctx);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e).Write();
+            }
         }
 
         public void Dispose()
