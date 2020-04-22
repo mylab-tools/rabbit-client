@@ -9,13 +9,18 @@ namespace MyLab.Mq
 {
     class DefaultMqPublisher : IMqPublisher, IDisposable
     {
-        private readonly IAppStatusService _statusService;
+        private readonly IAppStatusService _appStatusService;
+        private readonly IMqStatusService _statusService;
         private readonly IMqConnectionProvider _connectionProvider;
         private readonly MqChannelProvider _channelProvider;
         
-        public DefaultMqPublisher(IMqConnectionProvider connectionProvider, IAppStatusService statusService)
+        public DefaultMqPublisher(
+            IMqConnectionProvider connectionProvider, 
+            IMqStatusService statusService,
+            IAppStatusService appStatusService = null)
         {
             _statusService = statusService;
+            _appStatusService = appStatusService;
 
             _connectionProvider = connectionProvider;
             _channelProvider = new MqChannelProvider(_connectionProvider);
@@ -23,7 +28,8 @@ namespace MyLab.Mq
 
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class
         {
-            _statusService?.OutgoingMessageStartSending(envelop.PublishTarget.Exchange ?? envelop.PublishTarget.Routing);
+            var pubTarget = envelop.PublishTarget.Exchange ?? envelop.PublishTarget.Routing;
+            _statusService?.MessageStartSending(pubTarget);
 
             try
             {
@@ -31,11 +37,11 @@ namespace MyLab.Mq
             }
             catch (Exception e)
             {
-                _statusService?.OutgoingMessageSendingError(e);
+                _statusService?.SendingError(pubTarget, e);
                 throw;
             }
 
-            _statusService?.OutgoingMessageSent();
+            _statusService?.MessageSent(pubTarget);
         }
 
         void PublishCore<T>(OutgoingMqEnvelop<T> envelop) where T : class
@@ -71,7 +77,7 @@ namespace MyLab.Mq
 
         private IBasicProperties CreateBasicProperties<T>(OutgoingMqEnvelop<T> envelop, IModel channel) where T : class
         {
-            var appId = _statusService?.GetStatus().Name ?? "[undefined]";
+            var appId = _appStatusService?.GetStatus().Name ?? "[undefined]";
             var msg = envelop.Message;
             var unixNow = Convert.ToInt64((DateTime.Now.Subtract(new DateTime(1970, 1, 1))).TotalSeconds);
 

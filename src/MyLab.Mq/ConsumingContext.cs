@@ -14,10 +14,11 @@ namespace MyLab.Mq
     /// </summary>
     public class ConsumingContext
     {
+        private readonly string _queue;
         private readonly BasicDeliverEventArgs _args;
         private readonly IServiceProvider _serviceProvider;
         private readonly IModel _channel;
-        private readonly IAppStatusService _statusService;
+        private readonly IMqStatusService _statusService;
 
         /// <summary>
         /// Gets delivery identifier
@@ -25,20 +26,17 @@ namespace MyLab.Mq
         public ulong DeliveryTag { get; }
 
         /// <summary>
-        /// Determines that consumer events do not affect the state of the app
-        /// </summary>
-        public bool StatusIgnore { get; set; } = false;
-
-        /// <summary>
         /// Initializes a new instance of <see cref="ConsumingContext"/>
         /// </summary>
         public ConsumingContext(
+            string queue,
             BasicDeliverEventArgs args,
             IServiceProvider serviceProvider,
             IModel channel,
-            IAppStatusService statusService)
+            IMqStatusService statusService)
         {
             DeliveryTag = args.DeliveryTag;
+            _queue = queue;
             _args = args;
             _serviceProvider = serviceProvider;
             _channel = channel;
@@ -93,9 +91,7 @@ namespace MyLab.Mq
         public void Ack()
         {
             _channel.BasicAck(DeliveryTag, true);
-
-            if(!StatusIgnore)
-                _statusService.IncomingMqMessageProcessed();
+            _statusService.MessageProcessed(_queue);
         }
 
         /// <summary>
@@ -104,9 +100,7 @@ namespace MyLab.Mq
         public void RejectOnError(Exception exception)
         {
             _channel.BasicNack(DeliveryTag, true, true);
-
-            if (!StatusIgnore)
-                _statusService.IncomingMqMessageError(exception);
+            _statusService.ConsumingError(_queue, exception);
         }
     }
 }

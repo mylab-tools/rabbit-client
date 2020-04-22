@@ -113,6 +113,7 @@ namespace IntegrationTests
                 });
             var publisher = new DefaultMqPublisher(
                 new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
+                null,
                 statusServiceMock.Object);
 
             var correlationId = Guid.NewGuid();

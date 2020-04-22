@@ -20,7 +20,6 @@ namespace TestServer
             : base(ctx.QueueName)
         {
             _ctx = ctx;
-            StatusIgnore = true;
         }
 
         public static TestSimpleMqConsumer<TLogic> Create(string queueId)
@@ -43,7 +42,6 @@ namespace TestServer
             : base(ctx.QueueName, 2)
         {
             _ctx = ctx;
-            StatusIgnore = true;
         }
 
         public static TestBatchMqConsumer<TLogic> Create(string queueId)
