@@ -19,12 +19,7 @@ namespace MyLab.Mq
         /// Determines number of retrieved messages to process
         /// </summary>
         public int BatchSize { get; }
-
-        /// <summary>
-        /// Determines that consumer events do not affect the state of the app
-        /// </summary>
-        public bool StatusIgnore { get; set; } = false;
-
+        
         /// <summary>
         /// Initializes a new instance of <see cref="MqConsumer"/>
         /// </summary>

@@ -15,8 +15,8 @@ namespace MyLab.Mq
     {
         private readonly IMqConnectionProvider _connectionProvider;
         private readonly IMqConsumerRegistry _consumerRegistry;
-        private readonly IAppStatusService _statusService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IMqStatusService _mqStatusService;
         private readonly DslLogger _logger;
 
         private IDictionary<string, MqConsumer> _consumers;
@@ -25,15 +25,15 @@ namespace MyLab.Mq
         public DefaultMqConsumerManager(
             IMqConnectionProvider connectionProvider, 
             IMqConsumerRegistry consumerRegistry,
-            IAppStatusService statusService,
             IServiceProvider serviceProvider,
-            ILogger<DefaultMqConsumerManager> logger)
+            IMqStatusService mqStatusService,
+            ILogger<DefaultMqConsumerManager> logger = null)
         {
             _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
             _consumerRegistry = consumerRegistry ?? throw new ArgumentNullException(nameof(consumerRegistry));
-            _statusService = statusService ?? throw new ArgumentNullException(nameof(statusService));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _logger = logger.Dsl();
+            _mqStatusService = mqStatusService;
+            _logger = logger?.Dsl();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -54,6 +54,7 @@ namespace MyLab.Mq
                     queue: logicConsumer.Queue,
                     consumerTag: logicConsumer.Queue,
                     consumer: systemConsumer);
+                _mqStatusService.QueueConnected(logicConsumer.Queue);
             }
 
             return Task.CompletedTask;
@@ -84,17 +85,14 @@ namespace MyLab.Mq
                 return;
             }
 
-            if(!consumer.StatusIgnore)
-                _statusService.IncomingMqMessageReceived(args.ConsumerTag);
+            _mqStatusService.MessageReceived(args.ConsumerTag);
 
             var ctx = new ConsumingContext(
-                args, 
-                _serviceProvider, 
-                _curChannel, 
-                _statusService)
-            {
-                StatusIgnore = consumer.StatusIgnore
-            };
+                args.ConsumerTag,
+                args,
+                _serviceProvider,
+                _curChannel,
+                _mqStatusService);
 
             try
             {
