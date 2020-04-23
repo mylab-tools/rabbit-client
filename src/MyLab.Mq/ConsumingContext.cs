@@ -15,10 +15,10 @@ namespace MyLab.Mq
     public class ConsumingContext
     {
         private readonly string _queue;
-        private readonly BasicDeliverEventArgs _args;
         private readonly IServiceProvider _serviceProvider;
         private readonly IModel _channel;
         private readonly IMqStatusService _statusService;
+        private readonly IMqMessageAccessor _mqMessageAccessor;
 
         /// <summary>
         /// Gets delivery identifier
@@ -33,14 +33,15 @@ namespace MyLab.Mq
             BasicDeliverEventArgs args,
             IServiceProvider serviceProvider,
             IModel channel,
-            IMqStatusService statusService)
+            IMqStatusService statusService,
+            IMqMessageAccessor mqMessageAccessor)
         {
             DeliveryTag = args.DeliveryTag;
             _queue = queue;
-            _args = args;
             _serviceProvider = serviceProvider;
             _channel = channel;
             _statusService = statusService;
+            _mqMessageAccessor = mqMessageAccessor;
         }
 
         /// <summary>
@@ -58,31 +59,7 @@ namespace MyLab.Mq
         /// </summary>
         public MqMessage<T> GetMessage<T>()
         {
-            var bodyStr = Encoding.UTF8.GetString(_args.Body.ToArray());
-            var payload = JsonConvert.DeserializeObject<T>(bodyStr);
-
-            var props = _args.BasicProperties;
-            var msg= new MqMessage<T>(payload)
-            {
-                ReplyTo = props.ReplyTo
-            };
-
-            if(Guid.TryParse(props.CorrelationId, out var correlationId))
-                msg.CorrelationId = correlationId;
-            if (Guid.TryParse(props.MessageId, out var messageId))
-                msg.MessageId = messageId;
-            if (props.Headers != null)
-            {
-                msg.Headers = props.Headers
-                    .Select(h => new MqHeader
-                    {
-                        Name = h.Key,
-                        Value = h.Value.ToString()
-                    })
-                    .ToArray();
-            }
-
-            return msg;
+            return _mqMessageAccessor.GetScopedMqMessage<T>();
         }
 
         /// <summary>

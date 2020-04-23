@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MyLab.StatusProvider;
 
 namespace MyLab.Mq
 {
@@ -40,6 +39,11 @@ namespace MyLab.Mq
                 .AddHostedService<DefaultMqConsumerManager>()
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
 
+            services
+                .AddScoped<DefaultMqMessageAccessor>()
+                .AddScoped<IMqMessageAccessor>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>())
+                .AddScoped<IMqMessageAccessorCore>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>());
+
             return services;
         }
 
@@ -61,6 +65,11 @@ namespace MyLab.Mq
                 .AddSingleton(connectionProvider)
                 .AddSingleton<DefaultMqConsumerManager>()
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
+
+            services
+                .AddScoped<DefaultMqMessageAccessor>()
+                .AddScoped<IMqMessageAccessor>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>())
+                .AddScoped<IMqMessageAccessorCore>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>());
 
             return services;
         }

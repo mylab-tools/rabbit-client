@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyLab.LogDsl;
@@ -87,12 +88,20 @@ namespace MyLab.Mq
 
             _mqStatusService.MessageReceived(args.ConsumerTag);
 
+            using var scope = _serviceProvider.CreateScope();
+
+            var msgAccessorCore = scope.ServiceProvider.GetService<IMqMessageAccessorCore>();
+            msgAccessorCore.SetScopedMessage(args.Body, args.BasicProperties);
+
+            var msgAccessor = scope.ServiceProvider.GetService<IMqMessageAccessor>();
+
             var ctx = new ConsumingContext(
                 args.ConsumerTag,
                 args,
-                _serviceProvider,
+                scope.ServiceProvider,
                 _curChannel,
-                _mqStatusService);
+                _mqStatusService,
+                msgAccessor);
 
             try
             {

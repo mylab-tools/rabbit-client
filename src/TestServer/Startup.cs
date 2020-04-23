@@ -25,6 +25,7 @@ namespace TestServer
         {
             services.AddControllers();
             services.AddAppStatusProviding();
+            services.AddScoped<ScopedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

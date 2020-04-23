@@ -73,4 +73,21 @@ namespace TestServer
         public MqMessage<TestMqMsg>[] RejectedMsgs { get; set; }
         public MqMessage<TestMqMsg>[] AckMsgs { get; set; }
     }
+
+    public class MqLogicWithScopedDependency : IMqConsumerLogic<TestMqMsg>
+    {
+        private readonly ScopedService _scopedService;
+        public static string BuffVal { get; set; }
+
+        public MqLogicWithScopedDependency(ScopedService scopedService)
+        {
+            _scopedService = scopedService;
+        }
+        public Task Consume(MqMessage<TestMqMsg> message)
+        {
+            BuffVal = _scopedService.Get<TestMqMsg>().Payload.Content;
+
+            return Task.CompletedTask;
+        }
+    }
 }
