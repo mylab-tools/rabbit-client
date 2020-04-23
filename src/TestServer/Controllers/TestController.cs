@@ -29,5 +29,11 @@ namespace TestServer.Controllers
         {
             return Ok(TestBatchMqLogicWithReject.Box);
         }
+
+        [HttpGet("from-scope")]
+        public IActionResult GetFromScope()
+        {
+            return Ok(MqLogicWithScopedDependency.BuffVal);
+        }
     }
 }
