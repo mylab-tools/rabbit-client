@@ -275,6 +275,150 @@ publisher.Publish(new OutgoingMqEnvelop<Msg>
 });
 ```
 
-## Получение
+## Потребление
+
+Для потребления сообщения необходимо:
+
+* загрузить конфигурацию подключения  ([Конфигурирование](#Конфигурирование));
+* реализовать логику потребления сообщений
+
+* зарегистрировать потребителей.
+
+### Логика потребления
+
+Логика потребление - реализация обработки полученных сообщений. Реализация логики - класс, реализующий интерфейс `IMqConsumerLogic<TPayload>` для обработки сообщений по одному, и `IMqBatchConsumerLogic<TPayload>` для реализации логики обработки нескольких сообщений одновременно.
+
+Вот эти интерфейсы, для ознакомления:
+
+```C#
+/// <summary>
+/// Represent messages queue consumer
+/// </summary>
+public interface IMqConsumerLogic<TMsgPayload>
+{
+	Task Consume(MqMessage<TMsgPayload> message);
+}
+
+/// <summary>
+/// Represent batch messages queue consumer
+/// </summary>
+public interface IMqBatchConsumerLogic<TMsgPayload>
+{
+	Task Consume(IEnumerable<MqMessage<TMsgPayload>> messages);
+}
+```
+
+### Потребители
+
+Потребитель - один из наследников класса `MqConsumer`. В общем случае не требуется разрабатывать наследника для решения регулярных задач. Для этого есть готовые реализации:
+
+* `MqConsumer<TMsgPayload, TLogic>` - определяет обычного потребителя сообщений;
+* `MqBatchConsumer<TMsgPayload, TLogic>` - определяет потребителя сообщений, получающего по несколько сообщений сразу.
+
+Здесь:
+
+* `TMsgPayload` - тип бизнес-сообщения;
+* `TLogic` - тип логики потребления.
+
+### Регистрация потребителей
+
+Регистрация потребителей осуществляется с помощью метода расширения для `IServiceCollection`: 
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+	...
+    services.AddMqConsuming(registrar =>
+    {
+    	registrar.RegisterConsumer(
+    		new MqConsumer<MsgPayload,MyConsumerLogic>(
+    			"my:test-queue");
+    })
+    ...
+}
+
+class MsgPayload
+{
+	public string Value { get; set; }
+}
+
+class MyConsumerLogic : IMqConsumerLogic<MsgPayload>
+{
+	Task Consume(MqMessage<MsgPayload> message)
+	{
+		// do something
+	}
+}
+```
 
 ## Конфигурирование 
+
+Конфигурирование позволяет загрузить параметры подключения к MQ серверу и автоматически их применять для публикации и потребления сообщений.
+
+Объектная модель опций подключения выглядят следующим образом:
+
+```C#
+/// <summary>
+/// Contains MQ connection options
+/// </summary>
+public class MqOptions
+{
+    /// <summary>
+    /// Server host
+    /// </summary>
+    public string Host { get; set; }
+
+    /// <summary>
+    /// Virtual host
+    /// </summary>
+    public string VHost { get; set; }
+
+    /// <summary>
+    /// Port
+    /// </summary>
+    public int Port { get; set; } = 5672;
+    /// <summary>
+    /// Login user
+    /// </summary>
+    public string User { get; set; }
+    /// <summary>
+    /// Login password
+    /// </summary>
+    public string Password { get; set; }
+}
+```
+
+В приложении конфигурирование осуществляется двумя методами расширения `IServiceCollection`:
+
+* `LoadMqConfig` - загружает настройки из конфигурации с возможностью указания имени узла (**Mq** - по умолчанию);
+* `ConfigureMq` - определяет настройки через делегат.
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+{
+	...
+    services.LoadMqConfig(Configuration)
+    ...
+    services.ConfigureMq(o => 
+    {
+    	o.Host = "myhost.com";
+		o.VHost = "test-host";
+        o.User = "foo";
+        o.Password = "foo-pass";
+    });
+    ...
+}
+```
+
+Пример конфигурационного файла с портом по умолчанию:
+
+```json
+{
+	"Mq": {
+		"Host" : "myhost.com",
+		"VHost" : "test-host",
+        "User" : "foo",
+        "Password" : "foo-pass"
+	}
+}
+```
