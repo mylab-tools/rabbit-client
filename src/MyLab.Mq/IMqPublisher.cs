@@ -18,7 +18,8 @@ namespace MyLab.Mq
     /// </summary>
     public static class MqPublisherExtensions
     {
-        public static void Publish<T>(this IMqPublisher publisher, T msg)
+        public static void Publish<T>(this IMqPublisher publisher, T msg) 
+            where T : class
         {
             if (publisher == null) throw new ArgumentNullException(nameof(publisher));
             if (msg == null) throw new ArgumentNullException(nameof(msg));
@@ -29,7 +30,8 @@ namespace MyLab.Mq
             });
         }
 
-        public static void PublishToQueue<T>(this IMqPublisher publisher, T msg, string queueName)
+        public static void PublishToQueue<T>(this IMqPublisher publisher, T msg, string queueName) 
+            where T : class
         {
             if (publisher == null) throw new ArgumentNullException(nameof(publisher));
             if (msg == null) throw new ArgumentNullException(nameof(msg));
@@ -41,7 +43,7 @@ namespace MyLab.Mq
             });
         }
 
-        public static void PublishToExchange<T>(this IMqPublisher publisher, T msg, string exchange, string routingKey = null)
+        public static void PublishToExchange<T>(this IMqPublisher publisher, T msg, string exchange, string routingKey = null) where T : class
         {
             if (publisher == null) throw new ArgumentNullException(nameof(publisher));
             if (msg == null) throw new ArgumentNullException(nameof(msg));
