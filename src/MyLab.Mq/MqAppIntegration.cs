@@ -19,6 +19,8 @@ namespace MyLab.Mq
                 .AddSingleton<IMqPublisher, DefaultMqPublisher>()
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
 
+            services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
+
             return services;
         }
 
@@ -35,9 +37,10 @@ namespace MyLab.Mq
             consumerRegistration(registry.CreateRegistrar());
 
             services.AddSingleton<IMqConsumerRegistry>(registry)
-                .AddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>()
                 .AddHostedService<DefaultMqConsumerManager>()
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
+            
+            services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
 
             services
                 .AddScoped<DefaultMqMessageAccessor>()
