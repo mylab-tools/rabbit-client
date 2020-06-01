@@ -28,36 +28,29 @@ namespace MyLab.Mq
 
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class
         {
-            var pubTarget = envelop.PublishTarget.Exchange ?? envelop.PublishTarget.Routing;
-            _statusService?.MessageStartSending(pubTarget);
+            var pubTarget = GetPubTarget(envelop);
+            var pubTargetName = pubTarget.Exchange ?? pubTarget.Routing;
+
+            _statusService?.MessageStartSending(pubTargetName);
 
             try
             {
-                PublishCore(envelop);
+                PublishCore(envelop, pubTarget);
             }
             catch (Exception e)
             {
-                _statusService?.SendingError(pubTarget, e);
+                _statusService?.SendingError(pubTargetName, e);
                 throw;
             }
 
-            _statusService?.MessageSent(pubTarget);
+            _statusService?.MessageSent(pubTargetName);
         }
 
-        void PublishCore<T>(OutgoingMqEnvelop<T> envelop) where T : class
+        void PublishCore<T>(OutgoingMqEnvelop<T> envelop, PublishTarget pubTarget) where T : class
         {
             if (envelop == null) throw new ArgumentNullException(nameof(envelop));
-
-            var msgTypeDesc = MqMsgModelDesc.GetFromModel(typeof(T));
-
-            var resExchange = envelop.PublishTarget?.Exchange ??
-                              msgTypeDesc?.Exchange ??
-                              string.Empty;
-            var resRouting = envelop.PublishTarget?.Routing ??
-                             msgTypeDesc?.Routing ??
-                             string.Empty;
-
-            if (string.IsNullOrEmpty(resRouting) && string.IsNullOrEmpty(resExchange))
+            
+            if (string.IsNullOrEmpty(pubTarget.Routing) && string.IsNullOrEmpty(pubTarget.Exchange))
                 throw new InvalidOperationException($"Publishing target not defined. Payload type '{typeof(T).FullName}'");
 
             var channel = _channelProvider.Provide();
@@ -68,11 +61,28 @@ namespace MyLab.Mq
             var payloadBin = Encoding.UTF8.GetBytes(payloadStr);
 
             channel.BasicPublish(
-                resExchange,
-                resRouting,
+                pubTarget.Exchange,
+                pubTarget.Routing,
                 basicProperties,
                 payloadBin
             );
+        }
+
+        PublishTarget GetPubTarget<T>(OutgoingMqEnvelop<T> envelop)
+        {
+            var msgTypeDesc = MqMsgModelDesc.GetFromModel(typeof(T));
+
+            var resExchange = envelop.PublishTarget?.Exchange ??
+                              msgTypeDesc?.Exchange ??
+                              string.Empty;
+            var resRouting = envelop.PublishTarget?.Routing ??
+                             msgTypeDesc?.Routing ??
+                             string.Empty;
+            return new PublishTarget
+            {
+                Routing = resRouting,
+                Exchange = resExchange
+            };
         }
 
         private IBasicProperties CreateBasicProperties<T>(OutgoingMqEnvelop<T> envelop, IModel channel) where T : class

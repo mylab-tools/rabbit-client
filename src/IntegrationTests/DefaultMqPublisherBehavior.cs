@@ -35,11 +35,11 @@ namespace IntegrationTests
                 null);
             var outgoingMessage = new OutgoingMqEnvelop<string>
             {
-                PublishTarget = new PublishTarget
-                {
-                    Routing = null,
-                    Exchange = null
-                },
+                //PublishTarget = new PublishTarget
+                //{
+                //    Routing = null,
+                //    Exchange = null
+                //},
                 Message = new MqMessage<string>("Foo")
             };
 
