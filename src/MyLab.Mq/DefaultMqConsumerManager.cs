@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyLab.LogDsl;
-using MyLab.StatusProvider;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -95,7 +94,7 @@ namespace MyLab.Mq
 
             var msgAccessor = scope.ServiceProvider.GetService<IMqMessageAccessor>();
 
-            var ctx = new ConsumingContext(
+            var ctx = new DefaultConsumingContext(
                 args.ConsumerTag,
                 args,
                 scope.ServiceProvider,

@@ -36,7 +36,7 @@ namespace MyLab.Mq
         /// <summary>
         /// Override to implement message consuming
         /// </summary>
-        public abstract Task Consume(ConsumingContext consumingContext);
+        public abstract Task Consume(IConsumingContext consumingContext);
 
 
         /// <inheritdoc />
@@ -63,7 +63,7 @@ namespace MyLab.Mq
 
 
         /// <inheritdoc />
-        public override async Task Consume(ConsumingContext consumingContext)
+        public override async Task Consume(IConsumingContext consumingContext)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace MyLab.Mq
         }
 
         /// <inheritdoc />
-        public override async Task Consume(ConsumingContext consumingContext)
+        public override async Task Consume(IConsumingContext consumingContext)
         {
             _messages.Add(consumingContext.GetMessage<TMsgPayload>());
 
