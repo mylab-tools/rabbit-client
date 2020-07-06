@@ -74,9 +74,9 @@ namespace MyLab.Mq
         /// <summary>
         /// Reject delivery 
         /// </summary>
-        public void RejectOnError(Exception exception)
+        public void RejectOnError(Exception exception, bool requeue)
         {
-            _channel.BasicNack(DeliveryTag, true, true);
+            _channel.BasicNack(DeliveryTag, true, requeue);
             _statusService.ConsumingError(_queue, exception);
         }
     }
