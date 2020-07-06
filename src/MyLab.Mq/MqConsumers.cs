@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace MyLab.Mq
@@ -19,6 +18,11 @@ namespace MyLab.Mq
         /// Determines number of retrieved messages to process
         /// </summary>
         public int BatchSize { get; }
+
+        /// <summary>
+        /// Determines requeue behavior when message processing error
+        /// </summary>
+        public bool RequeueWhenError { get; set; } = false;
         
         /// <summary>
         /// Initializes a new instance of <see cref="MqConsumer"/>
@@ -70,7 +74,7 @@ namespace MyLab.Mq
             }
             catch (Exception e)
             {
-                consumingContext.RejectOnError(e);
+                consumingContext.RejectOnError(e, RequeueWhenError);
                 throw;
             }
         }
@@ -113,7 +117,7 @@ namespace MyLab.Mq
                 }
                 catch (Exception e)
                 {
-                    consumingContext.RejectOnError(e);
+                    consumingContext.RejectOnError(e, RequeueWhenError);
                 }
                 finally
                 {

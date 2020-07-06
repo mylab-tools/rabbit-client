@@ -95,8 +95,8 @@ namespace IntegrationTests
             var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
 
             //Assert
-            Assert.NotNull(testBox.AckMsg);
-            Assert.Equal("foo", testBox.AckMsg.Payload.Content);
+            Assert.Null(testBox.AckMsg);
+            //Assert.Equal("foo", testBox.AckMsg.Payload.Content);
             Assert.NotNull(testBox.RejectedMsg);
             Assert.Equal("foo", testBox.RejectedMsg.Payload.Content);
 
@@ -180,10 +180,10 @@ namespace IntegrationTests
             var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
 
             //Assert
-            Assert.NotNull(testBox.AckMsgs);
-            Assert.Equal(2, testBox.AckMsgs.Length);
-            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
-            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
+            Assert.Null(testBox.AckMsgs);
+            //Assert.Equal(2, testBox.AckMsgs.Length);
+            //Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
+            //Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
             Assert.NotNull(testBox.RejectedMsgs);
             Assert.Equal(2, testBox.RejectedMsgs.Length);
             Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "foo");
