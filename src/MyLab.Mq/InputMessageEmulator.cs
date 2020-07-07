@@ -11,6 +11,9 @@ namespace MyLab.Mq
     /// </summary>
     public interface IInputMessageEmulator
     {
+        /// <summary>
+        /// Emulates queueing of message 
+        /// </summary>
         public Task<FakeMessageQueueProcResult> Queue(object message, string queue, IBasicProperties messageProps = null);
     }
 
