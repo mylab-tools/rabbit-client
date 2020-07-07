@@ -68,7 +68,13 @@ namespace MyLab.Mq
 
             var ctx = new FakeConsumingContext(message, _serviceProvider);
 
-            await consumer.Consume(ctx);
+            try
+            {
+                await consumer.Consume(ctx);
+            }
+            catch 
+            {
+            }
 
             return ctx.Result;
         }
