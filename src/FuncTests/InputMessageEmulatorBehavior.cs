@@ -82,9 +82,68 @@ namespace FuncTests
             Assert.Equal(testEntity.Id, logic.LastMsgId);
         }
 
+        [Fact]
+        public async Task ShouldProvideDiForLogic()
+        {
+            //Arrange
+
+            var services = new ServiceCollection();
+
+            var consumer = new MqConsumer<TestEntity, TestConsumerLogicWithDependency>("foo-queue");
+            var emulatorRegistrar = new InputMessageEmulatorRegistrar();
+
+            services.AddSingleton<TestConsumerLogicWithDependency.Dependency2>();
+            services.AddSingleton<TestConsumerLogicWithDependency.Dependency1>();
+            services.AddMqConsuming(
+                consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
+                emulatorRegistrar
+            );
+
+            var srvProvider = services.BuildServiceProvider();
+
+            var emulator = srvProvider.GetService<IInputMessageEmulator>();
+
+            var testEntity = new TestEntity { Id = Guid.NewGuid().ToString() };
+
+            //Act
+            var res = await emulator.Queue(testEntity, "foo-queue");
+
+            //Assert
+            Assert.True(res.Acked);
+        }
+
         class TestEntity
         {
             public string Id { get; set; }
+        }
+
+        class TestConsumerLogicWithDependency : IMqConsumerLogic<TestEntity>
+        {
+            public TestConsumerLogicWithDependency(Dependency1 dependency)
+            {
+                
+            }
+
+            public Task Consume(MqMessage<TestEntity> message)
+            {
+                
+
+                return Task.CompletedTask;
+            }
+
+            
+            public class Dependency1
+            {
+                public Dependency1(Dependency2 dep2)
+                {
+                    
+                }
+            }
+
+            public class Dependency2
+            {
+
+            }
         }
 
         class TestConsumerLogic : IMqConsumerLogic<TestEntity>
