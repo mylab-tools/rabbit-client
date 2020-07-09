@@ -29,7 +29,8 @@ namespace MyLab.Mq
         /// </summary>
         public static IServiceCollection AddMqConsuming(
             this IServiceCollection services,
-            Action<IMqConsumerRegistrar> consumerRegistration)
+            Action<IMqConsumerRegistrar> consumerRegistration,
+            IInitiatorRegistrar initiatorRegistrar = null)
         {
             if (consumerRegistration == null) throw new ArgumentNullException(nameof(consumerRegistration));
 
@@ -39,35 +40,10 @@ namespace MyLab.Mq
             services.AddSingleton<IMqConsumerRegistry>(registry)
                 .AddHostedService<DefaultMqConsumerManager>()
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
+
+            (initiatorRegistrar ?? new DefaultQueueListenerRegistrar()).Register(services);
             
             services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
-
-            services
-                .AddScoped<DefaultMqMessageAccessor>()
-                .AddScoped<IMqMessageAccessor>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>())
-                .AddScoped<IMqMessageAccessorCore>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>());
-
-            return services;
-        }
-
-        /// <summary>
-        /// Add MQ consuming abilities
-        /// </summary>
-        public static IServiceCollection AddMqConsuming(
-            this IServiceCollection services,
-            IMqConnectionProvider connectionProvider,
-            Action<IMqConsumerRegistrar> consumerRegistration)
-        {
-            if (connectionProvider == null) throw new ArgumentNullException(nameof(connectionProvider));
-            if (consumerRegistration == null) throw new ArgumentNullException(nameof(consumerRegistration));
-
-            var registry = new DefaultMqConsumerRegistry();
-            consumerRegistration(registry.CreateRegistrar());
-
-            services.AddSingleton<IMqConsumerRegistry>(registry)
-                .AddSingleton(connectionProvider)
-                .AddSingleton<DefaultMqConsumerManager>()
-                .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
 
             services
                 .AddScoped<DefaultMqMessageAccessor>()

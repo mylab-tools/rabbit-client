@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
-using MyLab.StatusProvider;
-using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -12,7 +8,31 @@ namespace MyLab.Mq
     /// <summary>
     /// Contains dependencies for consuming
     /// </summary>
-    public class ConsumingContext
+    public interface IConsumingContext
+    {
+        /// <summary>
+        /// Creates consuming logic
+        /// </summary>
+        T CreateLogic<T>();
+
+        /// <summary>
+        /// Gets delivered message
+        /// </summary>
+        MqMessage<T> GetMessage<T>();
+
+        /// <summary>
+        /// Acknowledgement delivery 
+        /// </summary>
+        void Ack();
+
+        /// <summary>
+        /// Reject delivery 
+        /// </summary>
+        void RejectOnError(Exception exception, bool requeue);
+    }
+
+    
+    class DefaultConsumingContext : IConsumingContext
     {
         private readonly string _queue;
         private readonly IServiceProvider _serviceProvider;
@@ -26,9 +46,9 @@ namespace MyLab.Mq
         public ulong DeliveryTag { get; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ConsumingContext"/>
+        /// Initializes a new instance of <see cref="DefaultConsumingContext"/>
         /// </summary>
-        public ConsumingContext(
+        public DefaultConsumingContext(
             string queue,
             BasicDeliverEventArgs args,
             IServiceProvider serviceProvider,
@@ -78,6 +98,50 @@ namespace MyLab.Mq
         {
             _channel.BasicNack(DeliveryTag, true, requeue);
             _statusService.ConsumingError(_queue, exception);
+        }
+    }
+
+    class FakeConsumingContext : IConsumingContext
+    {
+        private readonly object _messagePayload;
+        private readonly IServiceProvider _serviceProvider;
+
+        public FakeMessageQueueProcResult Result { get; private set; }
+
+        public FakeConsumingContext(object messagePayload, IServiceProvider serviceProvider)
+        {
+            _messagePayload = messagePayload;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        }
+
+        public T CreateLogic<T>()
+        {
+            return (T)ActivatorUtilities.CreateInstance(
+                _serviceProvider,
+                typeof(T));
+        }
+
+        public MqMessage<T> GetMessage<T>()
+        {
+            return new MqMessage<T>((T)_messagePayload);
+        }
+
+        public void Ack()
+        {
+            Result = new FakeMessageQueueProcResult
+            {
+                Acked = true
+            };
+        }
+
+        public void RejectOnError(Exception exception, bool requeue)
+        {
+            Result = new FakeMessageQueueProcResult
+            {
+                Rejected = true,
+                RejectionException = exception,
+                RequeueFlag = requeue
+            };
         }
     }
 }

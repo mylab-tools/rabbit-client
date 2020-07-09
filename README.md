@@ -422,3 +422,109 @@ public void ConfigureServices(IServiceCollection services)
 	}
 }
 ```
+
+## Функциональное тестирование
+
+### Эмулятор сообщений
+
+Для функционального тестирования приложения, осуществляющего обработку сообщений из очередей на базе `MyLab.Mq`, рекомендуется использовать `эмулятор входящих сообщений` (сервис с интерфейсом `IInputMessageEmulator`).
+
+```C#
+/// <summary>
+/// Specifies emulator of queue with input messages
+/// </summary>
+public interface IInputMessageEmulator
+{
+    /// <summary>
+    /// Emulates queueing of message 
+    /// </summary>
+    public Task<FakeMessageQueueProcResult> Queue(object message, string queue, IBasicProperties messageProps = null);
+}
+
+/// <summary>
+/// Contains fake queue message processing result
+/// </summary>
+public class FakeMessageQueueProcResult
+{
+    /// <summary>
+    /// Is there was acknowledge
+    /// </summary>
+    public bool Acked { get; set; }
+
+    /// <summary>
+    /// Is there was rejected
+    /// </summary>
+    public bool Rejected { get; set; }
+
+    /// <summary>
+    /// Exception which is reason of rejection
+    /// </summary>
+    public Exception RejectionException { get; set; }
+
+    /// <summary>
+    /// Requeue flag value
+    /// </summary>
+    public bool RequeueFlag { get; set; }
+}
+```
+
+Для этого необходимо:
+
+* при регистрации потребителей, в методе `AddMqConsuming` указать объект регистрации эмулятора. При этом не будет осуществляться подключение к реальной очереди для прослушивания очередей:
+
+  ```C#
+  var emulatorRegistrar = new InputMessageEmulatorRegistrar();
+  services.AddMqConsuming(
+  	consumerRegistrar =&gt; consumerRegistrar.RegisterConsumer(consumer),
+  	emulatorRegistrar	// <----
+  );
+  ```
+
+* получить эмулятор `IInputMessageEmulator` из поставщика сервисов:
+
+  ```C#
+  var services = new ServiceCollection();
+  
+  ...
+  
+  var emulatorRegistrar = new InputMessageEmulatorRegistrar();
+  
+  services.AddMqConsuming(
+  	consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
+  	emulatorRegistrar
+  );
+  
+  var srvProvider = services.BuildServiceProvider();   // <----
+  
+  var emulator = srvProvider.GetService<IInputMessageEmulator>();
+  ```
+
+  Или в конструкторе объекта, создаваемого с использованием `DI`
+
+* отправить тестовое сообщение:
+
+  ```C#
+  await emulator.Queue(testMsg, "foo-queue");
+  ```
+
+При отправке через эмулятор, сообщение обрабатывается синхронно. Результатом обработки сообщения является объект типа `FakeMessageQueueProcResult` (представлен выше). Он и является предметом анализа в тесте.
+
+### Объект логики потребителя
+
+При тестировании рекомендуется рассмотреть использование единого экземпляра логики потребителя. Т.е. при регистрации создать объект логики потребителя и передать в потребитель, вместо подхода когда потребитель сам создаёт логику. При этом появляется возможность самостоятельно инициализировать объект логики, кастомизировав его, например, тестовым поведением.
+
+```C#
+var services = new ServiceCollection();
+
+var logic = new TestConsumerLogic();
+var consumer = new MqConsumer<TestEntity, TestConsumerLogic>("foo-queue", logic); // <----
+
+var emulatorRegistrar = new InputMessageEmulatorRegistrar();
+
+services.AddMqConsuming(
+    consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
+    emulatorRegistrar
+);
+```
+
+Объект логики и/или его тестовые зависимости являются предметом анализа в тесте.

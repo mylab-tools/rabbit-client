@@ -36,7 +36,7 @@ namespace MyLab.Mq
         /// <summary>
         /// Override to implement message consuming
         /// </summary>
-        public abstract Task Consume(ConsumingContext consumingContext);
+        public abstract Task Consume(IConsumingContext consumingContext);
 
 
         /// <inheritdoc />
@@ -51,24 +51,28 @@ namespace MyLab.Mq
     /// <typeparam name="TMsgPayload">message payload type</typeparam>
     /// <typeparam name="TLogic">consuming logic type</typeparam>
     public class MqConsumer<TMsgPayload, TLogic> : MqConsumer
-        where TLogic : IMqConsumerLogic<TMsgPayload>
+        where TLogic : class, IMqConsumerLogic<TMsgPayload>
     {
+        private readonly TLogic _singletonLogic;
+
         /// <summary>
         /// Initializes a new instance of <see cref="MqConsumer{TMsg, TLogic}"/>
         /// </summary>
-        public MqConsumer(string queue)
+        public MqConsumer(string queue, TLogic singletonLogic = null)
             :base(queue, 1)
         {
+            _singletonLogic = singletonLogic;
         }
 
-
         /// <inheritdoc />
-        public override async Task Consume(ConsumingContext consumingContext)
+        public override async Task Consume(IConsumingContext consumingContext)
         {
             try
             {
                 var msgObj = consumingContext.GetMessage<TMsgPayload>();
-                await consumingContext.CreateLogic<TLogic>().Consume(msgObj);
+                var logic = _singletonLogic ?? consumingContext.CreateLogic<TLogic>();
+
+                await logic.Consume(msgObj);
 
                 consumingContext.Ack();
             }
@@ -86,21 +90,22 @@ namespace MyLab.Mq
     /// <typeparam name="TMsgPayload">message payload type</typeparam>
     /// <typeparam name="TLogic">consuming logic type</typeparam>
     public class MqBatchConsumer<TMsgPayload, TLogic> : MqConsumer
-        where TLogic : IMqBatchConsumerLogic<TMsgPayload>
+        where TLogic : class, IMqBatchConsumerLogic<TMsgPayload>
     {
+        private readonly TLogic _singletonLogic;
         readonly List<MqMessage<TMsgPayload>> _messages = new List<MqMessage<TMsgPayload>>();
 
         /// <summary>
         /// Initializes a new instance of <see cref="MqBatchConsumer{TMsg, TLogic}"/>
         /// </summary>
-        public MqBatchConsumer(string queue, int batchSize)
+        public MqBatchConsumer(string queue, int batchSize, TLogic singletonLogic = null)
             : base(queue, batchSize)
         {
-
+            _singletonLogic = singletonLogic;
         }
 
         /// <inheritdoc />
-        public override async Task Consume(ConsumingContext consumingContext)
+        public override async Task Consume(IConsumingContext consumingContext)
         {
             _messages.Add(consumingContext.GetMessage<TMsgPayload>());
 
@@ -111,7 +116,9 @@ namespace MyLab.Mq
                 try
                 {
                     var msgs = msgCache.ToArray();
-                    await consumingContext.CreateLogic<TLogic>().Consume(msgs);
+                    var logic = _singletonLogic ?? consumingContext.CreateLogic<TLogic>();
+
+                    await logic.Consume(msgs);
 
                     consumingContext.Ack();
                 }
