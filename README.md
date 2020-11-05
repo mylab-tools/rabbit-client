@@ -528,3 +528,78 @@ services.AddMqConsuming(
 ```
 
 Объект логики и/или его тестовые зависимости являются предметом анализа в тесте.
+
+## Интеграционное тестирование
+
+При тестировании с реальным сервисом `RabbitMQ` в тестах может потребоваться выполнить некоторые действия без интеграции в `.NET Core` приложение и без связи с какими-то зависимостями.
+
+### Создание очереди
+
+Класс `MqQueueFactory` - фабрика очередей. Создаёт очередь с указанными характеристиками.
+
+Для целей тестирования, рекомендуется инициализировать фабрику, указывая префикс имён очередей и флаг `AutoDelete` :
+
+```C#
+var queueFactory = new MqQueueFactory(connProvider)
+{
+    Prefix = "prefix:",
+    AutoDelete = true
+};
+```
+
+У фабрики есть несколько способов назначения имён создаваемым очередям:
+
+* **указать точное имя**
+
+  ```C#
+  MqQueue queue = queueFactory.CreateWithName("foo");
+  //name: 'foo'
+  //ignore prefix!!
+  ```
+
+* **указать идентификатор**
+
+  ```C#
+  MqQueue queue = queueFactory.CreateWithId("foo");
+  //name: 'prefix:foo'
+  ```
+
+* **назначить случайный идентификатор**
+
+  ```C#
+  MqQueue queue = queueFactory.CreateWithRandomId();
+  //name: 'prefix:4a2943bdfdc5434fa134c2c018635fea'
+  ```
+
+### Публикация
+
+Публикация сообщения в очередь типа `MqQueue` осуществляется через метод `Publish`, в который можно передать произвольный объект, который будет сериализован в JSON и передан в очередь.
+
+```C#
+class Model
+{
+	public string Value { get;set; } = 10
+}
+
+//... 
+    
+queue.Publish(new Model());
+
+//MQ Message content: {"Value":10}
+```
+
+### Потребление
+
+Класс `MqQueue` предоставляет возможность синхронного чтения одного сообщения из очереди: 
+
+```C#
+MqMessage<TModel> next = queue.Listen<TModel>();
+```
+
+Ест возможность указать таймаут ожидания:
+
+```C#
+MqMessage<TModel> next = queue.Listen<TModel>(TimeSpan.FromSeconds(2));
+```
+
+Таймаут по умолчанию - 1 сек. В случае истечения заданного времени таймаута, возникнет исключение типа `TimeoutException`.
