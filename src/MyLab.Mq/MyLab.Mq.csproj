@@ -14,6 +14,14 @@
     <Version>1.7.4</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>.\MyLab.Mq.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>.\MyLab.Mq.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="MyLab.LogDsl" Version="2.2.0" />
     <PackageReference Include="MyLab.StatusProvider" Version="1.3.5" />
