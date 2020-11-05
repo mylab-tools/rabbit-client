@@ -1,23 +1,7 @@
-﻿using System;
-using MyLab.Mq;
-using MyLab.Mq.Communication;
-using MyLab.Mq.MqObjects;
+﻿using MyLab.Mq;
 
 namespace Tests.Common
 {
-
-    public class TestQueueFactory : MqQueueFactory
-    {
-        public static readonly TestQueueFactory Default = new TestQueueFactory();
-
-        public TestQueueFactory()
-            :base(new DefaultMqConnectionProvider(TestMqOptions.Load()))
-        {
-            Prefix = "mylab:mq:test:";
-            AutoDelete = true;
-        }
-    }
-
     public static class TestMqOptions 
     {
         public static MqOptions Load()

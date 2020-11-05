@@ -8,6 +8,7 @@ using MyLab.Mq.Communication;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace MyLab.Mq.MqObjects
 {
@@ -16,7 +17,7 @@ namespace MyLab.Mq.MqObjects
     /// </summary>
     public class MqQueue : IDisposable
     {
-        private readonly IMqConnectionProvider _connectionProvider;
+        private readonly MqChannelProvider _channelProvider;
 
         /// <summary>
         /// Queue name
@@ -28,7 +29,7 @@ namespace MyLab.Mq.MqObjects
         /// </summary>
         public MqQueue(string name, IMqConnectionProvider connectionProvider)
         {
-            _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
+            _channelProvider = new MqChannelProvider(connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider)));
             Name = name;
         }
 
@@ -37,12 +38,10 @@ namespace MyLab.Mq.MqObjects
         /// </summary>
         public void Publish(object message)
         {
-            using var ch = new MqChannelProvider(_connectionProvider);
-            
             string messageStr = JsonConvert.SerializeObject(message);
             var messageBin = Encoding.UTF8.GetBytes(messageStr);
 
-            ch.Provide().BasicPublish(
+            _channelProvider.Provide().BasicPublish(
                 exchange: string.Empty,
                 routingKey: Name,
                 body: messageBin);
@@ -54,9 +53,7 @@ namespace MyLab.Mq.MqObjects
         public MqMessage<T> Listen<T>(TimeSpan? timeout = null)
             where T : class
         {
-            using var chProvider = new MqChannelProvider(_connectionProvider);
-
-            var channel = chProvider.Provide();
+            var channel = _channelProvider.Provide();
 
             var consumeBlock = new AutoResetEvent(false);
 
@@ -114,12 +111,45 @@ namespace MyLab.Mq.MqObjects
         }
 
         /// <summary>
+        /// Binds queue to exchange
+        /// </summary>
+        public void BindToExchange(string exchangeName, string routingKey = null)
+        {
+            _channelProvider.Provide().QueueBind(Name, exchangeName, routingKey ?? "");
+        }
+
+        /// <summary>
+        /// Binds queue to exchange
+        /// </summary>
+        public void BindToExchange(MqExchange exchange, string routingKey = null)
+        {
+            BindToExchange(exchange.Name, routingKey);
+        }
+
+        /// <summary>
+        /// Gets 'true' if queue exists 
+        /// </summary>
+        /// <returns></returns>
+        public bool IsExists()
+        {
+            try
+            {
+                _channelProvider.Provide().QueueDeclarePassive(Name);
+            }
+            catch (OperationInterruptedException e) when (e.ShutdownReason.ReplyText.Contains("no queue"))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Remove Queue
         /// </summary>
         public void Dispose()
         {
-            using var channelProvider = new MqChannelProvider(_connectionProvider);
-            channelProvider.Provide().QueueDelete(Name, false, false);
+            _channelProvider.Provide().QueueDelete(Name, false, false);
         }
     }
 }
