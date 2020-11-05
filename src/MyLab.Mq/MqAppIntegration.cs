@@ -38,7 +38,6 @@ namespace MyLab.Mq
             consumerRegistration(registry.CreateRegistrar());
 
             services.AddSingleton<IMqConsumerRegistry>(registry)
-                .AddHostedService<DefaultMqConsumerManager>()
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
 
             (initiatorRegistrar ?? new DefaultQueueListenerRegistrar()).Register(services);
