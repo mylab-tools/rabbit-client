@@ -571,6 +571,55 @@ var queueFactory = new MqQueueFactory(connProvider)
   //name: 'prefix:4a2943bdfdc5434fa134c2c018635fea'
   ```
 
+### Создание обменника
+
+Класс `MqExchangeFactory` - фабрика обменников. Создаёт обменник с указанными характеристиками.
+
+Для целей тестирования, рекомендуется инициализировать фабрику, указывая префикс имён обменников и флаг `AutoDelete` :
+
+```C#
+var exchangeFactory = new MqExchangeFactory(MqExchangeType.Fanout, connProvider)
+{
+    Prefix = "prefix:",
+    AutoDelete = true
+};
+```
+
+У фабрики есть несколько способов назначения имён создаваемым обменникам:
+
+* **указать точное имя**
+
+  ```C#
+  MqExchange exchange = exchangeFactory.CreateWithName("foo");
+  //name: 'foo'
+  //ignore prefix!!
+  ```
+
+* **указать идентификатор**
+
+  ```C#
+  MqExchange exchange = exchangeFactory.CreateWithId("foo");
+  //name: 'prefix:foo'
+  ```
+
+* **назначить случайный идентификатор**
+
+  ```C#
+  MqExchange exchange = exchangeFactory.CreateWithRandomId();
+  //name: 'prefix:4a2943bdfdc5434fa134c2c018635fea'
+  ```
+
+### Привязка очереди к обменнику
+
+В примере ниже показано как осуществляется привязка очереди к обменнику:
+
+```C#
+MqQueue queue = ...
+MqExchange exchange = ...
+
+queue.BindToExchange(exchange, "foo-routing");
+```
+
 ### Публикация
 
 Публикация сообщения в очередь типа `MqQueue` осуществляется через метод `Publish`, в который можно передать произвольный объект, который будет сериализован в JSON и передан в очередь.
