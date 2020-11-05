@@ -7,11 +7,11 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class ExchangeFactoryBehavior
+    public class MqExchangeFactoryBehavior
     {
         private readonly ITestOutputHelper _output;
 
-        public ExchangeFactoryBehavior(ITestOutputHelper output)
+        public MqExchangeFactoryBehavior(ITestOutputHelper output)
         {
             _output = output;
         }
