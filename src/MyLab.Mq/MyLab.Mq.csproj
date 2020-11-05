@@ -5,13 +5,13 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Andrey O.</Authors>
     <Company>Andrey O.</Company>
-    <Copyright>Copyright (c) 2019 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <Copyright>Copyright (c) 2020 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
     <PackageProjectUrl>https://github.com/ozzy-ext-mylab/mq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ozzy-ext-mylab/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.6.4.0510</AssemblyVersion>
-    <FileVersion>1.6.4.0510</FileVersion>
-    <Version>1.6.4</Version>
+    <AssemblyVersion>1.7.4.0511</AssemblyVersion>
+    <FileVersion>1.7.4.0511</FileVersion>
+    <Version>1.7.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
