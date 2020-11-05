@@ -4,7 +4,10 @@ using RabbitMQ.Client;
 
 namespace MyLab.Mq
 {
-    class DefaultMqConnectionProvider : IMqConnectionProvider
+    /// <summary>
+    /// Default implementation for <see cref="IMqConnectionProvider"/>
+    /// </summary>
+    public class DefaultMqConnectionProvider : IMqConnectionProvider
     {
         private readonly ConnectionFactory _factory;
         private readonly object _lock = new object();
@@ -51,11 +54,11 @@ namespace MyLab.Mq
             return new ConnectionFactory
             {
                 HostName = options.Host,
-                VirtualHost = options.VHost,
+                VirtualHost = options.VHost ?? "/",
                 Port = options.Port,
                 UserName = options.User,
                 Password = options.Password,
-                DispatchConsumersAsync = true 
+                DispatchConsumersAsync = true
             };
         }
     }

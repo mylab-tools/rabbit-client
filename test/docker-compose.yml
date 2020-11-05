@@ -1,0 +1,10 @@
+version: '3.2'
+
+services:
+
+  rabbit:
+    container_name: mylab-mqtests-rabbit
+    image: rabbitmq:3.8.3-management
+    ports:
+      - "10160:5672"
+      

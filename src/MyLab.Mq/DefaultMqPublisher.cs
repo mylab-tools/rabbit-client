@@ -7,11 +7,10 @@ using RabbitMQ.Client;
 
 namespace MyLab.Mq
 {
-    class DefaultMqPublisher : IMqPublisher, IDisposable
+    class DefaultMqPublisher : IMqPublisher
     {
         private readonly IAppStatusService _appStatusService;
         private readonly IMqStatusService _statusService;
-        private readonly IMqConnectionProvider _connectionProvider;
         private readonly MqChannelProvider _channelProvider;
         
         public DefaultMqPublisher(
@@ -22,8 +21,7 @@ namespace MyLab.Mq
             _statusService = statusService;
             _appStatusService = appStatusService;
 
-            _connectionProvider = connectionProvider;
-            _channelProvider = new MqChannelProvider(_connectionProvider);
+            _channelProvider = new MqChannelProvider(connectionProvider);
         }
 
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class
@@ -109,12 +107,6 @@ namespace MyLab.Mq
                 basicProperties.Headers = msg.Headers.ToDictionary(h => h.Name, h => (object)h.Value);
 
             return basicProperties;
-        }
-
-        public void Dispose()
-        {
-            _channelProvider?.Dispose();
-            _connectionProvider?.Dispose();
         }
     }
 }

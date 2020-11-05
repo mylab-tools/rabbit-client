@@ -1,48 +1,41 @@
 ﻿using System;
-using RabbitMQ.Client;
+using MyLab.Mq;
 
 namespace Tests.Common
 {
-    public static class TestQueue
+
+    public class TestQueueFactory : MqQueueFactory
     {
-        public static ConnectionFactory CreateConnectionFactory(bool async = false)
+        public static readonly TestQueueFactory Default = new TestQueueFactory();
+
+        public TestQueueFactory()
+            :base(new DefaultMqConnectionProvider(TestMqOptions.Load()))
         {
-            var mqTestServer = Environment.GetEnvironmentVariable("MYLAB_TEST_MQ");
-            if (string.IsNullOrEmpty(mqTestServer))
-                throw new InvalidOperationException("Environment variable 'MYLAB_TEST_MQ' is not set");
+            Prefix = "mylab:mq:test:";
+            AutoDelete = true;
+        }
+    }
 
-            var mqTestUser = Environment.GetEnvironmentVariable("MYLAB_TEST_MQ_USER");
-            if (string.IsNullOrEmpty(mqTestUser))
-                throw new InvalidOperationException("Environment variable 'MYLAB_TEST_MQ_USER' is not set");
-
-            var mqTestPass = Environment.GetEnvironmentVariable("MYLAB_TEST_MQ_PASS");
-            if (string.IsNullOrEmpty(mqTestPass))
-                throw new InvalidOperationException("Environment variable 'MYLAB_TEST_MQ_PASS' is not set");
-
-            return new ConnectionFactory
+    public static class TestMqOptions 
+    {
+        public static MqOptions Load()
+        {
+            return new MqOptions
             {
-                Endpoint = AmqpTcpEndpoint.Parse(mqTestServer),
-                UserName = mqTestUser,
-                Password = mqTestPass,
-                DispatchConsumersAsync = async
+                Host = "127.0.0.1",
+                Password = "guest",
+                User = "guest",
+                Port = 10160
             };
         }
 
-        public static QueueTestCtx CreateWithId(string queueId)
+        public static void ConfigureAction(MqOptions options)
         {
-            return Create("mylab:mq-app:test:" + queueId);
-        }
-        public static QueueTestCtx Create(string queueName = null)
-        {
-            var factory = CreateConnectionFactory();
-            using var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
-
-            string resName = queueName ?? ("mylab:mq-app:test:" + Guid.NewGuid().ToString("N"));
-
-            channel.QueueDeclare(resName, autoDelete: true, exclusive: false);
-
-            return new QueueTestCtx(resName);
+            var actOptions = Load();
+            options.User = actOptions.User;
+            options.Password = actOptions.Password;
+            options.Host = actOptions.Host;
+            options.Port = actOptions.Port;
         }
     }
 }
