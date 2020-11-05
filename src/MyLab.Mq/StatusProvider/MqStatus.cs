@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using MyLab.StatusProvider;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.StatusProvider
 {
     /// <summary>
     /// Contains MQ specific status

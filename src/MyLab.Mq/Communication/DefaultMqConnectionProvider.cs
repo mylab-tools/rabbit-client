@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.Communication
 {
     /// <summary>
     /// Default implementation for <see cref="IMqConnectionProvider"/>

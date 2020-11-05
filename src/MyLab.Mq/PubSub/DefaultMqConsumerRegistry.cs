@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     class DefaultMqConsumerRegistry : IMqConsumerRegistry
     {

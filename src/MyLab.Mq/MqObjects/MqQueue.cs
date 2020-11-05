@@ -4,11 +4,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MyLab.Mq.Communication;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.MqObjects
 {
     /// <summary>
     /// Represent MQ queue

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Contains MQ model description

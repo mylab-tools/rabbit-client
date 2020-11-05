@@ -1,7 +1,7 @@
 ﻿using System;
 using RabbitMQ.Client;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.Communication
 {
     /// <summary>
     /// Defines MQ connection provider

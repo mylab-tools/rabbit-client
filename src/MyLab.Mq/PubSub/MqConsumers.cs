@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// The base for MQ consumer

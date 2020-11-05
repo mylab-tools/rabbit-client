@@ -1,9 +1,11 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using MyLab.Mq.StatusProvider;
+using MyLab.Mq.Test;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Contains dependencies for consuming

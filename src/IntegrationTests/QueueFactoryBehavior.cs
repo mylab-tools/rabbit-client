@@ -1,5 +1,7 @@
 ﻿using System;
 using MyLab.Mq;
+using MyLab.Mq.Communication;
+using MyLab.Mq.MqObjects;
 using RabbitMQ.Client.Exceptions;
 using Tests.Common;
 using Xunit;

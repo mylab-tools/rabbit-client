@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Represent messages queue consumer

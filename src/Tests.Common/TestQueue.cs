@@ -1,5 +1,7 @@
 ﻿using System;
 using MyLab.Mq;
+using MyLab.Mq.Communication;
+using MyLab.Mq.MqObjects;
 
 namespace Tests.Common
 {

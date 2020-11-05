@@ -6,10 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyLab.LogDsl;
+using MyLab.Mq.Communication;
+using MyLab.Mq.StatusProvider;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     class DefaultMqConsumerManager : IHostedService, IDisposable
     {

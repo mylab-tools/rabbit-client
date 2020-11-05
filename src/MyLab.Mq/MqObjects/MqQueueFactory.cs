@@ -1,6 +1,7 @@
 ﻿using System;
+using MyLab.Mq.Communication;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.MqObjects
 {
     /// <summary>
     /// Creates queue

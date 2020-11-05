@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Defines consumer registry

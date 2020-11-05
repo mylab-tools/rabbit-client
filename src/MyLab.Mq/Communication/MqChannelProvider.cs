@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using RabbitMQ.Client;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.Communication
 {
     class MqChannelProvider : IDisposable
     {

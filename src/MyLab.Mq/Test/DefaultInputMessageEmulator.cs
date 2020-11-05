@@ -2,47 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using MyLab.Mq.PubSub;
 using RabbitMQ.Client;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.Test
 {
-    /// <summary>
-    /// Specifies emulator of queue with input messages
-    /// </summary>
-    public interface IInputMessageEmulator
-    {
-        /// <summary>
-        /// Emulates queueing of message 
-        /// </summary>
-        public Task<FakeMessageQueueProcResult> Queue(object message, string queue, IBasicProperties messageProps = null);
-    }
-
-    /// <summary>
-    /// Contains fake queue message processing result
-    /// </summary>
-    public class FakeMessageQueueProcResult
-    {
-        /// <summary>
-        /// Is there was acknowledge
-        /// </summary>
-        public bool Acked { get; set; }
-
-        /// <summary>
-        /// Is there was rejected
-        /// </summary>
-        public bool Rejected { get; set; }
-
-        /// <summary>
-        /// Exception which is reason of rejection
-        /// </summary>
-        public Exception RejectionException { get; set; }
-
-        /// <summary>
-        /// Requeue flag value
-        /// </summary>
-        public bool RequeueFlag { get; set; }
-    }
-
     class DefaultInputMessageEmulator : IInputMessageEmulator
     {
         private readonly IServiceProvider _serviceProvider;

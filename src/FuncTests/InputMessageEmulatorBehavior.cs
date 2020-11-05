@@ -4,6 +4,8 @@ using System.Security.Authentication.ExtendedProtection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MyLab.Mq;
+using MyLab.Mq.PubSub;
+using MyLab.Mq.Test;
 using Xunit;
 
 namespace FuncTests

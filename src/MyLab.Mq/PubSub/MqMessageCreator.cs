@@ -4,7 +4,7 @@ using System.Text;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     static class MqMessageCreator
     {

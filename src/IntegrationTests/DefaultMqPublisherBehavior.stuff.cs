@@ -1,4 +1,7 @@
 ﻿using MyLab.Mq;
+using MyLab.Mq.Communication;
+using MyLab.Mq.MqObjects;
+using MyLab.Mq.PubSub;
 using MyLab.StatusProvider;
 using Tests.Common;
 

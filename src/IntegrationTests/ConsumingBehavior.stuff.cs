@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using MyLab.Mq;
+using MyLab.Mq.MqObjects;
+using MyLab.Mq.PubSub;
 using Tests.Common;
 using TestServer;
 using Xunit.Abstractions;

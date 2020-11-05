@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Defines a Message Queue publisher

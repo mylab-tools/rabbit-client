@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using MyLab.Mq.Communication;
+using MyLab.Mq.StatusProvider;
 using MyLab.StatusProvider;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace MyLab.Mq
+namespace MyLab.Mq.PubSub
 {
     class DefaultMqPublisher : IMqPublisher
     {

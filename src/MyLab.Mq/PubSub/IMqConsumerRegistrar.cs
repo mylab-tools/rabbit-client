@@ -1,4 +1,4 @@
-﻿namespace MyLab.Mq
+﻿namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Registers MQ consumers
