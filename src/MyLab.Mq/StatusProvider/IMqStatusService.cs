@@ -12,6 +12,10 @@ namespace MyLab.Mq.StatusProvider
         /// </summary>
         void QueueConnected(string queueName);
         /// <summary>
+        /// Report about connection closed
+        /// </summary>
+        void QueueDisconnected(string queueName);
+        /// <summary>
         /// Report about incoming message has received 
         /// </summary>
         void MessageReceived(string srcQueue);

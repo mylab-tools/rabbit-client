@@ -8,7 +8,7 @@ namespace MyLab.Mq.PubSub
     public interface IMqPublisher 
     {
         /// <summary>
-        /// Publish message into queue
+        /// Publishes message in MQ
         /// </summary>
         void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class;
     }
@@ -18,6 +18,9 @@ namespace MyLab.Mq.PubSub
     /// </summary>
     public static class MqPublisherExtensions
     {
+        /// <summary>
+        /// Publishes message
+        /// </summary>
         public static void Publish<T>(this IMqPublisher publisher, T msg) 
             where T : class
         {
@@ -30,6 +33,9 @@ namespace MyLab.Mq.PubSub
             });
         }
 
+        /// <summary>
+        /// Publishes message in queue
+        /// </summary>
         public static void PublishToQueue<T>(this IMqPublisher publisher, T msg, string queueName) 
             where T : class
         {
@@ -43,6 +49,9 @@ namespace MyLab.Mq.PubSub
             });
         }
 
+        /// <summary>
+        /// Publishes message in exchange
+        /// </summary>
         public static void PublishToExchange<T>(this IMqPublisher publisher, T msg, string exchange, string routingKey = null) where T : class
         {
             if (publisher == null) throw new ArgumentNullException(nameof(publisher));

@@ -3,9 +3,9 @@
 namespace MyLab.Mq.PubSub
 {
     /// <summary>
-    /// Defines consumer registry
+    /// Defines consumer registry which contains initial defined consumers
     /// </summary>
-    public interface IMqConsumerRegistry
+    public interface IMqInitialConsumerRegistry
     {
         /// <summary>
         /// Gets registered consumer array

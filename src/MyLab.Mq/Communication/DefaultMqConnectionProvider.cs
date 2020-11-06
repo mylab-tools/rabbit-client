@@ -14,21 +14,31 @@ namespace MyLab.Mq.Communication
 
         private IConnection _currConnection;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="DefaultMqConnectionProvider"/>
+        /// </summary>
         public DefaultMqConnectionProvider(IOptions<MqOptions> options)
             : this(options.Value)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="DefaultMqConnectionProvider"/>
+        /// </summary>
         public DefaultMqConnectionProvider(MqOptions options)
             : this(OptionToConnectionFactory(options))
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="DefaultMqConnectionProvider"/>
+        /// </summary>
         public DefaultMqConnectionProvider(ConnectionFactory connectionFactory)
         {
             _factory = connectionFactory;
         }
 
+        /// <inheritdoc />
         public IConnection Provide()
         {
             lock (_lock)
@@ -42,6 +52,7 @@ namespace MyLab.Mq.Communication
             return _currConnection;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _currConnection?.Dispose();

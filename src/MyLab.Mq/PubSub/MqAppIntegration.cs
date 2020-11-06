@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MyLab.Mq.Communication;
@@ -31,19 +30,20 @@ namespace MyLab.Mq.PubSub
         /// </summary>
         public static IServiceCollection AddMqConsuming(
             this IServiceCollection services,
-            Action<IMqConsumerRegistrar> consumerRegistration,
+            Action<IMqInitialConsumerRegistrar> consumerRegistration,
             IInitiatorRegistrar initiatorRegistrar = null)
         {
             if (consumerRegistration == null) throw new ArgumentNullException(nameof(consumerRegistration));
 
-            var registry = new DefaultMqConsumerRegistry();
+            var registry = new DefaultMqInitialConsumerRegistry();
             consumerRegistration(registry.CreateRegistrar());
 
-            services.AddSingleton<IMqConsumerRegistry>(registry)
+            services.AddSingleton<IMqInitialConsumerRegistry>(registry)
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
 
             (initiatorRegistrar ?? new DefaultQueueListenerRegistrar()).Register(services);
-            
+            services.AddSingleton<MqConsumerHost>();
+
             services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
 
             services
@@ -52,33 +52,6 @@ namespace MyLab.Mq.PubSub
                 .AddScoped<IMqMessageAccessorCore>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>());
 
             return services;
-        }
-    }
-
-    public static class MqConfig
-    {
-        public const string DefaultConfigSectionName = "Mq";
-
-        /// <summary>
-        /// Loads configuration for MessageQueue connection
-        /// </summary>
-        public static IServiceCollection LoadMqConfig(
-            this IServiceCollection services, 
-            IConfiguration configuration, 
-            string sectionName = DefaultConfigSectionName)
-        {
-            return services.Configure<MqOptions>(configuration.GetSection(sectionName));
-        }
-
-        /// <summary>
-        /// Loads configuration for MessageQueue connection
-        /// </summary>
-        public static IServiceCollection ConfigureMq(
-            this IServiceCollection services,
-            Action<MqOptions> configurator)
-        {
-            if (configurator == null) throw new ArgumentNullException(nameof(configurator));
-            return services.Configure(configurator);
         }
     }
 }

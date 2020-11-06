@@ -15,7 +15,7 @@ namespace MyLab.Mq.PubSub
     {
         public IServiceCollection Register(IServiceCollection serviceCollection)
         {
-            return serviceCollection.AddHostedService<MqConsumerManager>();
+            return serviceCollection.AddHostedService<MqConsumingStarter>();
         }
     }
 

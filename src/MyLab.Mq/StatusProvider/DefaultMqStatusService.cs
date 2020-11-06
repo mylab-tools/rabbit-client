@@ -23,6 +23,12 @@ namespace MyLab.Mq.StatusProvider
             _status.Value.Consume.Add(queueName, new ConsumeMqStatus());
         }
 
+        public void QueueDisconnected(string queueName)
+        {
+            if(_status.Value.Consume.ContainsKey(queueName))
+                _status.Value.Consume.Remove(queueName);
+        }
+
         public void MessageReceived(string srcQueue)
         {
             RetrieveConsumeStatus(srcQueue).LastTime = DateTime.Now;

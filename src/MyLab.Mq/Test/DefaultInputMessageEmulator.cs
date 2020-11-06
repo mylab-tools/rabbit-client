@@ -13,11 +13,11 @@ namespace MyLab.Mq.Test
         private readonly Dictionary<string, MqConsumer> _consumers;
 
         public DefaultInputMessageEmulator(
-            IMqConsumerRegistry consumerRegistry,
+            IMqInitialConsumerRegistry initialConsumerRegistry,
             IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _consumers = new Dictionary<string, MqConsumer>(consumerRegistry.GetConsumers());
+            _consumers = new Dictionary<string, MqConsumer>(initialConsumerRegistry.GetConsumers());
         }
 
         public async Task<FakeMessageQueueProcResult> Queue(object message, string queue, IBasicProperties messageProps = null)

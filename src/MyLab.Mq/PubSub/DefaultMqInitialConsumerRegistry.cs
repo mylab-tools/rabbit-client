@@ -2,13 +2,13 @@
 
 namespace MyLab.Mq.PubSub
 {
-    class DefaultMqConsumerRegistry : IMqConsumerRegistry
+    class DefaultMqInitialConsumerRegistry : IMqInitialConsumerRegistry
     {
         readonly Dictionary<string, MqConsumer> _consumers = new Dictionary<string, MqConsumer>();
 
-        public IMqConsumerRegistrar CreateRegistrar()
+        public IMqInitialConsumerRegistrar CreateRegistrar()
         {
-            return new ConsumerRegistrar(_consumers);
+            return new InitialConsumerRegistrar(_consumers);
         }
 
         public IReadOnlyDictionary<string, MqConsumer> GetConsumers()
@@ -16,11 +16,11 @@ namespace MyLab.Mq.PubSub
             return _consumers;
         }
 
-        class ConsumerRegistrar : IMqConsumerRegistrar
+        class InitialConsumerRegistrar : IMqInitialConsumerRegistrar
         {
             private readonly IDictionary<string, MqConsumer> _consumers;
 
-            public ConsumerRegistrar(IDictionary<string, MqConsumer> consumers)
+            public InitialConsumerRegistrar(IDictionary<string, MqConsumer> consumers)
             {
                 _consumers = consumers;
             }

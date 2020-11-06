@@ -1,151 +1,236 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Threading;
-//using System.Threading.Tasks;
-//using Microsoft.Extensions.DependencyInjection;
-//using Microsoft.Extensions.Logging;
-//using MyLab.LogDsl;
-//using MyLab.Mq.Communication;
-//using MyLab.Mq.StatusProvider;
-//using RabbitMQ.Client;
-//using RabbitMQ.Client.Events;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MyLab.LogDsl;
+using MyLab.Mq.Communication;
+using MyLab.Mq.StatusProvider;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
-//namespace MyLab.Mq.PubSub
-//{
-//    class MqConsumerHost : IIMqConsumerHost
-//    {
-//        private readonly IMqConnectionProvider _connectionProvider;
-//        private readonly IMqConsumerRegistry _consumerRegistry;
-//        private readonly IServiceProvider _serviceProvider;
-//        private readonly IMqStatusService _mqStatusService;
-//        private readonly DslLogger _logger;
+namespace MyLab.Mq.PubSub
+{
+    class MqConsumerHost : IMqConsumerHost, IMqConsumerRegistrar, IDisposable
+    {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IMqStatusService _mqStatusService;
+        private readonly DslLogger _logger;
 
-//        private IDictionary<string, MqConsumer> _consumers;
-//        private IModel _curChannel;
+        private readonly IDictionary<string, MqConsumer> _consumerRegister;
 
-//        public MqConsumerHost(IMqConnectionProvider connectionProvider,
-//            IMqConsumerRegistry consumerRegistry,
-//            IServiceProvider serviceProvider,
-//            IMqStatusService mqStatusService,
-//            ILogger<MqConsumerHost> logger = null)
-//        {
-//            _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
-//            _consumerRegistry = consumerRegistry ?? throw new ArgumentNullException(nameof(consumerRegistry));
-//            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-//            _mqStatusService = mqStatusService;
-//            _logger = logger?.Dsl();
-//        }
+        private readonly IDictionary<string, MqConsumer> _runConsumers = new Dictionary<string, MqConsumer>();
 
-//        public void Start()
-//        {
-//            var cp = _connectionProvider.Provide();
-//            _curChannel = cp.CreateModel();
-//            _curChannel.CallbackException += ChannelExceptionReceived;
+        private readonly Lazy<IModel> _channel;
+        private AsyncEventingBasicConsumer _systemConsumer;
+        private MqConsumerHostState _state = MqConsumerHostState.Stopped;
 
-//            var systemConsumer = new AsyncEventingBasicConsumer(_curChannel);
+        public MqConsumerHost(IMqConnectionProvider connectionProvider,
+            IMqInitialConsumerRegistry initialConsumerRegistry,
+            IServiceProvider serviceProvider,
+            IMqStatusService mqStatusService,
+            ILogger<MqConsumerHost> logger = null)
+        {
+            if (connectionProvider == null) 
+                throw new ArgumentNullException(nameof(connectionProvider));
 
-//            systemConsumer.Received += ConsumerReceivedAsync;
+            if (initialConsumerRegistry == null) 
+                throw new ArgumentNullException(nameof(initialConsumerRegistry));
 
-//            _consumers = new Dictionary<string, MqConsumer>(_consumerRegistry.GetConsumers());
+            _channel = new Lazy<IModel>(() =>
+            {
+                var ch = connectionProvider.Provide().CreateModel();
+                ch.CallbackException += ChannelExceptionReceived;
 
-//            foreach (var logicConsumer in _consumers.Values)
-//            {
-//                _curChannel.BasicConsume(
-//                    queue: logicConsumer.Queue,
-//                    consumerTag: logicConsumer.Queue,
-//                    consumer: systemConsumer);
-//                _mqStatusService.QueueConnected(logicConsumer.Queue);
-//            }
+                _systemConsumer = new AsyncEventingBasicConsumer(_channel.Value);
+                _systemConsumer.Received += ConsumerReceivedAsync;
 
-//            return Task.CompletedTask;
-//        }
+                return ch;
+            });
 
-//        private void ChannelExceptionReceived(object sender, CallbackExceptionEventArgs e)
-//        {
-//            _logger
-//                .Error(e.Exception)
-//                .Write();
-//        }
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _mqStatusService = mqStatusService;
+            _logger = logger?.Dsl();
 
-//        public Task StopAsync(CancellationToken cancellationToken)
-//        {
-//            ClosesAll();
+            _consumerRegister = new Dictionary<string, MqConsumer>(initialConsumerRegistry.GetConsumers());
+        }
 
-//            return Task.CompletedTask;
-//        }
+        public void Start()
+        {
+            if (_state != MqConsumerHostState.Stopped)
+            {
+                _logger
+                    .Warning($"An attempt to start consumer host in unsuitable state was detected")
+                    .AndFactIs("state", _state)
+                    .Write();
+            }
 
-//        private async Task ConsumerReceivedAsync(object sender, BasicDeliverEventArgs args)
-//        {
-//            if (!_consumers.TryGetValue(args.ConsumerTag, out var consumer))
-//            {
-//                _logger.Error("Consumer not found")
-//                    .AndFactIs("consumer-tag", args.ConsumerTag)
-//                    .Write();
+            _state = MqConsumerHostState.StartRunning;
 
-//                return;
-//            }
+            try
+            {
+                foreach (var logicConsumer in _consumerRegister.Values)
+                {
+                    StartConsumer(logicConsumer);
+                }
+            }
+            catch (Exception e)
+            {
+                _state = MqConsumerHostState.Undefined;
+                _logger.Error(e).Write();
+            }
 
-//            _mqStatusService.MessageReceived(args.ConsumerTag);
+            _state = MqConsumerHostState.Running;
+        }
 
-//            using var scope = _serviceProvider.CreateScope();
+        public void Stop()
+        {
+            if (_state != MqConsumerHostState.Stopped && _state != MqConsumerHostState.Undefined)
+            {
+                _logger
+                    .Warning($"An attempt to stop consumer host in unsuitable state was detected")
+                    .AndFactIs("state", _state)
+                    .Write();
+            }
 
-//            var msgAccessorCore = scope.ServiceProvider.GetService<IMqMessageAccessorCore>();
-//            msgAccessorCore.SetScopedMessage(args.Body, args.BasicProperties);
+            StopCore();
+        }
 
-//            var msgAccessor = scope.ServiceProvider.GetService<IMqMessageAccessor>();
+        public IDisposable AddConsumer(MqConsumer consumer)
+        {
+            if(_consumerRegister.ContainsKey(consumer.Queue))
+                throw new InvalidOperationException("The consumer for the same queue already registered");
 
-//            var ctx = new DefaultConsumingContext(
-//                args.ConsumerTag,
-//                args,
-//                scope.ServiceProvider,
-//                _curChannel,
-//                _mqStatusService,
-//                msgAccessor);
+            _consumerRegister.Add(consumer.Queue, consumer);
 
-//            try
-//            {
-//                await consumer.Consume(ctx);
-//            }
-//            catch (Exception e)
-//            {
-//                _logger.Error(e).Write();
-//            }
-//        }
+            if(_state == MqConsumerHostState.Running)
+                StartConsumer(consumer);
 
-//        public void Dispose()
-//        {
-//            ClosesAll();
-//        }
+            return new ConsumerUnregistrar(consumer.Queue, this);
+        }
 
-//        void ClosesAll()
-//        {
-//            _curChannel?.Dispose();
-//            _curChannel = null;
+        public void RemoveConsumer(string queueName)
+        {
+            if (_runConsumers.ContainsKey(queueName))
+                StopConsumer(queueName);
 
-//            if (_consumers != null)
-//            {
-//                foreach (var mqConsumer in _consumers.Values)
-//                {
-//                    mqConsumer.Dispose();
-//                }
-//                _consumers.Clear();
-//                _consumers = null;
-//            }
-//        }
+            _consumerRegister.Remove(queueName);
+        }
 
-//        public void Stop()
-//        {
-//            throw new NotImplementedException();
-//        }
+        public void Dispose()
+        {
+            StopCore();
+            _channel.Value?.Dispose();
 
-//        public IDisposable Add(MqConsumer consumer)
-//        {
-//            throw new NotImplementedException();
-//        }
+            if (_consumerRegister != null)
+            {
+                foreach (var mqConsumer in _consumerRegister.Values)
+                {
+                    mqConsumer.Dispose();
+                }
+                _consumerRegister.Clear();
+            }
+        }
 
-//        public void Remove(string queueName)
-//        {
-//            throw new NotImplementedException();
-//        }
-//    }
-//}
+        void StartConsumer(MqConsumer consumer)
+        {
+            _channel.Value.BasicConsume(
+                queue: consumer.Queue,
+                consumerTag: consumer.Queue,
+                consumer: _systemConsumer);
+            _mqStatusService.QueueConnected(consumer.Queue);
+
+            _runConsumers.Add(consumer.Queue, consumer);
+        }
+
+        private void ChannelExceptionReceived(object sender, CallbackExceptionEventArgs e)
+        {
+            _logger
+                .Error(e.Exception)
+                .Write();
+        }
+
+        private async Task ConsumerReceivedAsync(object sender, BasicDeliverEventArgs args)
+        {
+            if (!_runConsumers.TryGetValue(args.ConsumerTag, out var consumer))
+            {
+                _logger.Error("Consumer not found")
+                    .AndFactIs("consumer-tag", args.ConsumerTag)
+                    .Write();
+
+                return;
+            }
+
+            _mqStatusService.MessageReceived(args.ConsumerTag);
+
+            using var scope = _serviceProvider.CreateScope();
+
+            var msgAccessorCore = scope.ServiceProvider.GetService<IMqMessageAccessorCore>();
+            msgAccessorCore.SetScopedMessage(args.Body, args.BasicProperties);
+
+            var msgAccessor = scope.ServiceProvider.GetService<IMqMessageAccessor>();
+
+            var ctx = new DefaultConsumingContext(
+                args.ConsumerTag,
+                args,
+                scope.ServiceProvider,
+                _channel.Value,
+                _mqStatusService,
+                msgAccessor);
+
+            try
+            {
+                await consumer.Consume(ctx);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e).Write();
+            }
+        }
+
+        public void StopCore()
+        {
+            _state = MqConsumerHostState.StopRunning;
+
+            try
+            {
+                foreach (var logicConsumer in _runConsumers.Values)
+                {
+                    StopConsumer(logicConsumer.Queue);
+                }
+            }
+            catch (Exception e)
+            {
+                _state = MqConsumerHostState.Undefined;
+                _logger.Error(e).Write();
+            }
+
+            _state = MqConsumerHostState.Stopped;
+        }
+
+        void StopConsumer(string queueName)
+        {
+            _channel.Value.BasicCancel(queueName);
+            _mqStatusService.QueueDisconnected(queueName);
+
+            _runConsumers.Remove(queueName);
+        }
+
+        class ConsumerUnregistrar : IDisposable
+        {
+            private readonly string _queueName;
+            private readonly IMqConsumerRegistrar _registrar;
+
+            public ConsumerUnregistrar(string queueName, IMqConsumerRegistrar registrar)
+            {
+                _queueName = queueName;
+                _registrar = registrar;
+            }
+
+            public void Dispose()
+            {
+                _registrar.RemoveConsumer(_queueName);
+            }
+        }
+    }
+}
