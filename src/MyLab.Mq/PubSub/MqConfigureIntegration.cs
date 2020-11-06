@@ -7,7 +7,7 @@ namespace MyLab.Mq.PubSub
     /// <summary>
     /// Extensions to MQ tools configuration
     /// </summary>
-    public static class MqConfig
+    public static class MqConfigureIntegration
     {
         /// <summary>
         /// Default config section name 
@@ -17,7 +17,7 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Loads configuration for MessageQueue connection
         /// </summary>
-        public static IServiceCollection LoadMqConfig(
+        public static IServiceCollection ConfigureMqTools(
             this IServiceCollection services, 
             IConfiguration configuration, 
             string sectionName = DefaultConfigSectionName)
@@ -28,7 +28,7 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Loads configuration for MessageQueue connection
         /// </summary>
-        public static IServiceCollection ConfigureMq(
+        public static IServiceCollection ConfigureMqTools(
             this IServiceCollection services,
             Action<MqOptions> configurator)
         {

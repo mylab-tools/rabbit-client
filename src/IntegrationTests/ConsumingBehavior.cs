@@ -14,8 +14,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-
-            var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogic>(queue);
+            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogic>(queue);
 
             //Act
             await PublishMessages(queue, "foo");
@@ -40,8 +39,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-
-            var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogicWithReject>(queue);
+            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogicWithReject>(queue);
 
             //Act
             await PublishMessages(queue, "foo");
@@ -67,8 +65,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-
-            var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue);
+            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue);
 
             //Act
             await PublishMessages(queue, "foo", "bar");
@@ -81,7 +78,7 @@ namespace IntegrationTests
 
             var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
 
-            //Assert
+            ////Assert
             Assert.Null(testBox.RejectedMsgs);
             Assert.NotNull(testBox.AckMsgs);
             Assert.Equal(2, testBox.AckMsgs.Length);
@@ -96,8 +93,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-
-            var client = CreateTestClientWithBatchConsumer<TestBatchMqLogicWithReject>(queue);
+            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogicWithReject>(queue);
 
             //Act
             await PublishMessages(queue, "foo", "bar");
@@ -125,8 +121,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-
-            var client = CreateTestClientWithSingleConsumer<MqLogicWithScopedDependency>(queue);
+            using var client = CreateTestClientWithSingleConsumer<MqLogicWithScopedDependency>(queue);
 
             //Act
             await PublishMessages(queue, "foo");

@@ -1,8 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using MyLab.Mq;
 using MyLab.Mq.MqObjects;
 using MyLab.Mq.PubSub;
 using Tests.Common;
@@ -63,8 +61,8 @@ namespace IntegrationTests
                     services.AddMqConsuming(registrar =>
                     {
                         registrar.RegisterConsumer(consumer);
-                    });
-                    services.Configure<MqOptions>(TestMqOptions.ConfigureAction);
+                    })
+                        .ConfigureMqTools(TestMqOptions.ConfigureAction);
                 });
             }).CreateClient();
         }

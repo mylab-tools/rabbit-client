@@ -27,7 +27,7 @@ namespace IntegrationTests
         public void ShouldSendMessageWhenPublishTargetSpecified()
         {
             //Arrange
-            var queue = CreateTestQueue();
+            using var queue = CreateTestQueue();
             var publisher = CreateTestPublisher();
 
             var outgoingMessage = new OutgoingMqEnvelop<string>
@@ -54,7 +54,7 @@ namespace IntegrationTests
         public void ShouldSendMessageWhenPublishTargetSpecifiedByPayloadType()
         {
             //Arrange
-            var queue = CreateTestQueue();
+            using var queue = CreateTestQueue();
             var publisher = CreateTestPublisher();
 
             var outgoingMessage = new OutgoingMqEnvelop<Msg>
@@ -81,7 +81,7 @@ namespace IntegrationTests
         public void ShouldSendData()
         {
             //Arrange
-            var queue = CreateTestQueue();
+            using var queue = CreateTestQueue();
 
             var statusServiceMock = new Mock<IAppStatusService>();
             statusServiceMock.Setup(service => service.GetStatus())

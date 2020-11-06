@@ -42,7 +42,7 @@ namespace MyLab.Mq.PubSub
                 var ch = connectionProvider.Provide().CreateModel();
                 ch.CallbackException += ChannelExceptionReceived;
 
-                _systemConsumer = new AsyncEventingBasicConsumer(_channel.Value);
+                _systemConsumer = new AsyncEventingBasicConsumer(ch);
                 _systemConsumer.Received += ConsumerReceivedAsync;
 
                 return ch;
@@ -132,6 +132,7 @@ namespace MyLab.Mq.PubSub
             }
         }
 
+        Тут какая-то дичь
         void StartConsumer(MqConsumer consumer)
         {
             _channel.Value.BasicConsume(

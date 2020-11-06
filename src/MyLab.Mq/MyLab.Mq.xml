@@ -393,11 +393,6 @@
             Reject delivery 
             </summary>
         </member>
-        <member name="T:MyLab.Mq.PubSub.IInitiatorRegistrar">
-            <summary>
-            Registers MQ processing initiator
-            </summary>
-        </member>
         <member name="T:MyLab.Mq.PubSub.IMqConsumerLogic`1">
             <summary>
             Represent messages queue consumer
@@ -488,27 +483,32 @@
             Add MQ publisher <see cref="T:MyLab.Mq.PubSub.IMqPublisher"/> in application dependency container
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqConsuming(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.PubSub.IMqInitialConsumerRegistrar},MyLab.Mq.PubSub.IInitiatorRegistrar)">
+        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqConsuming(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.PubSub.IMqInitialConsumerRegistrar})">
             <summary>
             Add MQ consuming abilities
             </summary>
         </member>
-        <member name="T:MyLab.Mq.PubSub.MqConfig">
+        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqMsgEmulator(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add Emulator instead default MQ consuming tool
+            </summary>
+        </member>
+        <member name="T:MyLab.Mq.PubSub.MqConfigureIntegration">
             <summary>
             Extensions to MQ tools configuration
             </summary>
         </member>
-        <member name="F:MyLab.Mq.PubSub.MqConfig.DefaultConfigSectionName">
+        <member name="F:MyLab.Mq.PubSub.MqConfigureIntegration.DefaultConfigSectionName">
             <summary>
             Default config section name 
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqConfig.LoadMqConfig(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+        <member name="M:MyLab.Mq.PubSub.MqConfigureIntegration.ConfigureMqTools(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
             <summary>
             Loads configuration for MessageQueue connection
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqConfig.ConfigureMq(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.MqOptions})">
+        <member name="M:MyLab.Mq.PubSub.MqConfigureIntegration.ConfigureMqTools(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.MqOptions})">
             <summary>
             Loads configuration for MessageQueue connection
             </summary>

@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MyLab.Mq.Communication;
 using MyLab.Mq.StatusProvider;
+using MyLab.Mq.Test;
 
 namespace MyLab.Mq.PubSub
 {
@@ -30,26 +33,43 @@ namespace MyLab.Mq.PubSub
         /// </summary>
         public static IServiceCollection AddMqConsuming(
             this IServiceCollection services,
-            Action<IMqInitialConsumerRegistrar> consumerRegistration,
-            IInitiatorRegistrar initiatorRegistrar = null)
+            Action<IMqInitialConsumerRegistrar> consumerRegistration)
         {
-            if (consumerRegistration == null) throw new ArgumentNullException(nameof(consumerRegistration));
+            if (consumerRegistration == null) 
+                throw new ArgumentNullException(nameof(consumerRegistration));
 
             var registry = new DefaultMqInitialConsumerRegistry();
             consumerRegistration(registry.CreateRegistrar());
 
-            services.AddSingleton<IMqInitialConsumerRegistry>(registry)
-                .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
+            services
+                .AddSingleton<IMqInitialConsumerRegistry>(registry)
+                .AddSingleton<IMqConsumerHost, MqConsumerHost>()
+                .AddSingleton<IMqConsumerRegistrar, MqConsumerHost>();
 
-            (initiatorRegistrar ?? new DefaultQueueListenerRegistrar()).Register(services);
-            services.AddSingleton<MqConsumerHost>();
+            services.AddHostedService<MqConsumingStarter>();
 
+            services.TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
             services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
 
             services
                 .AddScoped<DefaultMqMessageAccessor>()
                 .AddScoped<IMqMessageAccessor>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>())
                 .AddScoped<IMqMessageAccessorCore>(sp => sp.GetRequiredService<DefaultMqMessageAccessor>());
+
+            return services;
+        }
+
+        /// <summary>
+        /// Add Emulator instead default MQ consuming tool
+        /// </summary>
+        public static IServiceCollection AddMqMsgEmulator(
+            this IServiceCollection services)
+        {
+            var consumingStarter = services.FirstOrDefault(s => s.ServiceType == typeof(MqConsumingStarter));
+            if (consumingStarter != null)
+                services.Remove(consumingStarter);
+
+            services.AddSingleton<IInputMessageEmulator, DefaultInputMessageEmulator>();
 
             return services;
         }
