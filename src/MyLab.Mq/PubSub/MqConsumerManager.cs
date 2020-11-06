@@ -13,7 +13,7 @@ using RabbitMQ.Client.Events;
 
 namespace MyLab.Mq.PubSub
 {
-    class DefaultMqConsumerManager : IHostedService, IDisposable
+    class MqConsumerManager : IHostedService, IDisposable
     {
         private readonly IMqConnectionProvider _connectionProvider;
         private readonly IMqConsumerRegistry _consumerRegistry;
@@ -24,12 +24,12 @@ namespace MyLab.Mq.PubSub
         private IDictionary<string, MqConsumer> _consumers;
         private IModel _curChannel;
 
-        public DefaultMqConsumerManager(
+        public MqConsumerManager(
             IMqConnectionProvider connectionProvider, 
             IMqConsumerRegistry consumerRegistry,
             IServiceProvider serviceProvider,
             IMqStatusService mqStatusService,
-            ILogger<DefaultMqConsumerManager> logger = null)
+            ILogger<MqConsumerManager> logger = null)
         {
             _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
             _consumerRegistry = consumerRegistry ?? throw new ArgumentNullException(nameof(consumerRegistry));
