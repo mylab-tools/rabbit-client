@@ -132,7 +132,6 @@ namespace MyLab.Mq.PubSub
             }
         }
 
-        Тут какая-то дичь
         void StartConsumer(MqConsumer consumer)
         {
             _channel.Value.BasicConsume(
@@ -211,7 +210,7 @@ namespace MyLab.Mq.PubSub
 
         void StopConsumer(string queueName)
         {
-            _channel.Value.BasicCancel(queueName);
+            _channel.Value.BasicCancelNoWait(queueName);
             _mqStatusService.QueueDisconnected(queueName);
 
             _runConsumers.Remove(queueName);
