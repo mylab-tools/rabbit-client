@@ -10,6 +10,6 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Gets registered consumer array
         /// </summary>
-        IReadOnlyDictionary<string, MqConsumer> GetConsumers();
+        IReadOnlyDictionary<string, IInitialConsumerProvider> GetConsumers();
     }
 }

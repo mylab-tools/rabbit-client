@@ -17,7 +17,8 @@ namespace MyLab.Mq.PubSub
         private readonly IMqStatusService _mqStatusService;
         private readonly DslLogger _logger;
 
-        private readonly IDictionary<string, MqConsumer> _consumerRegister;
+        private readonly IDictionary<string, IInitialConsumerProvider> _initialConsumerRegister;
+        private readonly IDictionary<string, MqConsumer> _runtimeConsumerRegister = new Dictionary<string, MqConsumer>();
 
         private readonly IDictionary<string, MqConsumer> _runConsumers = new Dictionary<string, MqConsumer>();
 
@@ -52,7 +53,7 @@ namespace MyLab.Mq.PubSub
             _mqStatusService = mqStatusService;
             _logger = logger?.Dsl();
 
-            _consumerRegister = new Dictionary<string, MqConsumer>(initialConsumerRegistry.GetConsumers());
+            _initialConsumerRegister = new Dictionary<string, IInitialConsumerProvider>(initialConsumerRegistry.GetConsumers());
         }
 
         public void Start()
@@ -69,7 +70,13 @@ namespace MyLab.Mq.PubSub
 
             try
             {
-                foreach (var logicConsumer in _consumerRegister.Values)
+                foreach (var logicConsumerProvider in _initialConsumerRegister.Values)
+                {
+                    var logicConsumer = logicConsumerProvider.Provide(_serviceProvider);
+                    StartConsumer(logicConsumer);
+                }
+
+                foreach (var logicConsumer in _runtimeConsumerRegister.Values)
                 {
                     StartConsumer(logicConsumer);
                 }
@@ -98,10 +105,10 @@ namespace MyLab.Mq.PubSub
 
         public IDisposable AddConsumer(MqConsumer consumer)
         {
-            if(_consumerRegister.ContainsKey(consumer.Queue))
+            if(_initialConsumerRegister.ContainsKey(consumer.Queue) || _runConsumers.ContainsKey(consumer.Queue))
                 throw new InvalidOperationException("The consumer for the same queue already registered");
 
-            _consumerRegister.Add(consumer.Queue, consumer);
+            _runtimeConsumerRegister.Add(consumer.Queue, consumer);
 
             if(_state == MqConsumerHostState.Running)
                 StartConsumer(consumer);
@@ -114,7 +121,9 @@ namespace MyLab.Mq.PubSub
             if (_runConsumers.ContainsKey(queueName))
                 StopConsumer(queueName);
 
-            _consumerRegister.Remove(queueName);
+            _runConsumers.Remove(queueName);
+            _runtimeConsumerRegister.Remove(queueName);
+            _initialConsumerRegister.Remove(queueName);
         }
 
         public void Dispose()
@@ -122,13 +131,13 @@ namespace MyLab.Mq.PubSub
             StopCore();
             _channel.Value?.Dispose();
 
-            if (_consumerRegister != null)
+            if (_runConsumers != null)
             {
-                foreach (var mqConsumer in _consumerRegister.Values)
+                foreach (var mqConsumer in _runConsumers.Values)
                 {
                     mqConsumer.Dispose();
                 }
-                _consumerRegister.Clear();
+                _runConsumers.Clear();
             }
         }
 

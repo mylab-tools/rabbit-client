@@ -62,7 +62,7 @@ namespace IntegrationTests
                     {
                         registrar.RegisterConsumer(consumer);
                     })
-                        .ConfigureMqTools(TestMqOptions.ConfigureAction);
+                        .ConfigureMq(TestMqOptions.ConfigureAction);
                 });
             }).CreateClient();
         }

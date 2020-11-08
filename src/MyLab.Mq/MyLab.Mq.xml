@@ -393,6 +393,16 @@
             Reject delivery 
             </summary>
         </member>
+        <member name="T:MyLab.Mq.PubSub.IInitialConsumerProvider">
+            <summary>
+            Provides initial registered consumer
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.PubSub.IInitialConsumerProvider.Provide(System.IServiceProvider)">
+            <summary>
+            Provides a consumer
+            </summary>
+        </member>
         <member name="T:MyLab.Mq.PubSub.IMqConsumerLogic`1">
             <summary>
             Represent messages queue consumer
@@ -424,6 +434,11 @@
             </summary>
         </member>
         <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistrar.RegisterConsumer(MyLab.Mq.PubSub.MqConsumer)">
+            <summary>
+            Registers MQ consumer
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistrar.RegisterConsumerByOptions``1(System.String,System.Func{``0,MyLab.Mq.PubSub.MqConsumer})">
             <summary>
             Registers MQ consumer
             </summary>
@@ -503,12 +518,12 @@
             Default config section name 
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqConfigureIntegration.ConfigureMqTools(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+        <member name="M:MyLab.Mq.PubSub.MqConfigureIntegration.ConfigureMq(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
             <summary>
             Loads configuration for MessageQueue connection
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqConfigureIntegration.ConfigureMqTools(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.MqOptions})">
+        <member name="M:MyLab.Mq.PubSub.MqConfigureIntegration.ConfigureMq(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.MqOptions})">
             <summary>
             Loads configuration for MessageQueue connection
             </summary>

@@ -1,4 +1,6 @@
-﻿namespace MyLab.Mq.PubSub
+﻿using System;
+
+namespace MyLab.Mq.PubSub
 {
     /// <summary>
     /// Registers initial MQ consumers
@@ -9,5 +11,11 @@
         /// Registers MQ consumer
         /// </summary>
         void RegisterConsumer(MqConsumer consumer);
+
+        /// <summary>
+        /// Registers MQ consumer
+        /// </summary>
+        void RegisterConsumerByOptions<TOptions>(string queueName, Func<TOptions, MqConsumer> consumerFactory)
+            where TOptions : class, new();
     }
 }

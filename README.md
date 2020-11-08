@@ -470,15 +470,15 @@ public class FakeMessageQueueProcResult
 
 Для этого необходимо:
 
-* при регистрации потребителей, в методе `AddMqConsuming` указать объект регистрации эмулятора. При этом не будет осуществляться подключение к реальной очереди для прослушивания очередей:
+* при конфигурировании приложения зарегистрировать эмулятор в сервисах:
 
   ```C#
-  var emulatorRegistrar = new InputMessageEmulatorRegistrar();
-  services.AddMqConsuming(
-  	consumerRegistrar =&gt; consumerRegistrar.RegisterConsumer(consumer),
-  	emulatorRegistrar	// <----
-  );
+  services
+      .AddMqConsuming(cr => cr.RegisterConsumer(consumer))
+      .AddMqMsgEmulator();  // <----
   ```
+  
+  При этом не будет осуществляться подключение к реальной очереди для прослушивания очередей.
 
 * получить эмулятор `IInputMessageEmulator` из поставщика сервисов:
 
@@ -487,20 +487,17 @@ public class FakeMessageQueueProcResult
   
   ...
   
-  var emulatorRegistrar = new InputMessageEmulatorRegistrar();
+  services
+      .AddMqConsuming(cr => cr.RegisterConsumer(consumer))
+      .AddMqMsgEmulator();
   
-  services.AddMqConsuming(
-  	consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
-  	emulatorRegistrar
-  );
+  var srvProvider = services.BuildServiceProvider();  
   
-  var srvProvider = services.BuildServiceProvider();   // <----
-  
-  var emulator = srvProvider.GetService<IInputMessageEmulator>();
+  var emulator = srvProvider.GetService<IInputMessageEmulator>(); // <----
   ```
-
+  
   Или в конструкторе объекта, создаваемого с использованием `DI`
-
+  
 * отправить тестовое сообщение:
 
   ```C#
