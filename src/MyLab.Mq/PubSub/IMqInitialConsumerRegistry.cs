@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MyLab.Mq.PubSub
 {
@@ -10,6 +11,6 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Gets registered consumer array
         /// </summary>
-        IReadOnlyDictionary<string, IInitialConsumerProvider> GetConsumers();
+        IEnumerable<MqConsumer> GetConsumers(IServiceProvider serviceProvider);
     }
 }

@@ -13,13 +13,12 @@ namespace MyLab.Mq.PubSub
 {
     class MqConsumerHost : IMqConsumerHost, IMqConsumerRegistrar, IDisposable
     {
+        private readonly IMqInitialConsumerRegistry _initialConsumerRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly IMqStatusService _mqStatusService;
         private readonly DslLogger _logger;
-
-        private readonly IDictionary<string, IInitialConsumerProvider> _initialConsumerRegister;
+        
         private readonly IDictionary<string, MqConsumer> _runtimeConsumerRegister = new Dictionary<string, MqConsumer>();
-
         private readonly IDictionary<string, MqConsumer> _runConsumers = new Dictionary<string, MqConsumer>();
 
         private readonly Lazy<IModel> _channel;
@@ -35,9 +34,6 @@ namespace MyLab.Mq.PubSub
             if (connectionProvider == null) 
                 throw new ArgumentNullException(nameof(connectionProvider));
 
-            if (initialConsumerRegistry == null) 
-                throw new ArgumentNullException(nameof(initialConsumerRegistry));
-
             _channel = new Lazy<IModel>(() =>
             {
                 var ch = connectionProvider.Provide().CreateModel();
@@ -49,11 +45,10 @@ namespace MyLab.Mq.PubSub
                 return ch;
             });
 
+            _initialConsumerRegistry = initialConsumerRegistry ?? throw new ArgumentNullException(nameof(initialConsumerRegistry));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _mqStatusService = mqStatusService;
             _logger = logger?.Dsl();
-
-            _initialConsumerRegister = new Dictionary<string, IInitialConsumerProvider>(initialConsumerRegistry.GetConsumers());
         }
 
         public void Start()
@@ -70,9 +65,9 @@ namespace MyLab.Mq.PubSub
 
             try
             {
-                foreach (var logicConsumerProvider in _initialConsumerRegister.Values)
+                var initialConsumers = _initialConsumerRegistry.GetConsumers(_serviceProvider);
+                foreach (var logicConsumer in initialConsumers)
                 {
-                    var logicConsumer = logicConsumerProvider.Provide(_serviceProvider);
                     StartConsumer(logicConsumer);
                 }
 
@@ -105,7 +100,7 @@ namespace MyLab.Mq.PubSub
 
         public IDisposable AddConsumer(MqConsumer consumer)
         {
-            if(_initialConsumerRegister.ContainsKey(consumer.Queue) || _runConsumers.ContainsKey(consumer.Queue))
+            if(_runConsumers.ContainsKey(consumer.Queue))
                 throw new InvalidOperationException("The consumer for the same queue already registered");
 
             _runtimeConsumerRegister.Add(consumer.Queue, consumer);
@@ -123,7 +118,6 @@ namespace MyLab.Mq.PubSub
 
             _runConsumers.Remove(queueName);
             _runtimeConsumerRegister.Remove(queueName);
-            _initialConsumerRegister.Remove(queueName);
         }
 
         public void Dispose()

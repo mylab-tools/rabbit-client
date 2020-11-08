@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ namespace MyLab.Mq.Test
     class DefaultInputMessageEmulator : IInputMessageEmulator
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly Dictionary<string, IInitialConsumerProvider> _consumers;
+        private readonly Dictionary<string, MqConsumer> _consumers;
         private readonly DslLogger _log;
 
         public DefaultInputMessageEmulator(
@@ -21,13 +22,15 @@ namespace MyLab.Mq.Test
             ILogger<DefaultInputMessageEmulator> logger = null)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _consumers = new Dictionary<string, IInitialConsumerProvider>(initialConsumerRegistry.GetConsumers());
+            _consumers = initialConsumerRegistry
+                .GetConsumers(_serviceProvider)
+                .ToDictionary(c => c.Queue, c => c);
             _log = logger?.Dsl();
         }
 
         public async Task<FakeMessageQueueProcResult> Queue(object message, string queue, IBasicProperties messageProps = null)
         {
-            if (!_consumers.TryGetValue(queue, out var consumerProvider))
+            if (!_consumers.TryGetValue(queue, out var consumer))
             {
                 return null;
             }
@@ -42,7 +45,6 @@ namespace MyLab.Mq.Test
 
             try
             {
-                var consumer = consumerProvider.Provide(_serviceProvider);
                 await consumer.Consume(ctx);
             }
             catch (Exception e)

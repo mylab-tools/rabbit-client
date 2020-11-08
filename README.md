@@ -351,6 +351,17 @@ class MyConsumerLogic : IMqConsumerLogic<MsgPayload>
 }
 ```
 
+В случае, если наименование или дополнительные опции создания потребителя содержатся в конфигурации, регистрация потребителя может выглядеть следующим образом:
+
+```C#
+services.AddMqConsuming(r =>
+	r.RegisterConsumerByOptions<MyOptions>(
+       opt => new MqConsumer<MsgPayload,MyConsumerLogic>(opt.Queue)
+                )
+```
+
+  
+
 ## Конфигурирование 
 
 Конфигурирование позволяет загрузить параметры подключения к MQ серверу и автоматически их применять для публикации и потребления сообщений.

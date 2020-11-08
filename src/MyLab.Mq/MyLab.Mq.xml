@@ -438,7 +438,7 @@
             Registers MQ consumer
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistrar.RegisterConsumerByOptions``1(System.String,System.Func{``0,MyLab.Mq.PubSub.MqConsumer})">
+        <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistrar.RegisterConsumerByOptions``1(System.Func{``0,MyLab.Mq.PubSub.MqConsumer})">
             <summary>
             Registers MQ consumer
             </summary>
@@ -448,7 +448,7 @@
             Defines consumer registry which contains initial defined consumers
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistry.GetConsumers">
+        <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistry.GetConsumers(System.IServiceProvider)">
             <summary>
             Gets registered consumer array
             </summary>

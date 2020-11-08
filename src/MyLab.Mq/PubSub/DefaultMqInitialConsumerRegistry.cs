@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyLab.Mq.PubSub
 {
     class DefaultMqInitialConsumerRegistry : IMqInitialConsumerRegistry
     {
-        readonly Dictionary<string, IInitialConsumerProvider> _consumers = new Dictionary<string, IInitialConsumerProvider>();
+        readonly List<IInitialConsumerProvider> _consumers = new List<IInitialConsumerProvider>();
 
         public IMqInitialConsumerRegistrar CreateRegistrar()
         {
             return new InitialConsumerRegistrar(_consumers);
         }
 
-        public IReadOnlyDictionary<string, IInitialConsumerProvider> GetConsumers()
+        public IEnumerable<MqConsumer> GetConsumers(IServiceProvider serviceProvider)
         {
-            return _consumers;
+            return _consumers.Select(c => c.Provide(serviceProvider));
         }
 
         class InitialConsumerRegistrar : IMqInitialConsumerRegistrar
         {
-            private readonly IDictionary<string, IInitialConsumerProvider> _consumers;
+            private readonly List<IInitialConsumerProvider> _consumers;
 
-            public InitialConsumerRegistrar(IDictionary<string, IInitialConsumerProvider> consumers)
+            public InitialConsumerRegistrar(List<IInitialConsumerProvider> consumers)
             {
                 _consumers = consumers;
             }
@@ -29,20 +30,14 @@ namespace MyLab.Mq.PubSub
             public void RegisterConsumer(MqConsumer consumer)
             {
                 var cp = new ObjectInitialConsumerProvider(consumer);
-                if (!_consumers.ContainsKey(consumer.Queue))
-                    _consumers.Add(consumer.Queue, cp);
-                else
-                    _consumers[consumer.Queue] = cp;
+                _consumers.Add(cp);
             }
 
-            public void RegisterConsumerByOptions<TOptions>(string queueName, Func<TOptions, MqConsumer> consumerFactory)
+            public void RegisterConsumerByOptions<TOptions>(Func<TOptions, MqConsumer> consumerFactory)
                 where TOptions : class, new()
             {
                 var cp = new ByOptionConsumerFactoryProvider<TOptions>(consumerFactory);
-                if (!_consumers.ContainsKey(queueName))
-                    _consumers.Add(queueName, cp);
-                else
-                    _consumers[queueName] = cp;
+                _consumers.Add(cp);
             }
         }
     }

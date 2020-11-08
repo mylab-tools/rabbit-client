@@ -15,7 +15,7 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Registers MQ consumer
         /// </summary>
-        void RegisterConsumerByOptions<TOptions>(string queueName, Func<TOptions, MqConsumer> consumerFactory)
+        void RegisterConsumerByOptions<TOptions>(Func<TOptions, MqConsumer> consumerFactory)
             where TOptions : class, new();
     }
 }

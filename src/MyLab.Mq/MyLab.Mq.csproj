@@ -9,9 +9,9 @@
     <PackageProjectUrl>https://github.com/ozzy-ext-mylab/mq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ozzy-ext-mylab/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.7.6.0811</AssemblyVersion>
-    <FileVersion>1.7.6.0811</FileVersion>
-    <Version>1.7.6</Version>
+    <AssemblyVersion>1.7.7.0811</AssemblyVersion>
+    <FileVersion>1.7.7.0811</FileVersion>
+    <Version>1.7.7</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
