@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MyLab.Mq.Communication;
 
 namespace MyLab.Mq.MqObjects
@@ -31,6 +32,16 @@ namespace MyLab.Mq.MqObjects
         public bool Exclusive { get; set; } = false;
 
         /// <summary>
+        /// Specifies a dead letter exchange
+        /// </summary>
+        public string DeadLetterExchange { get; set; }
+
+        /// <summary>
+        /// Specifies a dead letter routing key
+        /// </summary>
+        public string DeadLetterRoutingKey { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="MqQueueFactory"/>
         /// </summary>
         public MqQueueFactory(IMqConnectionProvider connectionProvider)
@@ -61,7 +72,16 @@ namespace MyLab.Mq.MqObjects
         {
             using var channelProvider = new MqChannelProvider(_connectionProvider);
 
-            channelProvider.Provide().QueueDeclare(name, Durable, Exclusive, AutoDelete, null);
+            var args = new Dictionary<string, object>();
+
+            if (DeadLetterExchange != null)
+            {
+                args.Add("x-dead-letter-exchange", DeadLetterExchange);
+                if(DeadLetterRoutingKey != null)
+                    args.Add("x-dead-letter-routing-key", DeadLetterRoutingKey);
+            }
+
+            channelProvider.Provide().QueueDeclare(name, Durable, Exclusive, AutoDelete, args);
 
             return new MqQueue(name, _connectionProvider);
         }

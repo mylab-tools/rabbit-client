@@ -43,7 +43,7 @@ namespace IntegrationTests
             //Act
             publisher.Publish(outgoingMessage);
 
-            var incoming = queue.Listen<string>();
+            var incoming = queue.ListenAutoAck<string>();
 
             //Assert
             Assert.NotNull(incoming.Payload);
@@ -70,7 +70,7 @@ namespace IntegrationTests
             //Act
             publisher.Publish(outgoingMessage);
 
-            var incoming = queue.Listen<Msg>();
+            var incoming = queue.ListenAutoAck<Msg>();
 
             //Assert
             Assert.NotNull(incoming.Payload);
@@ -118,7 +118,7 @@ namespace IntegrationTests
             //Act
             publisher.Publish(outgoingMsg);
 
-            var incoming = queue.Listen<Msg>();
+            var incoming = queue.ListenAutoAck<Msg>();
 
             //Assert
             Assert.NotNull(incoming.ReplyTo);

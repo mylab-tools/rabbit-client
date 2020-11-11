@@ -217,6 +217,32 @@
             Declare exchange types
             </summary>
         </member>
+        <member name="T:MyLab.Mq.MqObjects.MqMessageRead`1">
+            <summary>
+            Read message
+            </summary>
+            <typeparam name="T">payload type</typeparam>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqMessageRead`1.Message">
+            <summary>
+            Message
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.MqObjects.MqMessageRead`1.#ctor(RabbitMQ.Client.IModel,System.UInt64,MyLab.Mq.MqMessage{`0})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.Mq.MqObjects.MqMessageRead`1"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.MqObjects.MqMessageRead`1.Ack">
+            <summary>
+            Ack message
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.MqObjects.MqMessageRead`1.Nack">
+            <summary>
+            Nack message
+            </summary>
+        </member>
         <member name="T:MyLab.Mq.MqObjects.MqQueue">
             <summary>
             Represent MQ queue
@@ -238,6 +264,11 @@
             </summary>
         </member>
         <member name="M:MyLab.Mq.MqObjects.MqQueue.Listen``1(System.Nullable{System.TimeSpan})">
+            <summary>
+            Listens next message synchronously 
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.MqObjects.MqQueue.ListenAutoAck``1(System.Nullable{System.TimeSpan})">
             <summary>
             Listens next message synchronously 
             </summary>
@@ -286,6 +317,16 @@
         <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.Exclusive">
             <summary>
             Used by only one connection and the queue will be deleted when that connection closes
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.DeadLetterExchange">
+            <summary>
+            Specifies a dead letter exchange
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.DeadLetterRoutingKey">
+            <summary>
+            Specifies a dead letter routing key
             </summary>
         </member>
         <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.#ctor(MyLab.Mq.Communication.IMqConnectionProvider)">

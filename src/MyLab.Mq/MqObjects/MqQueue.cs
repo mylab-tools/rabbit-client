@@ -47,10 +47,26 @@ namespace MyLab.Mq.MqObjects
                 body: messageBin);
         }
 
+
         /// <summary>
         /// Listens next message synchronously 
         /// </summary>
-        public MqMessage<T> Listen<T>(TimeSpan? timeout = null)
+        public MqMessageRead<T> Listen<T>(TimeSpan? timeout = null)
+            where T : class
+        {
+            return ListenCore<T>(timeout, false);
+        }
+
+        /// <summary>
+        /// Listens next message synchronously 
+        /// </summary>
+        public MqMessage<T> ListenAutoAck<T>(TimeSpan? timeout = null)
+            where T : class
+        {
+            return ListenCore<T>(timeout, true).Message;
+        }
+
+        MqMessageRead<T> ListenCore<T>(TimeSpan? timeout, bool autoAck)
             where T : class
         {
             var channel = _channelProvider.Provide();
@@ -60,6 +76,8 @@ namespace MyLab.Mq.MqObjects
             MqMessage<T> result = null;
             Exception e = null;
 
+            ulong deliveryTag = 0;
+            
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
             {
@@ -86,6 +104,8 @@ namespace MyLab.Mq.MqObjects
                             .Select(MqHeader.Create)
                             .ToArray();
                     }
+
+                    deliveryTag = ea.DeliveryTag;
                 }
                 catch (Exception exception)
                 {
@@ -99,7 +119,7 @@ namespace MyLab.Mq.MqObjects
                 return Task.CompletedTask;
             };
 
-            channel.BasicConsume(queue: Name, consumer: consumer);
+            channel.BasicConsume(queue: Name, consumer: consumer, autoAck: autoAck);
 
             if (!consumeBlock.WaitOne(timeout ?? TimeSpan.FromSeconds(1)))
                 throw new TimeoutException();
@@ -107,7 +127,7 @@ namespace MyLab.Mq.MqObjects
             if (e != null)
                 throw new TargetInvocationException(e);
 
-            return result;
+            return new MqMessageRead<T>(consumer.Model, deliveryTag, result);
         }
 
         /// <summary>

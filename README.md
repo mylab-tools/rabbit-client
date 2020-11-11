@@ -650,13 +650,51 @@ queue.Publish(new Model());
 Класс `MqQueue` предоставляет возможность синхронного чтения одного сообщения из очереди: 
 
 ```C#
-MqMessage<TModel> next = queue.Listen<TModel>();
+MqMessageRead<TModel> next = queue.Listen<TModel>();
 ```
 
-Ест возможность указать таймаут ожидания:
+Есть возможность указать таймаут ожидания:
 
 ```C#
-MqMessage<TModel> next = queue.Listen<TModel>(TimeSpan.FromSeconds(2));
+MqMessageRead<TModel> next = queue.Listen<TModel>(TimeSpan.FromSeconds(2));
 ```
 
 Таймаут по умолчанию - 1 сек. В случае истечения заданного времени таймаута, возникнет исключение типа `TimeoutException`.
+
+Полученное сообщение следует подтвердить или отклонить: методы `Ack` и `Nack`, соответственно.
+
+```C#
+/// <summary>
+/// Read message
+/// </summary>
+/// <typeparam name="T">payload type</typeparam>
+public class MqMessageRead<T>
+{
+    /// <summary>
+    /// Message
+    /// </summary>
+    public MqMessage<T> Message { get; }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="MqMessageRead{T}"/>
+    /// </summary>
+    public MqMessageRead(IModel model, ulong deliveryTag, MqMessage<T> message)
+
+    /// <summary>
+    /// Ack message
+    /// </summary>
+    public void Ack()
+
+    /// <summary>
+    /// Nack message
+    /// </summary>
+    public void Nack()
+}
+```
+
+Также есть возможность читать с автоподтверждением:
+
+```C#
+MqMessage<T> next = queue.ListenAutoAck<TModel>()
+```
+
