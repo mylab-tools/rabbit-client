@@ -1,5 +1,6 @@
 using System;
 using MyLab.Mq;
+using MyLab.Mq.PubSub;
 using Xunit;
 
 namespace UnitTests

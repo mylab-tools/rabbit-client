@@ -351,6 +351,27 @@ class MyConsumerLogic : IMqConsumerLogic<MsgPayload>
 }
 ```
 
+В случае, если наименование или дополнительные опции создания потребителя содержатся в конфигурации, регистрация потребителя может выглядеть следующим образом:
+
+```C#
+services.AddMqConsuming(r =>
+	r.RegisterConsumerByOptions<MyOptions>(
+       opt => new MqConsumer<MsgPayload,MyConsumerLogic>(opt.Queue)
+                )
+```
+
+ Для случая, когда регистрировать потребителя следует только при наличии в опциях определённого параметра:
+
+```
+services.AddMqConsuming(r =>
+	r.RegisterConsumerByOptions<MyOptions, string>(
+	   opt => opt.Queue
+       queue => new MqConsumer<MsgPayload,MyConsumerLogic>(queue)
+                )
+```
+
+ 
+
 ## Конфигурирование 
 
 Конфигурирование позволяет загрузить параметры подключения к MQ серверу и автоматически их применять для публикации и потребления сообщений.
@@ -470,15 +491,15 @@ public class FakeMessageQueueProcResult
 
 Для этого необходимо:
 
-* при регистрации потребителей, в методе `AddMqConsuming` указать объект регистрации эмулятора. При этом не будет осуществляться подключение к реальной очереди для прослушивания очередей:
+* при конфигурировании приложения зарегистрировать эмулятор в сервисах:
 
   ```C#
-  var emulatorRegistrar = new InputMessageEmulatorRegistrar();
-  services.AddMqConsuming(
-  	consumerRegistrar =&gt; consumerRegistrar.RegisterConsumer(consumer),
-  	emulatorRegistrar	// <----
-  );
+  services
+      .AddMqConsuming(cr => cr.RegisterConsumer(consumer))
+      .AddMqMsgEmulator();  // <----
   ```
+  
+  При этом не будет осуществляться подключение к реальной очереди для прослушивания очередей.
 
 * получить эмулятор `IInputMessageEmulator` из поставщика сервисов:
 
@@ -487,20 +508,17 @@ public class FakeMessageQueueProcResult
   
   ...
   
-  var emulatorRegistrar = new InputMessageEmulatorRegistrar();
+  services
+      .AddMqConsuming(cr => cr.RegisterConsumer(consumer))
+      .AddMqMsgEmulator();
   
-  services.AddMqConsuming(
-  	consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
-  	emulatorRegistrar
-  );
+  var srvProvider = services.BuildServiceProvider();  
   
-  var srvProvider = services.BuildServiceProvider();   // <----
-  
-  var emulator = srvProvider.GetService<IInputMessageEmulator>();
+  var emulator = srvProvider.GetService<IInputMessageEmulator>(); // <----
   ```
-
+  
   Или в конструкторе объекта, создаваемого с использованием `DI`
-
+  
 * отправить тестовое сообщение:
 
   ```C#
@@ -528,3 +546,165 @@ services.AddMqConsuming(
 ```
 
 Объект логики и/или его тестовые зависимости являются предметом анализа в тесте.
+
+## Интеграционное тестирование
+
+При тестировании с реальным сервисом `RabbitMQ` в тестах может потребоваться выполнить некоторые действия без интеграции в `.NET Core` приложение и без связи с какими-то зависимостями.
+
+### Создание очереди
+
+Класс `MqQueueFactory` - фабрика очередей. Создаёт очередь с указанными характеристиками.
+
+Для целей тестирования, рекомендуется инициализировать фабрику, указывая префикс имён очередей и флаг `AutoDelete` :
+
+```C#
+var queueFactory = new MqQueueFactory(connProvider)
+{
+    Prefix = "prefix:",
+    AutoDelete = true
+};
+```
+
+У фабрики есть несколько способов назначения имён создаваемым очередям:
+
+* **указать точное имя**
+
+  ```C#
+  MqQueue queue = queueFactory.CreateWithName("foo");
+  //name: 'foo'
+  //ignore prefix!!
+  ```
+
+* **указать идентификатор**
+
+  ```C#
+  MqQueue queue = queueFactory.CreateWithId("foo");
+  //name: 'prefix:foo'
+  ```
+
+* **назначить случайный идентификатор**
+
+  ```C#
+  MqQueue queue = queueFactory.CreateWithRandomId();
+  //name: 'prefix:4a2943bdfdc5434fa134c2c018635fea'
+  ```
+
+### Создание обменника
+
+Класс `MqExchangeFactory` - фабрика обменников. Создаёт обменник с указанными характеристиками.
+
+Для целей тестирования, рекомендуется инициализировать фабрику, указывая префикс имён обменников и флаг `AutoDelete` :
+
+```C#
+var exchangeFactory = new MqExchangeFactory(MqExchangeType.Fanout, connProvider)
+{
+    Prefix = "prefix:",
+    AutoDelete = true
+};
+```
+
+У фабрики есть несколько способов назначения имён создаваемым обменникам:
+
+* **указать точное имя**
+
+  ```C#
+  MqExchange exchange = exchangeFactory.CreateWithName("foo");
+  //name: 'foo'
+  //ignore prefix!!
+  ```
+
+* **указать идентификатор**
+
+  ```C#
+  MqExchange exchange = exchangeFactory.CreateWithId("foo");
+  //name: 'prefix:foo'
+  ```
+
+* **назначить случайный идентификатор**
+
+  ```C#
+  MqExchange exchange = exchangeFactory.CreateWithRandomId();
+  //name: 'prefix:4a2943bdfdc5434fa134c2c018635fea'
+  ```
+
+### Привязка очереди к обменнику
+
+В примере ниже показано как осуществляется привязка очереди к обменнику:
+
+```C#
+MqQueue queue = ...
+MqExchange exchange = ...
+
+queue.BindToExchange(exchange, "foo-routing");
+```
+
+### Публикация
+
+Публикация сообщения в очередь типа `MqQueue` осуществляется через метод `Publish`, в который можно передать произвольный объект, который будет сериализован в JSON и передан в очередь.
+
+```C#
+class Model
+{
+	public string Value { get;set; } = 10
+}
+
+//... 
+    
+queue.Publish(new Model());
+
+//MQ Message content: {"Value":10}
+```
+
+### Потребление
+
+Класс `MqQueue` предоставляет возможность синхронного чтения одного сообщения из очереди: 
+
+```C#
+MqMessageRead<TModel> next = queue.Listen<TModel>();
+```
+
+Есть возможность указать таймаут ожидания:
+
+```C#
+MqMessageRead<TModel> next = queue.Listen<TModel>(TimeSpan.FromSeconds(2));
+```
+
+Таймаут по умолчанию - 1 сек. В случае истечения заданного времени таймаута, возникнет исключение типа `TimeoutException`.
+
+Полученное сообщение следует подтвердить или отклонить: методы `Ack` и `Nack`, соответственно.
+
+```C#
+/// <summary>
+/// Read message
+/// </summary>
+/// <typeparam name="T">payload type</typeparam>
+public class MqMessageRead<T>
+{
+    /// <summary>
+    /// Message
+    /// </summary>
+    public MqMessage<T> Message { get; }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="MqMessageRead{T}"/>
+    /// </summary>
+    public MqMessageRead(IModel model, ulong deliveryTag, MqMessage<T> message)
+
+    /// <summary>
+    /// Ack message
+    /// </summary>
+    public void Ack()
+
+    /// <summary>
+    /// Nack message
+    /// </summary>
+    public void Nack()
+}
+```
+
+Также есть возможность читать с автоподтверждением:
+
+```C#
+MqMessage<T> next = queue.ListenAutoAck<TModel>()
+```
+

@@ -2,44 +2,20 @@
 using Moq;
 using MyLab.Mq;
 using MyLab.StatusProvider;
-using Tests.Common;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class DefaultMqPublisherBehavior : IDisposable
+    public partial class DefaultMqPublisherBehavior 
     {
-        private readonly ITestOutputHelper _output;
-        private readonly QueueTestCtx _queueCtx;
-        private readonly TestMqConsumer _listener;
-
-        private const string BoundQueue = "mylab:mq-app:test:bound";
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="DefaultMqPublisherBehavior"/>
-        /// </summary>
-        public DefaultMqPublisherBehavior(ITestOutputHelper output)
-        {
-            _output = output;
-            _queueCtx = TestQueue.Create(BoundQueue);
-            _listener = _queueCtx.CreateListener();
-        }
-
         [Fact]
         public void ShouldFailIfPublishTargetNotDefined()
         {
             //Arrange
-            var publisher = new DefaultMqPublisher(
-                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
-                null);
+            var publisher = CreateTestPublisher();
+
             var outgoingMessage = new OutgoingMqEnvelop<string>
             {
-                //PublishTarget = new PublishTarget
-                //{
-                //    Routing = null,
-                //    Exchange = null
-                //},
                 Message = new MqMessage<string>("Foo")
             };
 
@@ -51,14 +27,14 @@ namespace IntegrationTests
         public void ShouldSendMessageWhenPublishTargetSpecified()
         {
             //Arrange
-            var publisher = new DefaultMqPublisher(
-                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
-                null);
+            using var queue = CreateTestQueue();
+            var publisher = CreateTestPublisher();
+
             var outgoingMessage = new OutgoingMqEnvelop<string>
             {
                 PublishTarget = new PublishTarget
                 {
-                    Routing = BoundQueue,
+                    Routing = queue.Name,
                     Exchange = null
                 },
                 Message = new MqMessage<string>("Foo")
@@ -67,7 +43,7 @@ namespace IntegrationTests
             //Act
             publisher.Publish(outgoingMessage);
 
-            var incoming = _listener.Listen<string>();
+            var incoming = queue.ListenAutoAck<string>();
 
             //Assert
             Assert.NotNull(incoming.Payload);
@@ -78,9 +54,9 @@ namespace IntegrationTests
         public void ShouldSendMessageWhenPublishTargetSpecifiedByPayloadType()
         {
             //Arrange
-            var publisher = new DefaultMqPublisher(
-                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
-                null);
+            using var queue = CreateTestQueue();
+            var publisher = CreateTestPublisher();
+
             var outgoingMessage = new OutgoingMqEnvelop<Msg>
             {
                 PublishTarget = new PublishTarget
@@ -94,7 +70,7 @@ namespace IntegrationTests
             //Act
             publisher.Publish(outgoingMessage);
 
-            var incoming = _listener.Listen<Msg>();
+            var incoming = queue.ListenAutoAck<Msg>();
 
             //Assert
             Assert.NotNull(incoming.Payload);
@@ -105,16 +81,15 @@ namespace IntegrationTests
         public void ShouldSendData()
         {
             //Arrange
+            using var queue = CreateTestQueue();
+
             var statusServiceMock = new Mock<IAppStatusService>();
             statusServiceMock.Setup(service => service.GetStatus())
                 .Returns(new ApplicationStatus
                 {
                     Name = "FooApp"
                 });
-            var publisher = new DefaultMqPublisher(
-                new DefaultMqConnectionProvider(TestQueue.CreateConnectionFactory()), 
-                null,
-                statusServiceMock.Object);
+            var publisher = CreateTestPublisher(statusServiceMock.Object);
 
             var correlationId = Guid.NewGuid();
             var messageId = Guid.NewGuid();
@@ -126,7 +101,7 @@ namespace IntegrationTests
             {
                 PublishTarget = new PublishTarget
                 {
-                    Routing = BoundQueue
+                    Routing = queue.Name
                 },
                 Message = new MqMessage<Msg>(mgsPayload)
                 {
@@ -143,7 +118,7 @@ namespace IntegrationTests
             //Act
             publisher.Publish(outgoingMsg);
 
-            var incoming = _listener.Listen<Msg>();
+            var incoming = queue.ListenAutoAck<Msg>();
 
             //Assert
             Assert.NotNull(incoming.ReplyTo);
@@ -155,17 +130,6 @@ namespace IntegrationTests
             Assert.NotNull(incoming.Headers);
             Assert.Contains(incoming.Headers, header => header.Name == "FooHeader" && header.Value == "FooValue");
 
-        }
-
-        public void Dispose()
-        {
-            _queueCtx.Dispose();
-        }
-
-        [Mq(Routing = BoundQueue)]
-        class Msg
-        {
-            public string Value { get; set; }
         }
     }
 }

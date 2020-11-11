@@ -9,7 +9,7 @@ namespace MyLab.Mq
     public class MqAttribute : Attribute
     {
         /// <summary>
-        /// Gets or sets exchange name
+        /// Gets or sets exchange name 
         /// </summary>
         public string Exchange { get; set; }
 

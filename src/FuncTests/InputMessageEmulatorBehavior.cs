@@ -1,9 +1,9 @@
 using System;
-using System.ComponentModel.Design;
-using System.Security.Authentication.ExtendedProtection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MyLab.Mq;
+using MyLab.Mq.PubSub;
+using MyLab.Mq.Test;
 using Xunit;
 
 namespace FuncTests
@@ -19,12 +19,10 @@ namespace FuncTests
 
             var logic = new TestConsumerLogic();
             var consumer = new MqConsumer<TestEntity, TestConsumerLogic>("foo-queue", logic);
-            var emulatorRegistrar = new InputMessageEmulatorRegistrar();
-
-            services.AddMqConsuming(
-                consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
-                emulatorRegistrar
-                );
+            
+            services
+                .AddMqConsuming(cr => cr.RegisterConsumer(consumer))
+                .AddMqMsgEmulator();
 
             var srvProvider = services.BuildServiceProvider();
 
@@ -58,12 +56,9 @@ namespace FuncTests
                 RequeueWhenError = requeueFlag
             };
 
-            var emulatorRegistrar = new InputMessageEmulatorRegistrar();
-
-            services.AddMqConsuming(
-                consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
-                emulatorRegistrar
-            );
+            services
+                .AddMqConsuming(consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer))
+                .AddMqMsgEmulator();
 
             var srvProvider = services.BuildServiceProvider();
 
@@ -90,14 +85,12 @@ namespace FuncTests
             var services = new ServiceCollection();
 
             var consumer = new MqConsumer<TestEntity, TestConsumerLogicWithDependency>("foo-queue");
-            var emulatorRegistrar = new InputMessageEmulatorRegistrar();
 
             services.AddSingleton<TestConsumerLogicWithDependency.Dependency2>();
             services.AddSingleton<TestConsumerLogicWithDependency.Dependency1>();
-            services.AddMqConsuming(
-                consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer),
-                emulatorRegistrar
-            );
+            services
+                .AddMqConsuming(consumerRegistrar => consumerRegistrar.RegisterConsumer(consumer))
+                .AddMqMsgEmulator();
 
             var srvProvider = services.BuildServiceProvider();
 
