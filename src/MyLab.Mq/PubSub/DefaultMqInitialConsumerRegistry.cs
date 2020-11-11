@@ -15,7 +15,9 @@ namespace MyLab.Mq.PubSub
 
         public IEnumerable<MqConsumer> GetConsumers(IServiceProvider serviceProvider)
         {
-            return _consumers.Select(c => c.Provide(serviceProvider));
+            return _consumers
+                .Select(c => c.Provide(serviceProvider))
+                .Where(c => c != null);
         }
 
         class InitialConsumerRegistrar : IMqInitialConsumerRegistrar
@@ -36,8 +38,20 @@ namespace MyLab.Mq.PubSub
             public void RegisterConsumerByOptions<TOptions>(Func<TOptions, MqConsumer> consumerFactory)
                 where TOptions : class, new()
             {
+                if (consumerFactory == null) throw new ArgumentNullException(nameof(consumerFactory));
                 var cp = new ByOptionConsumerFactoryProvider<TOptions>(consumerFactory);
                 _consumers.Add(cp);
+            }
+
+            public void RegisterConsumerByOptions<TOptions, TOption>(
+                Func<TOptions, TOption> optionSelector, 
+                Func<TOption, MqConsumer> consumerFactory) 
+                where TOptions : class, new()
+            {
+                if (optionSelector == null) throw new ArgumentNullException(nameof(optionSelector));
+                if (consumerFactory == null) throw new ArgumentNullException(nameof(consumerFactory));
+
+                _consumers.Add(new BySelectedOptionConsumerFactoryProvider<TOptions, TOption>(optionSelector, consumerFactory));
             }
         }
     }

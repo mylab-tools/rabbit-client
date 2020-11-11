@@ -484,6 +484,11 @@
             Registers MQ consumer
             </summary>
         </member>
+        <member name="M:MyLab.Mq.PubSub.IMqInitialConsumerRegistrar.RegisterConsumerByOptions``2(System.Func{``0,``1},System.Func{``1,MyLab.Mq.PubSub.MqConsumer})">
+            <summary>
+            Registers MQ consumer if specified option was defined
+            </summary>
+        </member>
         <member name="T:MyLab.Mq.PubSub.IMqInitialConsumerRegistry">
             <summary>
             Defines consumer registry which contains initial defined consumers

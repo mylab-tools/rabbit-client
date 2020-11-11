@@ -360,7 +360,17 @@ services.AddMqConsuming(r =>
                 )
 ```
 
-  
+ Для случая, когда регистрировать потребителя следует только при наличии в опциях определённого параметра:
+
+```
+services.AddMqConsuming(r =>
+	r.RegisterConsumerByOptions<MyOptions, string>(
+	   opt => opt.Queue
+       queue => new MqConsumer<MsgPayload,MyConsumerLogic>(queue)
+                )
+```
+
+ 
 
 ## Конфигурирование 
 
