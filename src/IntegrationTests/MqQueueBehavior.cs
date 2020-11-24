@@ -192,5 +192,31 @@ namespace IntegrationTests
             //Assert
             Assert.NotNull(timeoutException);
         }
+
+        [Fact]
+        public void ShouldReceiveSeveralMessages()
+        {
+            //Arrange
+            var q = TestQueueFactory.Default.CreateWithRandomId();
+
+            //q.Publish("foo");
+            //q.Publish("bar");
+
+            for (int i = 0; i < 100; i++)
+            {
+                q.Publish(i.ToString());
+            }
+
+            //Act
+            var msg1 = q.ListenAutoAck<string>();
+            _output.WriteLine("Msg1: " + msg1?.Payload);
+
+            //var msg2 = q.ListenAutoAck<string>();
+            //_output.WriteLine("Msg2: " + msg2?.Payload);
+
+            ////Assert
+            //Assert.Equal("foo", msg1?.Payload);
+            //Assert.Equal("bar", msg2?.Payload);
+        }
     }
 }

@@ -77,10 +77,12 @@ namespace MyLab.Mq.MqObjects
             Exception e = null;
 
             ulong deliveryTag = 0;
-            
+
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.Received += (model, ea) =>
             {
+                channel.BasicCancel(ea.ConsumerTag);
+
                 try
                 {
                     var body = ea.Body;
