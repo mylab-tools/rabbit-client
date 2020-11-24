@@ -46,7 +46,7 @@ namespace IntegrationTests
             return CreateTestClient(new MqConsumer<TestMqMsg, T>(queue.Name));
         }
 
-        private HttpClient CreateTestClientWithBatchConsumer<T>(MqQueue queue, int size = 2)
+        private HttpClient CreateTestClientWithBatchConsumer<T>(MqQueue queue, ushort size = 2)
             where T : class, IMqBatchConsumerLogic<TestMqMsg>
         {
             return CreateTestClient(new MqBatchConsumer<TestMqMsg, T>(queue.Name, size));

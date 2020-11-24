@@ -17,7 +17,7 @@ namespace MyLab.Mq.MqObjects
     /// </summary>
     public class MqQueue : IDisposable
     {
-        private readonly MqChannelProvider _channelProvider;
+        private readonly IMqChannelProvider _channelProvider;
 
         /// <summary>
         /// Queue name
@@ -27,9 +27,9 @@ namespace MyLab.Mq.MqObjects
         /// <summary>
         /// Initializes a new instance of <see cref="MqQueue"/>
         /// </summary>
-        public MqQueue(string name, IMqConnectionProvider connectionProvider)
+        public MqQueue(string name, IMqChannelProvider channelProvider)
         {
-            _channelProvider = new MqChannelProvider(connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider)));
+            _channelProvider = channelProvider ?? throw new ArgumentNullException(nameof(channelProvider));
             Name = name;
         }
 
@@ -79,9 +79,26 @@ namespace MyLab.Mq.MqObjects
             ulong deliveryTag = 0;
 
             var consumer = new AsyncEventingBasicConsumer(channel);
-            consumer.Received += (model, ea) =>
+
+            consumer.Received += OnConsumerOnReceived;
+
+            var consumerTag = channel.BasicConsume(queue: Name, consumer: consumer, autoAck: autoAck);
+
+            var isTimeout = !consumeBlock.WaitOne(timeout ?? TimeSpan.FromSeconds(1));
+
+            channel.BasicCancel(consumerTag);
+
+            if (isTimeout)
+                throw new TimeoutException();
+
+            if (e != null)
+                throw new TargetInvocationException(e);
+
+            return new MqMessageRead<T>(consumer.Model, deliveryTag, result);
+
+            Task OnConsumerOnReceived(object model, BasicDeliverEventArgs ea)
             {
-                channel.BasicCancel(ea.ConsumerTag);
+                consumer.Received -= OnConsumerOnReceived;
 
                 try
                 {
@@ -102,8 +119,7 @@ namespace MyLab.Mq.MqObjects
 
                     if (ea.BasicProperties.Headers != null)
                     {
-                        result.Headers = ea.BasicProperties.Headers
-                            .Select(MqHeader.Create)
+                        result.Headers = ea.BasicProperties.Headers.Select(MqHeader.Create)
                             .ToArray();
                     }
 
@@ -119,17 +135,7 @@ namespace MyLab.Mq.MqObjects
                 }
 
                 return Task.CompletedTask;
-            };
-
-            channel.BasicConsume(queue: Name, consumer: consumer, autoAck: autoAck);
-
-            if (!consumeBlock.WaitOne(timeout ?? TimeSpan.FromSeconds(1)))
-                throw new TimeoutException();
-
-            if (e != null)
-                throw new TargetInvocationException(e);
-
-            return new MqMessageRead<T>(consumer.Model, deliveryTag, result);
+            }
         }
 
         /// <summary>

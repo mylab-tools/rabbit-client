@@ -68,7 +68,8 @@ namespace IntegrationTests
         MqExchangeFactory CreateExchangeFactory(string namePrefix = null)
         {
             var connProvider = new DefaultMqConnectionProvider(TestMqOptions.Load());
-            return new MqExchangeFactory(MqExchangeType.Fanout, connProvider)
+            var chProvider = new MqChannelProvider(connProvider);
+            return new MqExchangeFactory(MqExchangeType.Fanout, chProvider)
             {
                 Prefix = namePrefix,
                 AutoDelete = true

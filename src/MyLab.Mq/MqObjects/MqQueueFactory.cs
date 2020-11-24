@@ -9,7 +9,7 @@ namespace MyLab.Mq.MqObjects
     /// </summary>
     public class MqQueueFactory
     {
-        private readonly IMqConnectionProvider _connectionProvider;
+        private readonly IMqChannelProvider _channelProvider;
 
         /// <summary>
         /// Prefix for queue name 
@@ -44,9 +44,9 @@ namespace MyLab.Mq.MqObjects
         /// <summary>
         /// Initializes a new instance of <see cref="MqQueueFactory"/>
         /// </summary>
-        public MqQueueFactory(IMqConnectionProvider connectionProvider)
+        public MqQueueFactory(IMqChannelProvider channelProvider)
         {
-            _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
+            _channelProvider = channelProvider ?? throw new ArgumentNullException(nameof(channelProvider));
         }
 
         /// <summary>
@@ -70,8 +70,6 @@ namespace MyLab.Mq.MqObjects
         /// </summary>
         public MqQueue CreateWithName(string name)
         {
-            using var channelProvider = new MqChannelProvider(_connectionProvider);
-
             var args = new Dictionary<string, object>();
 
             if (DeadLetterExchange != null)
@@ -81,9 +79,9 @@ namespace MyLab.Mq.MqObjects
                     args.Add("x-dead-letter-routing-key", DeadLetterRoutingKey);
             }
 
-            channelProvider.Provide().QueueDeclare(name, Durable, Exclusive, AutoDelete, args);
+            _channelProvider.Provide().QueueDeclare(name, Durable, Exclusive, AutoDelete, args);
 
-            return new MqQueue(name, _connectionProvider);
+            return new MqQueue(name, _channelProvider);
         }
     }
 }

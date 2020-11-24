@@ -13,17 +13,17 @@ namespace MyLab.Mq.PubSub
     {
         private readonly IAppStatusService _appStatusService;
         private readonly IMqStatusService _statusService;
-        private readonly MqChannelProvider _channelProvider;
+        private readonly IMqChannelProvider _channelProvider;
         
         public DefaultMqPublisher(
-            IMqConnectionProvider connectionProvider, 
+            IMqChannelProvider channelProvider, 
             IMqStatusService statusService,
             IAppStatusService appStatusService = null)
         {
             _statusService = statusService;
             _appStatusService = appStatusService;
 
-            _channelProvider = new MqChannelProvider(connectionProvider);
+            _channelProvider = channelProvider;
         }
 
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class

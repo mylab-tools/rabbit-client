@@ -17,7 +17,7 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Determines number of retrieved messages to process
         /// </summary>
-        public int BatchSize { get; }
+        public ushort BatchSize { get; }
 
         /// <summary>
         /// Determines requeue behavior when message processing error
@@ -27,7 +27,7 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Initializes a new instance of <see cref="MqConsumer"/>
         /// </summary>
-        protected MqConsumer(string queue, int batchSize)
+        protected MqConsumer(string queue, ushort batchSize)
         {
             Queue = queue;
             BatchSize = batchSize;
@@ -98,7 +98,7 @@ namespace MyLab.Mq.PubSub
         /// <summary>
         /// Initializes a new instance of <see cref="MqBatchConsumer{TMsg, TLogic}"/>
         /// </summary>
-        public MqBatchConsumer(string queue, int batchSize, TLogic singletonLogic = null)
+        public MqBatchConsumer(string queue, ushort batchSize, TLogic singletonLogic = null)
             : base(queue, batchSize)
         {
             _singletonLogic = singletonLogic;
