@@ -24,7 +24,8 @@ namespace IntegrationTests
             //Arrange
             var queueName = Guid.NewGuid().ToString("N");
             var connProvider = new DefaultMqConnectionProvider(TestMqOptions.Load());
-            var queue = new MqQueue(queueName, connProvider);
+            var chProvider = new MqChannelProvider(connProvider);
+            var queue = new MqQueue(queueName, chProvider);
 
             //Act
             var exists = queue.IsExists();
@@ -52,7 +53,7 @@ namespace IntegrationTests
         {
             //Arrange
             var queue = TestQueueFactory.Default.CreateWithRandomId();
-            var exchange = TestExchangeFactory.Fanaut.CreateWithRandomId();
+            var exchange = TestExchangeFactory.Fanout.CreateWithRandomId();
 
             //Act
             queue.BindToExchange(exchange);
@@ -100,24 +101,34 @@ namespace IntegrationTests
         public void ShouldDefineDeadLetterExchange()
         {
             //Arrange
-            var deadLetterExchange = TestExchangeFactory.Fanaut.CreateWithRandomId();
+            var deadLetterExchange = TestExchangeFactory.Fanout.CreateWithRandomId();
             var deadLetterQueue = TestQueueFactory.Default.CreateWithRandomId();
             deadLetterQueue.BindToExchange(deadLetterExchange);
 
             var queueFactory = new TestQueueFactory
             {
-                DeadLetterExchange = deadLetterExchange.Name
+                DeadLetterExchange = deadLetterExchange.Name,
+                AutoDelete = false
             };
             var queue = queueFactory.CreateWithRandomId();
 
-            //Act
-            queue.Publish("foo");
+            MqMessageRead<string> deadMsg;
 
-            var msg = queue.Listen<string>();
-            msg.Nack();
+            try
+            {
+                //Act
+                queue.Publish("foo");
 
-            var deadMsg = deadLetterQueue.Listen<string>();
-            deadMsg.Ack();
+                var msg = queue.Listen<string>();
+                msg.Nack();
+
+                deadMsg = deadLetterQueue.Listen<string>();
+                deadMsg.Ack();
+            }
+            finally
+            {
+                queue.Dispose();
+            }
 
             //Assert
             Assert.NotNull(deadMsg);
@@ -128,25 +139,33 @@ namespace IntegrationTests
         public void ShouldDefineDeadLetterWithRouting()
         {
             //Arrange
-            var deadLetterExchange = TestExchangeFactory.Fanaut.CreateWithRandomId();
+            var deadLetterExchange = TestExchangeFactory.Fanout.CreateWithRandomId();
             var deadLetterQueue = TestQueueFactory.Default.CreateWithRandomId();
             deadLetterQueue.BindToExchange(deadLetterExchange, "bar");
 
             var queueFactory = new TestQueueFactory
             {
                 DeadLetterExchange = deadLetterExchange.Name,
-                DeadLetterRoutingKey = "bar"
+                DeadLetterRoutingKey = "bar",
+                AutoDelete = false
             };
             var queue = queueFactory.CreateWithRandomId();
+            MqMessageRead<string> deadMsg;
+            try
+            {
+                //Act
+                queue.Publish("foo");
 
-            //Act
-            queue.Publish("foo");
+                var msg = queue.Listen<string>();
+                msg.Nack();
 
-            var msg = queue.Listen<string>();
-            msg.Nack();
-
-            var deadMsg = deadLetterQueue.Listen<string>();
-            deadMsg.Ack();
+                deadMsg = deadLetterQueue.Listen<string>();
+                deadMsg.Ack();
+            }
+            finally
+            {
+                queue.Dispose();
+            }
 
             //Assert
             Assert.NotNull(deadMsg);
@@ -191,6 +210,44 @@ namespace IntegrationTests
 
             //Assert
             Assert.NotNull(timeoutException);
+        }
+
+        [Fact]
+        public void ShouldReceiveSeveralMessages()
+        {
+            //Arrange
+            var queueFactory = new TestQueueFactory
+            {
+                AutoDelete = false
+            };
+            var q = queueFactory.CreateWithRandomId();
+
+            MqMessageRead<string> msg1;
+            MqMessageRead<string> msg2;
+
+            try
+            {
+                q.Publish("foo");
+                q.Publish("bar");
+
+                //Act
+                msg1 = q.Listen<string>();
+                _output.WriteLine("Msg1: " + msg1.Message.Payload);
+                msg1.Ack();
+
+                msg2 = q.Listen<string>();
+                _output.WriteLine("Msg2: " + msg2.Message.Payload);
+                msg2.Ack();
+
+            }
+            finally
+            {
+                q.Dispose();
+            }
+
+            ////Assert
+            Assert.Equal("foo", msg1.Message.Payload);
+            Assert.Equal("bar", msg2.Message.Payload);
         }
     }
 }

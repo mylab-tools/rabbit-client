@@ -7,4 +7,9 @@ services:
     image: rabbitmq:3.8.3-management
     ports:
       - "10160:5672"
-      
+      - "10161:15672"
+    networks:
+    - mylab-mqtests
+
+networks:
+  mylab-mqtests:

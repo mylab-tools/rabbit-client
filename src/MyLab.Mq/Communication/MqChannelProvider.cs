@@ -1,47 +1,82 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using RabbitMQ.Client;
 
 namespace MyLab.Mq.Communication
 {
-    class MqChannelProvider : IDisposable
+    class MqChannelProvider : IDisposable, IMqChannelProvider
     {
         private readonly IMqConnectionProvider _connectionProvider;
-        private readonly Dictionary<int, IModel> _channels = new Dictionary<int, IModel>();
+        private readonly ThreadToChannelsMap _channels = new ThreadToChannelsMap();
 
         public MqChannelProvider(IMqConnectionProvider connectionProvider)
         {
             _connectionProvider = connectionProvider;
         }
 
-        public IModel Provide()
+        public IModel Provide(ushort prefetchCount = 1)
         {
-            if (!_channels.TryGetValue(Thread.CurrentThread.ManagedThreadId, out var channel))
-            {
-                channel = _connectionProvider.Provide().CreateModel();
-                _channels.Add(Thread.CurrentThread.ManagedThreadId, channel);
-            }
-            else
+            var channelMap =_channels.GetOrAdd(Thread.CurrentThread.ManagedThreadId,
+                threadId =>
+                {
+                    var newChannel = CreateChannel(prefetchCount);
+
+                    return new PrefetchCountToChannelMap
+                    {
+                        {prefetchCount, newChannel}
+                    };
+                });
+
+            if (channelMap.TryGetValue(prefetchCount, out var channel))
             {
                 if (channel.IsClosed)
                 {
-                    channel = _connectionProvider.Provide().CreateModel();
-                    _channels[Thread.CurrentThread.ManagedThreadId]= channel;
+                    channel = CreateChannel(prefetchCount);
+                    channelMap[prefetchCount] = channel;
                 }
+            }
+            else
+            {
+                channel = CreateChannel(prefetchCount);
+                channelMap.Add(prefetchCount, channel);
             }
 
             return channel;
         }
 
+        IModel CreateChannel(ushort prefetchCount)
+        {
+            var ch = _connectionProvider.Provide().CreateModel();
+            ch.BasicQos(0, prefetchCount, false);
+
+            return ch;
+        }
+
         public void Dispose()
         {
-            foreach (var channel in _channels.Values)
+            foreach (var prefetchToChannelMap in _channels.Values)
             {
-                channel?.Dispose();
+                foreach (var channel in prefetchToChannelMap.Values)
+                {
+                    channel?.Dispose();
+                }
+
+                prefetchToChannelMap.Clear();
             }
 
             _channels.Clear();
+        }
+
+        class PrefetchCountToChannelMap : Dictionary<ushort, IModel>
+        {
+
+        }
+
+        class ThreadToChannelsMap : ConcurrentDictionary<int, PrefetchCountToChannelMap>
+        {
+
         }
     }
 }

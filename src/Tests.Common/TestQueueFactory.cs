@@ -1,5 +1,4 @@
-﻿using MyLab.Mq.Communication;
-using MyLab.Mq.MqObjects;
+﻿using MyLab.Mq.MqObjects;
 
 namespace Tests.Common
 {
@@ -9,7 +8,7 @@ namespace Tests.Common
         public static readonly TestQueueFactory Default = new TestQueueFactory();
 
         public TestQueueFactory()
-            :base(new DefaultMqConnectionProvider(TestMqOptions.Load()))
+            :base(TestMqOptions.ChannelProvider)
         {
             Prefix = "mylab:mq:test:";
             AutoDelete = true;

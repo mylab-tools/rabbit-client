@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using MyLab.LogDsl;
 using MyLab.Mq.Communication;
 using MyLab.Mq.StatusProvider;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 
 namespace MyLab.Mq.PubSub
 {
     class MqConsumerHost : IMqConsumerHost, IMqConsumerRegistrar, IDisposable
     {
+        private readonly IMqChannelProvider _channelProvider;
         private readonly IMqInitialConsumerRegistry _initialConsumerRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly IMqStatusService _mqStatusService;
@@ -21,30 +19,21 @@ namespace MyLab.Mq.PubSub
         private readonly IDictionary<string, MqConsumer> _runtimeConsumerRegister = new Dictionary<string, MqConsumer>();
         private readonly IDictionary<string, MqConsumer> _runConsumers = new Dictionary<string, MqConsumer>();
 
-        private readonly Lazy<IModel> _channel;
-        private AsyncEventingBasicConsumer _systemConsumer;
         private MqConsumerHostState _state = MqConsumerHostState.Stopped;
+        private readonly ChannelCallbackExceptionLogger _channelCallbackExceptionLogger;
+        private readonly ChannelMessageReceivingController _channelMessageReceivingController;
 
-        public MqConsumerHost(IMqConnectionProvider connectionProvider,
+        public MqConsumerHost(IMqChannelProvider channelProvider,
             IMqInitialConsumerRegistry initialConsumerRegistry,
             IServiceProvider serviceProvider,
             IMqStatusService mqStatusService,
             ILogger<MqConsumerHost> logger = null)
         {
-            if (connectionProvider == null) 
-                throw new ArgumentNullException(nameof(connectionProvider));
 
-            _channel = new Lazy<IModel>(() =>
-            {
-                var ch = connectionProvider.Provide().CreateModel();
-                ch.CallbackException += ChannelExceptionReceived;
-
-                _systemConsumer = new AsyncEventingBasicConsumer(ch);
-                _systemConsumer.Received += ConsumerReceivedAsync;
-
-                return ch;
-            });
-
+            var messageProcessor = new QueueMessageProcessor(mqStatusService, serviceProvider, _runConsumers);
+            _channelMessageReceivingController = new ChannelMessageReceivingController(messageProcessor);
+            _channelCallbackExceptionLogger = new ChannelCallbackExceptionLogger(logger);
+            _channelProvider = channelProvider ?? throw new ArgumentNullException(nameof(channelProvider));
             _initialConsumerRegistry = initialConsumerRegistry ?? throw new ArgumentNullException(nameof(initialConsumerRegistry));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _mqStatusService = mqStatusService;
@@ -116,79 +105,23 @@ namespace MyLab.Mq.PubSub
             if (_runConsumers.ContainsKey(queueName))
                 StopConsumer(queueName);
 
-            _runConsumers.Remove(queueName);
             _runtimeConsumerRegister.Remove(queueName);
         }
 
         public void Dispose()
         {
             StopCore();
-            _channel.Value?.Dispose();
-
-            if (_runConsumers != null)
-            {
-                foreach (var mqConsumer in _runConsumers.Values)
-                {
-                    mqConsumer.Dispose();
-                }
-                _runConsumers.Clear();
-            }
         }
 
         void StartConsumer(MqConsumer consumer)
         {
-            _channel.Value.BasicConsume(
-                queue: consumer.Queue,
-                consumerTag: consumer.Queue,
-                consumer: _systemConsumer);
+            var channel = _channelProvider.Provide(consumer.BatchSize);
+
+            _channelCallbackExceptionLogger.Register(channel, consumer.Queue);
+            _channelMessageReceivingController.Register(channel, consumer.Queue);
+
             _mqStatusService.QueueConnected(consumer.Queue);
-
             _runConsumers.Add(consumer.Queue, consumer);
-        }
-
-        private void ChannelExceptionReceived(object sender, CallbackExceptionEventArgs e)
-        {
-            _logger
-                .Error(e.Exception)
-                .Write();
-        }
-
-        private async Task ConsumerReceivedAsync(object sender, BasicDeliverEventArgs args)
-        {
-            if (!_runConsumers.TryGetValue(args.ConsumerTag, out var consumer))
-            {
-                _logger.Error("Consumer not found")
-                    .AndFactIs("consumer-tag", args.ConsumerTag)
-                    .Write();
-
-                return;
-            }
-
-            _mqStatusService.MessageReceived(args.ConsumerTag);
-
-            using var scope = _serviceProvider.CreateScope();
-
-            var msgAccessorCore = scope.ServiceProvider.GetService<IMqMessageAccessorCore>();
-            msgAccessorCore.SetScopedMessage(args.Body, args.BasicProperties);
-
-            var msgAccessor = scope.ServiceProvider.GetService<IMqMessageAccessor>();
-
-            var ctx = new DefaultConsumingContext(
-                args.ConsumerTag,
-                args,
-                scope.ServiceProvider,
-                _channel.Value,
-                _mqStatusService,
-                msgAccessor);
-
-            try
-            {
-                await consumer.Consume(ctx);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e).Write();
-            }
         }
 
         public void StopCore()
@@ -197,9 +130,16 @@ namespace MyLab.Mq.PubSub
 
             try
             {
-                foreach (var logicConsumer in _runConsumers.Values)
+                _channelCallbackExceptionLogger.Clear();
+                _channelMessageReceivingController.Clear();
+                _mqStatusService.AllQueueDisconnected();
+
+                var runConsumers = _runConsumers.Values.ToArray();
+                _runConsumers.Clear();
+
+                foreach (var runConsumer in runConsumers)
                 {
-                    StopConsumer(logicConsumer.Queue);
+                    runConsumer.Dispose();
                 }
             }
             catch (Exception e)
@@ -213,8 +153,14 @@ namespace MyLab.Mq.PubSub
 
         void StopConsumer(string queueName)
         {
-            _channel.Value.BasicCancelNoWait(queueName);
+            _channelMessageReceivingController.Unregister(queueName);
+            _channelCallbackExceptionLogger.Unregister(queueName);
             _mqStatusService.QueueDisconnected(queueName);
+
+            if (_runConsumers.TryGetValue(queueName, out var runConsumer))
+            {
+                runConsumer.Dispose();
+            }
 
             _runConsumers.Remove(queueName);
         }

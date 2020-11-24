@@ -13,17 +13,17 @@ namespace MyLab.Mq.PubSub
     {
         private readonly IAppStatusService _appStatusService;
         private readonly IMqStatusService _statusService;
-        private readonly MqChannelProvider _channelProvider;
+        private readonly IMqChannelProvider _channelProvider;
         
         public DefaultMqPublisher(
-            IMqConnectionProvider connectionProvider, 
+            IMqChannelProvider channelProvider, 
             IMqStatusService statusService,
             IAppStatusService appStatusService = null)
         {
             _statusService = statusService;
             _appStatusService = appStatusService;
 
-            _channelProvider = new MqChannelProvider(connectionProvider);
+            _channelProvider = channelProvider;
         }
 
         public void Publish<T>(OutgoingMqEnvelop<T> envelop) where T : class
@@ -57,7 +57,11 @@ namespace MyLab.Mq.PubSub
 
             var basicProperties = CreateBasicProperties<T>(envelop, channel);
 
-            var payloadStr = JsonConvert.SerializeObject(envelop.Message.Payload);
+            var payloadStr = JsonConvert.SerializeObject(envelop.Message.Payload, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
             var payloadBin = Encoding.UTF8.GetBytes(payloadStr);
 
             channel.BasicPublish(

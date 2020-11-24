@@ -28,6 +28,7 @@ namespace IntegrationTests
             var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
 
             //Assert
+            Assert.NotNull(testBox.AckMsg);
             Assert.Equal("foo", testBox.AckMsg.Payload.Content);
             Assert.Null(testBox.RejectedMsg);
 

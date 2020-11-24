@@ -8,7 +8,7 @@ namespace MyLab.Mq.MqObjects
     /// </summary>
     public class MqExchangeFactory
     {
-        private readonly IMqConnectionProvider _connectionProvider;
+        private readonly IMqChannelProvider _channelProvider;
 
         /// <summary>
         /// Prefix for exchange name 
@@ -33,10 +33,10 @@ namespace MyLab.Mq.MqObjects
         /// <summary>
         /// Initializes a new instance of <see cref="MqQueueFactory"/>
         /// </summary>
-        public MqExchangeFactory(MqExchangeType exchangeType, IMqConnectionProvider connectionProvider)
+        public MqExchangeFactory(MqExchangeType exchangeType, IMqChannelProvider channelProvider)
         {
+            _channelProvider = channelProvider ?? throw new ArgumentNullException(nameof(channelProvider));
             ExchangeType = exchangeType;
-            _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
         }
 
         /// <summary>
@@ -60,13 +60,11 @@ namespace MyLab.Mq.MqObjects
         /// </summary>
         public MqExchange CreateWithName(string name)
         {
-            using var channelProvider = new MqChannelProvider(_connectionProvider);
-
-            var channel = channelProvider.Provide();
+            var channel = _channelProvider.Provide();
 
             channel.ExchangeDeclare(name, ExchangeType.ToLiteral(), Durable, AutoDelete, null);
 
-            return new MqExchange(name, _connectionProvider);
+            return new MqExchange(name, _channelProvider);
         }
     }
 }

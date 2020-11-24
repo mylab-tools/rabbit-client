@@ -30,6 +30,16 @@
         <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.Dispose">
             <inheritdoc />
         </member>
+        <member name="T:MyLab.Mq.Communication.IMqChannelProvider">
+            <summary>
+            Provides MQ channels
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.Communication.IMqChannelProvider.Provide(System.UInt16)">
+            <summary>
+            Provides MQ channel with specified prefetch count
+            </summary>
+        </member>
         <member name="T:MyLab.Mq.Communication.IMqConnectionProvider">
             <summary>
             Defines MQ connection provider
@@ -147,7 +157,7 @@
             Exchange name
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqExchange.#ctor(System.String,MyLab.Mq.Communication.IMqConnectionProvider)">
+        <member name="M:MyLab.Mq.MqObjects.MqExchange.#ctor(System.String,MyLab.Mq.Communication.IMqChannelProvider)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.MqObjects.MqExchange"/>
             </summary>
@@ -192,7 +202,7 @@
             Exchange type
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqExchangeFactory.#ctor(MyLab.Mq.MqObjects.MqExchangeType,MyLab.Mq.Communication.IMqConnectionProvider)">
+        <member name="M:MyLab.Mq.MqObjects.MqExchangeFactory.#ctor(MyLab.Mq.MqObjects.MqExchangeType,MyLab.Mq.Communication.IMqChannelProvider)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.MqObjects.MqQueueFactory"/>
             </summary>
@@ -253,7 +263,7 @@
             Queue name
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqQueue.#ctor(System.String,MyLab.Mq.Communication.IMqConnectionProvider)">
+        <member name="M:MyLab.Mq.MqObjects.MqQueue.#ctor(System.String,MyLab.Mq.Communication.IMqChannelProvider)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.MqObjects.MqQueue"/>
             </summary>
@@ -329,7 +339,7 @@
             Specifies a dead letter routing key
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.#ctor(MyLab.Mq.Communication.IMqConnectionProvider)">
+        <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.#ctor(MyLab.Mq.Communication.IMqChannelProvider)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.MqObjects.MqQueueFactory"/>
             </summary>
@@ -594,7 +604,7 @@
             Determines requeue behavior when message processing error
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqConsumer.#ctor(System.String,System.Int32)">
+        <member name="M:MyLab.Mq.PubSub.MqConsumer.#ctor(System.String,System.UInt16)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.PubSub.MqConsumer"/>
             </summary>
@@ -629,7 +639,7 @@
             <typeparam name="TMsgPayload">message payload type</typeparam>
             <typeparam name="TLogic">consuming logic type</typeparam>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqBatchConsumer`2.#ctor(System.String,System.Int32,`1)">
+        <member name="M:MyLab.Mq.PubSub.MqBatchConsumer`2.#ctor(System.String,System.UInt16,`1)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.PubSub.MqBatchConsumer`2"/>
             </summary>
@@ -685,6 +695,11 @@
         <member name="M:MyLab.Mq.StatusProvider.IMqStatusService.QueueDisconnected(System.String)">
             <summary>
             Report about connection closed
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.StatusProvider.IMqStatusService.AllQueueDisconnected">
+            <summary>
+            Report about all connection closed
             </summary>
         </member>
         <member name="M:MyLab.Mq.StatusProvider.IMqStatusService.MessageReceived(System.String)">

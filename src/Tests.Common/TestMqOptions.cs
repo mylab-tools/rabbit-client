@@ -1,4 +1,5 @@
 ﻿using MyLab.Mq;
+using MyLab.Mq.Communication;
 
 namespace Tests.Common
 {
@@ -23,5 +24,7 @@ namespace Tests.Common
             options.Host = actOptions.Host;
             options.Port = actOptions.Port;
         }
+
+        public static readonly IMqChannelProvider ChannelProvider = new MqChannelProvider(new DefaultMqConnectionProvider(Load()));
     }
 }

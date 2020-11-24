@@ -12,7 +12,7 @@ namespace MyLab.Mq.MqObjects
     /// </summary>
     public class MqExchange : IDisposable
     {
-        private readonly MqChannelProvider _channelProvider;
+        private readonly IMqChannelProvider _channelProvider;
 
         /// <summary>
         /// Exchange name
@@ -22,10 +22,10 @@ namespace MyLab.Mq.MqObjects
         /// <summary>
         /// Initializes a new instance of <see cref="MqExchange"/>
         /// </summary>
-        public MqExchange(string name, IMqConnectionProvider connectionProvider)
+        public MqExchange(string name, IMqChannelProvider channelProvider)
         {
+            _channelProvider = channelProvider ?? throw new ArgumentNullException(nameof(channelProvider));
             Name = name;
-            _channelProvider = new MqChannelProvider(connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider)));
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace MyLab.Mq.MqObjects
         /// </summary>
         public void Dispose()
         {
-            _channelProvider.Dispose();
+            _channelProvider.Provide().ExchangeDeleteNoWait(Name);
         }
     }
 }
