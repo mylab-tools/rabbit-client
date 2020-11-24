@@ -57,7 +57,11 @@ namespace MyLab.Mq.PubSub
 
             var basicProperties = CreateBasicProperties<T>(envelop, channel);
 
-            var payloadStr = JsonConvert.SerializeObject(envelop.Message.Payload);
+            var payloadStr = JsonConvert.SerializeObject(envelop.Message.Payload, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
             var payloadBin = Encoding.UTF8.GetBytes(payloadStr);
 
             channel.BasicPublish(
