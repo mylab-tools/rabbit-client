@@ -67,7 +67,7 @@ namespace MyLab.Mq.PubSub
         public static IServiceCollection AddMqMsgEmulator(
             this IServiceCollection services)
         {
-            var consumingStarter = services.FirstOrDefault(s => s.ServiceType == typeof(MqConsumingStarter));
+            var consumingStarter = services.FirstOrDefault(s => s.ImplementationType == typeof(MqConsumingStarter));
             if (consumingStarter != null)
                 services.Remove(consumingStarter);
 

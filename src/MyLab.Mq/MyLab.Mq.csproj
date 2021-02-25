@@ -5,13 +5,19 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Andrey O.</Authors>
     <Company>Andrey O.</Company>
-    <Copyright>Copyright (c) 2020 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
-    <PackageProjectUrl>https://github.com/ozzy-ext-mylab/mq</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/ozzy-ext-mylab/mq.git</RepositoryUrl>
+    <Copyright>Copyright (c) 2021 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <PackageProjectUrl>https://github.com/mylab-tools/mq</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mylab-tools/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.7.13.0802</AssemblyVersion>
-    <FileVersion>1.7.13.0802</FileVersion>
-    <Version>1.7.13</Version>
+    <AssemblyVersion>1.7.14.2502</AssemblyVersion>
+    <FileVersion>1.7.14.2502</FileVersion>
+    <Version>1.7.14</Version>
+    <PackageIcon>tools.png</PackageIcon>
+    <PackageTags>mq rabbitmq net core</PackageTags>
+    <Description>Message Queue client application. Contains client and server abilities based on RabbitMQ implementation</Description>
+    <PackageReleaseNotes>Исправлено:
+
+* Не удалялся сервис подключения к `RabbitMQ` при добавлении эмулятора сообщений</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,6 +32,13 @@
     <PackageReference Include="MyLab.LogDsl" Version="2.2.0" />
     <PackageReference Include="MyLab.StatusProvider" Version="1.5.9" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="tools.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
