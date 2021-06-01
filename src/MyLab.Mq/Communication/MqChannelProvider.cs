@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using RabbitMQ.Client;
 
@@ -11,7 +12,7 @@ namespace MyLab.Mq.Communication
         private readonly IMqConnectionProvider _connectionProvider;
         private readonly ThreadToChannelsMap _channels = new ThreadToChannelsMap();
 
-        public int ChannelCount => _channels.Count;
+        public int ChannelCount => _channels.Sum(ch => ch.Value.Count);
 
         public MqChannelProvider(IMqConnectionProvider connectionProvider)
         {
