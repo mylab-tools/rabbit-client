@@ -40,6 +40,25 @@
             Provides MQ channel with specified prefetch count
             </summary>
         </member>
+        <member name="T:MyLab.Mq.Communication.MqChannel">
+            <summary>
+            Represent MQ channel
+            </summary>
+            <remarks>Should be disposed after using</remarks>
+        </member>
+        <member name="P:MyLab.Mq.Communication.MqChannel.Model">
+            <summary>
+            Mq channel model
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.Communication.MqChannel.#ctor(RabbitMQ.Client.IModel,System.Action{RabbitMQ.Client.IModel})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.Mq.Communication.MqChannel"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.Communication.MqChannel.Dispose">
+            <inheritdoc />
+        </member>
         <member name="T:MyLab.Mq.Communication.IMqConnectionProvider">
             <summary>
             Defines MQ connection provider

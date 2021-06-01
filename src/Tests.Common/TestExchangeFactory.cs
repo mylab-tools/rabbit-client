@@ -8,7 +8,7 @@ namespace Tests.Common
         public static readonly TestExchangeFactory Direct = new TestExchangeFactory(MqExchangeType.Direct);
 
         public TestExchangeFactory(MqExchangeType exchangeType)
-            : base(exchangeType, TestMqOptions.ChannelProvider)
+            : base(exchangeType, TestMqTools.ChannelProvider)
         {
             Prefix = "mylab:mq:test:";
             AutoDelete = true;

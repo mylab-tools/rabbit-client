@@ -6,6 +6,7 @@ namespace MyLab.Mq.StatusProvider
     class DefaultMqStatusService : IMqStatusService
     {
         private readonly Lazy<MqStatus> _status;
+        private readonly object _statusSync = new object();
 
         public DefaultMqStatusService(IServiceProvider serviceProvider)
         {
@@ -20,18 +21,23 @@ namespace MyLab.Mq.StatusProvider
 
         public void QueueConnected(string queueName)
         {
-            _status.Value.Consume.Add(queueName, new ConsumeMqStatus());
+            lock (_statusSync)
+                _status.Value.Consume.Add(queueName, new ConsumeMqStatus());
         }
 
         public void QueueDisconnected(string queueName)
         {
-            if(_status.Value.Consume.ContainsKey(queueName))
-                _status.Value.Consume.Remove(queueName);
+            lock (_statusSync)
+            {
+                if (_status.Value.Consume.ContainsKey(queueName))
+                    _status.Value.Consume.Remove(queueName);
+            }
         }
 
         public void AllQueueDisconnected()
         {
-            _status.Value.Consume.Clear();
+            lock (_statusSync)
+                _status.Value.Consume.Clear();
         }
 
         public void MessageReceived(string srcQueue)
@@ -66,24 +72,30 @@ namespace MyLab.Mq.StatusProvider
 
         PublishMqStatus RetrievePubStatus(string pubTarget)
         {
-            if (!_status.Value.Publish.TryGetValue(pubTarget, out var stat))
+            lock (_statusSync)
             {
-                stat = new PublishMqStatus();
-                _status.Value.Publish.Add(pubTarget, stat);
-            }
+                if (!_status.Value.Publish.TryGetValue(pubTarget, out var stat))
+                {
+                    stat = new PublishMqStatus();
+                    _status.Value.Publish.Add(pubTarget, stat);
+                }
 
-            return stat;
+                return stat;
+            }
         }
 
         ConsumeMqStatus RetrieveConsumeStatus(string pubTarget)
         {
-            if (!_status.Value.Consume.TryGetValue(pubTarget, out var stat))
+            lock (_statusSync)
             {
-                stat = new ConsumeMqStatus();
-                _status.Value.Consume.Add(pubTarget, stat);
-            }
+                if (!_status.Value.Consume.TryGetValue(pubTarget, out var stat))
+                {
+                    stat = new ConsumeMqStatus();
+                    _status.Value.Consume.Add(pubTarget, stat);
+                }
 
-            return stat;
+                return stat;
+            }
         }
     }
 }

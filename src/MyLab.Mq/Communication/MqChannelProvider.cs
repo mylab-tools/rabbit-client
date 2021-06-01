@@ -11,6 +11,8 @@ namespace MyLab.Mq.Communication
         private readonly IMqConnectionProvider _connectionProvider;
         private readonly ThreadToChannelsMap _channels = new ThreadToChannelsMap();
 
+        public int ChannelCount => _channels.Count;
+
         public MqChannelProvider(IMqConnectionProvider connectionProvider)
         {
             _connectionProvider = connectionProvider;
