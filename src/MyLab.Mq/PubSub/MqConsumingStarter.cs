@@ -3,14 +3,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MyLab.LogDsl;
+using MyLab.Log.Dsl;
 
 namespace MyLab.Mq.PubSub
 {
     class MqConsumingStarter : IHostedService
     {
         private readonly IMqConsumerHost _consumerHost;
-        private readonly DslLogger _log;
+        private readonly IDslLogger _log;
 
         public MqConsumingStarter(
             IMqConsumerHost consumerHost,

@@ -9,9 +9,9 @@
     <PackageProjectUrl>https://github.com/mylab-tools/mq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mylab-tools/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.7.14.2502</AssemblyVersion>
-    <FileVersion>1.7.14.2502</FileVersion>
-    <Version>1.7.14</Version>
+    <AssemblyVersion>1.7.15.2206</AssemblyVersion>
+    <FileVersion>1.7.15.2206</FileVersion>
+    <Version>1.7.15</Version>
     <PackageIcon>tools.png</PackageIcon>
     <PackageTags>mq rabbitmq net core</PackageTags>
     <Description>Message Queue client application. Contains client and server abilities based on RabbitMQ implementation</Description>
@@ -29,7 +29,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MyLab.LogDsl" Version="2.2.0" />
+    <PackageReference Include="MyLab.Log.Dsl" Version="3.1.1" />
     <PackageReference Include="MyLab.StatusProvider" Version="1.5.9" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
   </ItemGroup>

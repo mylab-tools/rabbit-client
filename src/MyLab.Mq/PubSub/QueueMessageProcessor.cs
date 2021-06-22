@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using MyLab.LogDsl;
+using MyLab.Log.Dsl;
 using MyLab.Mq.StatusProvider;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -15,7 +15,7 @@ namespace MyLab.Mq.PubSub
         private readonly IServiceProvider _serviceProvider;
         private readonly IDictionary<string, MqConsumer> _consumerTagToConsumerMap;
 
-        public DslLogger Logger { get; set; }
+        public IDslLogger Logger { get; set; }
 
         public QueueMessageProcessor(
             IMqStatusService statusService, 
