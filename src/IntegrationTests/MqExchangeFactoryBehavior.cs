@@ -67,7 +67,7 @@ namespace IntegrationTests
 
         MqExchangeFactory CreateExchangeFactory(string namePrefix = null)
         {
-            var connProvider = new DefaultMqConnectionProvider(TestMqOptions.Load());
+            var connProvider = new DefaultMqConnectionProvider(TestMqTools.Load());
             var chProvider = new MqChannelProvider(connProvider);
             return new MqExchangeFactory(MqExchangeType.Fanout, chProvider)
             {

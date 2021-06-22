@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MyLab.LogDsl;
+using MyLab.Log.Dsl;
 using MyLab.Mq.PubSub;
 using RabbitMQ.Client;
 
@@ -14,7 +14,7 @@ namespace MyLab.Mq.Test
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<string, MqConsumer> _consumers;
-        private readonly DslLogger _log;
+        private readonly IDslLogger _log;
 
         public DefaultInputMessageEmulator(
             IMqInitialConsumerRegistry initialConsumerRegistry,

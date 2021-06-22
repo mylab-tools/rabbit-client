@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using MyLab.LogDsl;
+using MyLab.Log.Dsl;
 using MyLab.Mq.Communication;
 using MyLab.Mq.StatusProvider;
 
@@ -14,7 +14,7 @@ namespace MyLab.Mq.PubSub
         private readonly IMqInitialConsumerRegistry _initialConsumerRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly IMqStatusService _mqStatusService;
-        private readonly DslLogger _logger;
+        private readonly IDslLogger _logger;
         
         private readonly IDictionary<string, MqConsumer> _runtimeConsumerRegister = new Dictionary<string, MqConsumer>();
         private readonly IDictionary<string, MqConsumer> _runConsumers = new Dictionary<string, MqConsumer>();

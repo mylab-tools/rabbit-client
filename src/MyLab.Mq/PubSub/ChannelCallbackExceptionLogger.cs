@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using MyLab.LogDsl;
+using MyLab.Log.Dsl;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -10,7 +10,7 @@ namespace MyLab.Mq.PubSub
 {
     class ChannelCallbackExceptionLogger
     {
-        private readonly DslLogger _logger;
+        private readonly IDslLogger _logger;
         private readonly Dictionary<IModel, List<string>> _channelsToQueueMap = new Dictionary<IModel, List<string>>();
 
         public ChannelCallbackExceptionLogger(ILogger logger)

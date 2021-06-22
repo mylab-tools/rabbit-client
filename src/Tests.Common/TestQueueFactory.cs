@@ -8,7 +8,7 @@ namespace Tests.Common
         public static readonly TestQueueFactory Default = new TestQueueFactory();
 
         public TestQueueFactory()
-            :base(TestMqOptions.ChannelProvider)
+            :base(TestMqTools.ChannelProvider)
         {
             Prefix = "mylab:mq:test:";
             AutoDelete = true;
