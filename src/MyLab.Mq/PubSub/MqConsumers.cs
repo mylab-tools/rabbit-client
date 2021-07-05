@@ -92,8 +92,18 @@ namespace MyLab.Mq.PubSub
     public class MqBatchConsumer<TMsgPayload, TLogic> : MqConsumer
         where TLogic : class, IMqBatchConsumerLogic<TMsgPayload>
     {
+        private Task _monitorTask;
+        private DateTime _lastMsgTime = DateTime.MinValue;
+        private IConsumingContext _lastConsumingContext;
+
         private readonly TLogic _singletonLogic;
         readonly List<MqMessage<TMsgPayload>> _messages = new List<MqMessage<TMsgPayload>>();
+
+        /// <summary>
+        /// Determines time span after which an incomplete batch is processed
+        /// </summary>
+        /// <remarks>5 sec by default</remarks>
+        public TimeSpan BatchTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
         /// Initializes a new instance of <see cref="MqBatchConsumer{TMsg, TLogic}"/>
@@ -107,30 +117,53 @@ namespace MyLab.Mq.PubSub
         /// <inheritdoc />
         public override async Task Consume(IConsumingContext consumingContext)
         {
+            _lastConsumingContext = consumingContext;
+            _lastMsgTime = DateTime.Now;
+            
             _messages.Add(consumingContext.GetMessage<TMsgPayload>());
 
             if (_messages.Count >= BatchSize)
             {
-                var msgCache = _messages.ToArray();
-
-                try
-                {
-                    var msgs = msgCache.ToArray();
-                    var logic = _singletonLogic ?? consumingContext.CreateLogic<TLogic>();
-
-                    await logic.Consume(msgs);
-
-                    consumingContext.Ack();
-                }
-                catch (Exception e)
-                {
-                    consumingContext.RejectOnError(e, RequeueWhenError);
-                }
-                finally
-                {
-                    _messages.RemoveAll(m => msgCache.Contains(m));
-                }
+                await PerformConsumingAsync(consumingContext);
             }
+
+            _monitorTask ??= Task.Run(Async);
+        }
+
+        private async Task PerformConsumingAsync(IConsumingContext consumingContext)
+        {
+            var msgCache = _messages.ToArray();
+
+            try
+            {
+                var msgs = msgCache.ToArray();
+                var logic = _singletonLogic ?? consumingContext.CreateLogic<TLogic>();
+
+                await logic.Consume(msgs);
+
+                consumingContext.Ack();
+            }
+            catch (Exception e)
+            {
+                consumingContext.RejectOnError(e, RequeueWhenError);
+            }
+            finally
+            {
+                _messages.RemoveAll(m => msgCache.Contains(m));
+            }
+        }
+
+        private async Task Async()
+        {
+            do
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+
+                if (DateTime.Now  - _lastMsgTime >= BatchTimeout && _messages.Count != 0)
+                {
+                    await PerformConsumingAsync(_lastConsumingContext);
+                }
+            } while (true);
         }
     }
 }

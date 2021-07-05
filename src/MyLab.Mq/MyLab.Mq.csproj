@@ -9,15 +9,13 @@
     <PackageProjectUrl>https://github.com/mylab-tools/mq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mylab-tools/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.7.15.2206</AssemblyVersion>
-    <FileVersion>1.7.15.2206</FileVersion>
-    <Version>1.7.15</Version>
+    <AssemblyVersion>1.8.15.0507</AssemblyVersion>
+    <FileVersion>1.8.15.0507</FileVersion>
+    <Version>1.8.15</Version>
     <PackageIcon>tools.png</PackageIcon>
     <PackageTags>mq rabbitmq net core</PackageTags>
     <Description>Message Queue client application. Contains client and server abilities based on RabbitMQ implementation</Description>
-    <PackageReleaseNotes>Исправлено:
-
-* Не удалялся сервис подключения к `RabbitMQ` при добавлении эмулятора сообщений</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

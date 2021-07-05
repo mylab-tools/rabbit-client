@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using MyLab.Mq;
 using Newtonsoft.Json;
@@ -85,6 +86,33 @@ namespace IntegrationTests
             Assert.Equal(2, testBox.AckMsgs.Length);
             Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
             Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
+
+            await PrintStatus(client);
+        }
+
+        [Fact]
+        public async Task ShouldConsumeIncompleteMessageBatch()
+        {
+            //Arrange
+            using var queue = CreateTestQueue();
+            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue);
+
+            //Act
+            await PublishMessages(queue, "foo");
+            await Task.Delay(TimeSpan.FromSeconds(2));
+
+            var resp = await client.GetAsync("test/batch");
+            var respStr = await resp.Content.ReadAsStringAsync();
+
+            _output.WriteLine(respStr);
+            resp.EnsureSuccessStatusCode();
+
+            var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
+
+            ////Assert
+            Assert.Null(testBox.RejectedMsgs);
+            Assert.Single(testBox.AckMsgs);
+            Assert.Equal("foo", testBox.AckMsgs[0].Payload.Content);
 
             await PrintStatus(client);
         }
