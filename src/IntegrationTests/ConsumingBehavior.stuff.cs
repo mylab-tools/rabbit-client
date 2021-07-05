@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using MyLab.Mq.MqObjects;
@@ -49,7 +50,10 @@ namespace IntegrationTests
         private HttpClient CreateTestClientWithBatchConsumer<T>(MqQueue queue, ushort size = 2)
             where T : class, IMqBatchConsumerLogic<TestMqMsg>
         {
-            return CreateTestClient(new MqBatchConsumer<TestMqMsg, T>(queue.Name, size));
+            return CreateTestClient(new MqBatchConsumer<TestMqMsg, T>(queue.Name, size)
+            {
+                BatchTimeout = TimeSpan.FromSeconds(1)
+            });
         }
 
         private HttpClient CreateTestClient(MqConsumer consumer)

@@ -658,6 +658,12 @@
             <typeparam name="TMsgPayload">message payload type</typeparam>
             <typeparam name="TLogic">consuming logic type</typeparam>
         </member>
+        <member name="P:MyLab.Mq.PubSub.MqBatchConsumer`2.BatchTimeout">
+            <summary>
+            Determines time span after which an incomplete batch is processed
+            </summary>
+            <remarks>5 sec by default</remarks>
+        </member>
         <member name="M:MyLab.Mq.PubSub.MqBatchConsumer`2.#ctor(System.String,System.UInt16,`1)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.PubSub.MqBatchConsumer`2"/>
