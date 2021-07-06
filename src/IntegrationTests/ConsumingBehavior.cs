@@ -5,17 +5,19 @@ using MyLab.Mq;
 using Newtonsoft.Json;
 using TestServer;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
     public partial class ConsumingBehavior : IClassFixture<WebApplicationFactory<Startup>>
     {
+
         [Fact]
         public async Task ShouldConsumeSimpleMessage()
         {
             //Arrange
             using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogic>(queue);
+            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogic>(queue, _output);
 
             //Act
             await PublishMessages(queue, "foo");
@@ -41,7 +43,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogicWithReject>(queue);
+            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogicWithReject>(queue, _output);
 
             //Act
             await PublishMessages(queue, "foo");
@@ -67,7 +69,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue);
+            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue, _output);
 
             //Act
             await PublishMessages(queue, "foo", "bar");
@@ -95,11 +97,11 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue);
+            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue, _output, size: 5);
 
             //Act
-            await PublishMessages(queue, "foo");
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            await PublishMessages(queue, "foo", "bar");
+            await Task.Delay(TimeSpan.FromSeconds(3));
 
             var resp = await client.GetAsync("test/batch");
             var respStr = await resp.Content.ReadAsStringAsync();
@@ -111,8 +113,9 @@ namespace IntegrationTests
 
             ////Assert
             Assert.Null(testBox.RejectedMsgs);
-            Assert.Single(testBox.AckMsgs);
-            Assert.Equal("foo", testBox.AckMsgs[0].Payload.Content);
+            Assert.Equal(2, testBox.AckMsgs.Length);
+            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
+            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
 
             await PrintStatus(client);
         }
@@ -122,7 +125,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogicWithReject>(queue);
+            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogicWithReject>(queue, _output);
 
             //Act
             await PublishMessages(queue, "foo", "bar");
@@ -150,7 +153,7 @@ namespace IntegrationTests
         {
             //Arrange
             using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithSingleConsumer<MqLogicWithScopedDependency>(queue);
+            using var client = CreateTestClientWithSingleConsumer<MqLogicWithScopedDependency>(queue, _output);
 
             //Act
             await PublishMessages(queue, "foo");

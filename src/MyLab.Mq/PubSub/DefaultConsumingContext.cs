@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MyLab.Log.Dsl;
 using MyLab.Mq.StatusProvider;
 using MyLab.Mq.Test;
 using RabbitMQ.Client;
@@ -31,6 +33,11 @@ namespace MyLab.Mq.PubSub
         /// Reject delivery 
         /// </summary>
         void RejectOnError(Exception exception, bool requeue);
+
+        /// <summary>
+        /// Provides logger
+        /// </summary>
+        IDslLogger GetLogger<T>();
     }
 
     
@@ -101,6 +108,14 @@ namespace MyLab.Mq.PubSub
             _channel.BasicNack(DeliveryTag, true, requeue);
             _statusService.ConsumingError(_queue, exception);
         }
+
+        public IDslLogger GetLogger<T>()
+        {
+            return _serviceProvider
+                .GetService<ILoggerFactory>()
+                .CreateLogger(typeof(T))
+                .Dsl();
+        }
     }
 
     class FakeConsumingContext : IConsumingContext
@@ -144,6 +159,14 @@ namespace MyLab.Mq.PubSub
                 RejectionException = exception,
                 RequeueFlag = requeue
             };
+        }
+
+        public IDslLogger GetLogger<T>()
+        {
+            return _serviceProvider
+                .GetService<ILoggerFactory>()
+                .CreateLogger(typeof(T))
+                .Dsl();
         }
     }
 }
