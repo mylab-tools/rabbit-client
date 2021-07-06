@@ -433,6 +433,11 @@
             Reject delivery 
             </summary>
         </member>
+        <member name="M:MyLab.Mq.PubSub.IConsumingContext.GetLogger``1">
+            <summary>
+            Provides logger
+            </summary>
+        </member>
         <member name="P:MyLab.Mq.PubSub.DefaultConsumingContext.DeliveryTag">
             <summary>
             Gets delivery identifier

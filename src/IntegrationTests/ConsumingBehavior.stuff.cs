@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MyLab.Mq.MqObjects;
 using MyLab.Mq.PubSub;
 using Tests.Common;
@@ -41,27 +43,31 @@ namespace IntegrationTests
 
         private MqQueue CreateTestQueue() => TestQueueFactory.Default.CreateWithRandomId();
 
-        private HttpClient CreateTestClientWithSingleConsumer<T>(MqQueue queue)
+        private HttpClient CreateTestClientWithSingleConsumer<T>(MqQueue queue, ITestOutputHelper output)
             where T : class, IMqConsumerLogic<TestMqMsg>
         {
-            return CreateTestClient(new MqConsumer<TestMqMsg, T>(queue.Name));
+            return CreateTestClient(new MqConsumer<TestMqMsg, T>(queue.Name), output);
         }
 
-        private HttpClient CreateTestClientWithBatchConsumer<T>(MqQueue queue, ushort size = 2)
+        private HttpClient CreateTestClientWithBatchConsumer<T>(MqQueue queue, ITestOutputHelper output, ushort size = 2)
             where T : class, IMqBatchConsumerLogic<TestMqMsg>
         {
             return CreateTestClient(new MqBatchConsumer<TestMqMsg, T>(queue.Name, size)
             {
-                BatchTimeout = TimeSpan.FromSeconds(1)
-            });
+                BatchTimeout = TimeSpan.FromSeconds(2)
+            }, output);
         }
 
-        private HttpClient CreateTestClient(MqConsumer consumer)
+        private HttpClient CreateTestClient(MqConsumer consumer, ITestOutputHelper output)
         {
             return _appFactory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
+                    services.AddLogging(b => b
+                        .SetMinimumLevel(LogLevel.Trace)
+                        .AddFilter(level => level >= LogLevel.Debug)
+                        .AddXUnit(output));
                     services.AddMqConsuming(registrar =>
                     {
                         registrar.RegisterConsumer(consumer);
