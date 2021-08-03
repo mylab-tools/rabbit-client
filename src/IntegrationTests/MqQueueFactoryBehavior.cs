@@ -68,7 +68,7 @@ namespace IntegrationTests
         MqQueueFactory CreateQueueFactory(string namePrefix = null)
         {
             var connProvider = new DefaultMqConnectionProvider(TestMqTools.Load());
-            return new MqQueueFactory(new MqChannelProvider(connProvider))
+            return new MqQueueFactory(new DefaultMqChannelProvider(connProvider))
             {
                 Prefix = namePrefix,
                 AutoDelete = true

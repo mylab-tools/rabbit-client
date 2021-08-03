@@ -9,9 +9,9 @@
     <PackageProjectUrl>https://github.com/mylab-tools/mq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mylab-tools/mq.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyVersion>1.8.19.0607</AssemblyVersion>
-    <FileVersion>1.8.19.0607</FileVersion>
-    <Version>1.8.19</Version>
+    <AssemblyVersion>1.9.19.0308</AssemblyVersion>
+    <FileVersion>1.9.19.0308</FileVersion>
+    <Version>1.9.19</Version>
     <PackageIcon>tools.png</PackageIcon>
     <PackageTags>mq rabbitmq net core</PackageTags>
     <Description>Message Queue client application. Contains client and server abilities based on RabbitMQ implementation</Description>

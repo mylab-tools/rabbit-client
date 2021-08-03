@@ -6,7 +6,7 @@ namespace Tests.Common
 {
     public static class TestMqTools
     {
-        private static MqChannelProvider _chProvider;
+        private static DefaultMqChannelProvider _chProvider;
         private static DefaultMqConnectionProvider _connProvider;
 
         public static IMqConnectionProvider ConnectionProvider => _connProvider;
@@ -54,7 +54,7 @@ namespace Tests.Common
         static void Init()
         {
             _connProvider = new DefaultMqConnectionProvider(Load());
-            _chProvider = new MqChannelProvider(ConnectionProvider);
+            _chProvider = new DefaultMqChannelProvider(ConnectionProvider);
         }
     }
 }

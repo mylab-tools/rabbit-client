@@ -7,18 +7,28 @@ using RabbitMQ.Client;
 
 namespace MyLab.Mq.Communication
 {
-    class MqChannelProvider : IDisposable, IMqChannelProvider
+    /// <summary>
+    /// Provides MW channels
+    /// </summary>
+    public class DefaultMqChannelProvider : IDisposable, IMqChannelProvider
     {
         private readonly IMqConnectionProvider _connectionProvider;
         private readonly ThreadToChannelsMap _channels = new ThreadToChannelsMap();
 
+        /// <summary>
+        /// Channels count
+        /// </summary>
         public int ChannelCount => _channels.Sum(ch => ch.Value.Count);
 
-        public MqChannelProvider(IMqConnectionProvider connectionProvider)
+        /// <summary>
+        /// Initializes a new instance of <see cref="DefaultMqChannelProvider"/>
+        /// </summary>
+        public DefaultMqChannelProvider(IMqConnectionProvider connectionProvider)
         {
             _connectionProvider = connectionProvider;
         }
 
+        /// <inheritdoc />
         public IModel Provide(ushort prefetchCount = 1)
         {
             var channelMap =_channels.GetOrAdd(Thread.CurrentThread.ManagedThreadId,
@@ -57,6 +67,7 @@ namespace MyLab.Mq.Communication
             return ch;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             foreach (var prefetchToChannelMap in _channels.Values)

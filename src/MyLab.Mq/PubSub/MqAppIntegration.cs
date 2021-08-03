@@ -24,7 +24,7 @@ namespace MyLab.Mq.PubSub
                 .TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
 
             services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
-            services.TryAddSingleton<IMqChannelProvider, MqChannelProvider>();
+            services.TryAddSingleton<IMqChannelProvider, DefaultMqChannelProvider>();
 
             return services;
         }
@@ -51,7 +51,7 @@ namespace MyLab.Mq.PubSub
 
             services.TryAddSingleton<IMqStatusService, DefaultMqStatusService>();
             services.TryAddSingleton<IMqConnectionProvider, DefaultMqConnectionProvider>();
-            services.TryAddSingleton<IMqChannelProvider, MqChannelProvider>();
+            services.TryAddSingleton<IMqChannelProvider, DefaultMqChannelProvider>();
 
             services
                 .AddScoped<DefaultMqMessageAccessor>()

@@ -14,7 +14,7 @@ namespace IntegrationTests
         private MqQueue CreateTestQueue() => TestQueueFactory.Default.CreateWithName(BoundQueue);
 
         IMqPublisher CreateTestPublisher(IAppStatusService appStatusService = null) => new DefaultMqPublisher(
-            new MqChannelProvider(new DefaultMqConnectionProvider(TestMqTools.Load())),
+            new DefaultMqChannelProvider(new DefaultMqConnectionProvider(TestMqTools.Load())),
             null, appStatusService);
 
         [Mq(Routing = BoundQueue)]

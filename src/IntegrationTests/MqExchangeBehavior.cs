@@ -14,7 +14,7 @@ namespace IntegrationTests
             //Arrange
             var exchangeName = Guid.NewGuid().ToString("N");
             var connProvider = new DefaultMqConnectionProvider(TestMqTools.Load());
-            var chProvider = new MqChannelProvider(connProvider);
+            var chProvider = new DefaultMqChannelProvider(connProvider);
             var exchange = new MqExchange(exchangeName, chProvider);
 
             //Act
