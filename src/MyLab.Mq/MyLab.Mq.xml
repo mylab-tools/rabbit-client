@@ -502,6 +502,17 @@
             Reject delivery 
             </summary>
         </member>
+        <member name="T:MyLab.Mq.PubSub.IEnabledIndicatorService">
+            <summary>
+            Indicates MQ enable
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.PubSub.IEnabledIndicatorService.ShouldBeEnabled">
+            <summary>
+            Gets whether MQ tools should be enabled 
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:MyLab.Mq.PubSub.IInitialConsumerProvider">
             <summary>
             Provides initial registered consumer
@@ -612,7 +623,7 @@
             Add MQ publisher <see cref="T:MyLab.Mq.PubSub.IMqPublisher"/> in application dependency container
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqConsuming(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.PubSub.IMqInitialConsumerRegistrar})">
+        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqConsuming(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.PubSub.IMqInitialConsumerRegistrar},System.Boolean)">
             <summary>
             Add MQ consuming abilities
             </summary>

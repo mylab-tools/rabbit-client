@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MyLab.Mq;
+using MyLab.Mq.PubSub;
 using Newtonsoft.Json;
+using Tests.Common;
 using TestServer;
 using Xunit;
 using Xunit.Abstractions;
@@ -36,6 +40,46 @@ namespace IntegrationTests
             Assert.Null(testBox.RejectedMsg);
 
             await PrintStatus(client);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ShouldNotConsumeWhenNotConfigured(bool optional)
+        {
+            //Arrange
+            using var queue = CreateTestQueue();
+
+            var consumer = new MqConsumer<TestMqMsg, TestSimpleMqLogic>(queue.Name);
+
+            using var client = _appFactory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.AddLogging(b => b
+                        .SetMinimumLevel(LogLevel.Trace)
+                        .AddFilter(level => level >= LogLevel.Debug)
+                        .AddXUnit(_output));
+                    services.AddMqConsuming(registrar =>
+                    {
+                        registrar.RegisterConsumer(consumer);
+                    }, optional);
+                });
+            }).CreateClient();
+
+            //Act
+            await PublishMessages(queue, "foo");
+
+            var resp = await client.GetAsync("test/single");
+            var respStr = await resp.Content.ReadAsStringAsync();
+
+            _output.WriteLine(respStr);
+            resp.EnsureSuccessStatusCode();
+
+            var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
+
+            //Assert
+            Assert.Null(testBox.AckMsg);
         }
 
         [Fact]

@@ -34,7 +34,8 @@ namespace MyLab.Mq.PubSub
         /// </summary>
         public static IServiceCollection AddMqConsuming(
             this IServiceCollection services,
-            Action<IMqInitialConsumerRegistrar> consumerRegistration)
+            Action<IMqInitialConsumerRegistrar> consumerRegistration, 
+            bool optional = false)
         {
             if (consumerRegistration == null) 
                 throw new ArgumentNullException(nameof(consumerRegistration));
@@ -46,6 +47,9 @@ namespace MyLab.Mq.PubSub
                 .AddSingleton<IMqInitialConsumerRegistry>(registry)
                 .AddSingleton<IMqConsumerHost, MqConsumerHost>()
                 .AddSingleton<IMqConsumerRegistrar, MqConsumerHost>();
+
+            if(optional)
+                services.AddSingleton<IEnabledIndicatorService, EnabledIndicatorService>();
 
             services.AddHostedService<MqConsumingStarter>();
 

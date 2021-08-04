@@ -14,6 +14,7 @@ namespace MyLab.Mq.PubSub
         private readonly IMqInitialConsumerRegistry _initialConsumerRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly IMqStatusService _mqStatusService;
+        private readonly IEnabledIndicatorService _enabledIndicatorService;
         private readonly IDslLogger _logger;
         
         private readonly IDictionary<string, MqConsumer> _runtimeConsumerRegister = new Dictionary<string, MqConsumer>();
@@ -27,6 +28,7 @@ namespace MyLab.Mq.PubSub
             IMqInitialConsumerRegistry initialConsumerRegistry,
             IServiceProvider serviceProvider,
             IMqStatusService mqStatusService,
+            IEnabledIndicatorService enabledIndicatorService = null,
             ILogger<MqConsumerHost> logger = null)
         {
 
@@ -37,11 +39,20 @@ namespace MyLab.Mq.PubSub
             _initialConsumerRegistry = initialConsumerRegistry ?? throw new ArgumentNullException(nameof(initialConsumerRegistry));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _mqStatusService = mqStatusService;
+            _enabledIndicatorService = enabledIndicatorService;
             _logger = logger?.Dsl();
         }
 
         public void Start()
         {
+            if (_enabledIndicatorService != null && !_enabledIndicatorService.ShouldBeEnabled())
+            {
+                _logger
+                    .Warning("Enabled indicator service indicate `false`. Consuming is not started.")
+                    .Write();
+                return;
+            }
+
             if (_state != MqConsumerHostState.Stopped)
             {
                 _logger
