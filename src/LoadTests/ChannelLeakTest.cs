@@ -65,7 +65,7 @@ namespace LoadTests
 
         int GetAppChannelCount()
         {
-            var chp = (MqChannelProvider)_appFactory.Services.GetService(typeof(IMqChannelProvider));
+            var chp = (DefaultMqChannelProvider)_appFactory.Services.GetService(typeof(IMqChannelProvider));
             return chp.ChannelCount;
         }
 

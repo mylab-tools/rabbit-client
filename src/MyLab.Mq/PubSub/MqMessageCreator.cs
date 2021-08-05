@@ -11,7 +11,23 @@ namespace MyLab.Mq.PubSub
         public static MqMessage<T> Create<T>(ReadOnlyMemory<byte> binBody, IBasicProperties basicProperties)
         {
             var bodyStr = Encoding.UTF8.GetString(binBody.ToArray());
-            var payload = JsonConvert.DeserializeObject<T>(bodyStr);
+            T payload;
+
+            if (typeof(T) == typeof(string))
+            {
+                payload = (T)(object)bodyStr;
+            }
+            else
+            {
+                try
+                {
+                    payload = JsonConvert.DeserializeObject<T>(bodyStr);
+                }
+                catch (Exception e)
+                {
+                    throw new JsonMessageSerializationException(bodyStr, e);
+                }
+            }
 
             var props = basicProperties;
             var msg = new MqMessage<T>(payload)

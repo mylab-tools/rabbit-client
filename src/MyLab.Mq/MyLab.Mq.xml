@@ -4,17 +4,38 @@
         <name>MyLab.Mq</name>
     </assembly>
     <members>
+        <member name="T:MyLab.Mq.Communication.DefaultMqChannelProvider">
+            <summary>
+            Provides MW channels
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.Communication.DefaultMqChannelProvider.ChannelCount">
+            <summary>
+            Channels count
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.Communication.DefaultMqChannelProvider.#ctor(MyLab.Mq.Communication.IMqConnectionProvider)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.Mq.Communication.DefaultMqChannelProvider"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.Communication.DefaultMqChannelProvider.Provide(System.UInt16)">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.Mq.Communication.DefaultMqChannelProvider.Dispose">
+            <inheritdoc />
+        </member>
         <member name="T:MyLab.Mq.Communication.DefaultMqConnectionProvider">
             <summary>
             Default implementation for <see cref="T:MyLab.Mq.Communication.IMqConnectionProvider"/>
             </summary>
         </member>
-        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.Mq.MqOptions})">
+        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.Mq.MqOptions},Microsoft.Extensions.Logging.ILogger{MyLab.Mq.Communication.DefaultMqConnectionProvider})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.Communication.DefaultMqConnectionProvider"/>
             </summary>
         </member>
-        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(MyLab.Mq.MqOptions)">
+        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(MyLab.Mq.MqOptions,Microsoft.Extensions.Logging.ILogger{MyLab.Mq.Communication.DefaultMqConnectionProvider})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.Communication.DefaultMqConnectionProvider"/>
             </summary>
@@ -328,54 +349,67 @@
             Creates queue
             </summary>
         </member>
-        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.Prefix">
-            <summary>
-            Prefix for queue name 
-            </summary>
-        </member>
-        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.AutoDelete">
-            <summary>
-            Queue that has had at least one consumer is deleted when last consumer unsubscribes
-            </summary>
-        </member>
-        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.Durable">
-            <summary>
-            The queue will survive a broker restart
-            </summary>
-        </member>
-        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.Exclusive">
-            <summary>
-            Used by only one connection and the queue will be deleted when that connection closes
-            </summary>
-        </member>
-        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.DeadLetterExchange">
-            <summary>
-            Specifies a dead letter exchange
-            </summary>
-        </member>
-        <member name="P:MyLab.Mq.MqObjects.MqQueueFactory.DeadLetterRoutingKey">
-            <summary>
-            Specifies a dead letter routing key
-            </summary>
-        </member>
         <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.#ctor(MyLab.Mq.Communication.IMqChannelProvider)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.MqObjects.MqQueueFactory"/>
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.CreateWithRandomId">
+        <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.GetChannelProvider">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.Mq.MqObjects.MqQueueFactoryBase">
+            <summary>
+            Creates queue
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactoryBase.Prefix">
+            <summary>
+            Prefix for queue name 
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactoryBase.AutoDelete">
+            <summary>
+            Queue that has had at least one consumer is deleted when last consumer unsubscribes
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactoryBase.Durable">
+            <summary>
+            The queue will survive a broker restart
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactoryBase.Exclusive">
+            <summary>
+            Used by only one connection and the queue will be deleted when that connection closes
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactoryBase.DeadLetterExchange">
+            <summary>
+            Specifies a dead letter exchange
+            </summary>
+        </member>
+        <member name="P:MyLab.Mq.MqObjects.MqQueueFactoryBase.DeadLetterRoutingKey">
+            <summary>
+            Specifies a dead letter routing key
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.MqObjects.MqQueueFactoryBase.CreateWithRandomId">
             <summary>
             Create queue with name = {Pattern}:{Guid.NewGuid().ToString("N")}
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.CreateWithId(System.String)">
+        <member name="M:MyLab.Mq.MqObjects.MqQueueFactoryBase.CreateWithId(System.String)">
             <summary>
             Create queue with name = {Pattern}:{id}
             </summary>
         </member>
-        <member name="M:MyLab.Mq.MqObjects.MqQueueFactory.CreateWithName(System.String)">
+        <member name="M:MyLab.Mq.MqObjects.MqQueueFactoryBase.CreateWithName(System.String)">
             <summary>
             Create queue with name = {name}
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.MqObjects.MqQueueFactoryBase.GetChannelProvider">
+            <summary>
+            Override to get channel provider
             </summary>
         </member>
         <member name="T:MyLab.Mq.MqOptions">
@@ -467,6 +501,17 @@
             <summary>
             Reject delivery 
             </summary>
+        </member>
+        <member name="T:MyLab.Mq.PubSub.IEnabledIndicatorService">
+            <summary>
+            Indicates MQ enable
+            </summary>
+        </member>
+        <member name="M:MyLab.Mq.PubSub.IEnabledIndicatorService.ShouldBeEnabled">
+            <summary>
+            Gets whether MQ tools should be enabled 
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:MyLab.Mq.PubSub.IInitialConsumerProvider">
             <summary>
@@ -578,7 +623,7 @@
             Add MQ publisher <see cref="T:MyLab.Mq.PubSub.IMqPublisher"/> in application dependency container
             </summary>
         </member>
-        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqConsuming(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.PubSub.IMqInitialConsumerRegistrar})">
+        <member name="M:MyLab.Mq.PubSub.MqIntegration.AddMqConsuming(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.Mq.PubSub.IMqInitialConsumerRegistrar},System.Boolean)">
             <summary>
             Add MQ consuming abilities
             </summary>

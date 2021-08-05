@@ -24,7 +24,7 @@ namespace IntegrationTests
             //Arrange
             var queueName = Guid.NewGuid().ToString("N");
             var connProvider = new DefaultMqConnectionProvider(TestMqTools.Load());
-            var chProvider = new MqChannelProvider(connProvider);
+            var chProvider = new DefaultMqChannelProvider(connProvider);
             var queue = new MqQueue(queueName, chProvider);
 
             //Act

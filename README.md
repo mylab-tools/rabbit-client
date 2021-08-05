@@ -362,7 +362,7 @@ services.AddMqConsuming(r =>
 
  Для случая, когда регистрировать потребителя следует только при наличии в опциях определённого параметра:
 
-```
+```C#
 services.AddMqConsuming(r =>
 	r.RegisterConsumerByOptions<MyOptions, string>(
 	   opt => opt.Queue
@@ -370,7 +370,41 @@ services.AddMqConsuming(r =>
                 )
 ```
 
- 
+### Потребление опционально
+
+Если функция потребления должна быть активна только в случае, если указана соответствующая конфигурация, то это можно указать, используя параметр `optional` при добавлении механизмов потребления в сервисы приложения:
+
+```C#
+services.AddMqConsuming(r => ..., options: true);
+```
+
+ Значение параметра по умолчанию - `false`.
+
+Ниже приведены логи в случае, если не указаны параметры подключения к очереди:
+
+*  если потребитель подключен не опционально:
+
+  ```
+  [2021-08-04 07:06:10Z] fail: MyLab.Mq.PubSub.MqConsumerHost[0]
+        Message: None of the specified endpoints were reachable
+        Time: 2021-08-04T10:06:10.313
+        Labels:
+          log_level: error
+        Exception:
+          Message: None of the specified endpoints were reachable
+          Type: RabbitMQ.Client.Exceptions.BrokerUnreachableException
+          ....
+  ```
+
+* если потребитель подключен опционально:
+
+  ```
+  [2021-08-04 07:25:16Z] warn: MyLab.Mq.PubSub.MqConsumerHost[0]
+        Message: Enabled indicator service indicate `false`. Consuming is not started.
+        Time: 2021-08-04T10:25:16.877
+        Labels:
+          log_level: warning
+  ```
 
 ## Конфигурирование 
 

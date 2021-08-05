@@ -14,6 +14,7 @@ namespace MyLab.Mq.PubSub
         private readonly IMqInitialConsumerRegistry _initialConsumerRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly IMqStatusService _mqStatusService;
+        private readonly IEnabledIndicatorService _enabledIndicatorService;
         private readonly IDslLogger _logger;
         
         private readonly IDictionary<string, MqConsumer> _runtimeConsumerRegister = new Dictionary<string, MqConsumer>();
@@ -27,21 +28,33 @@ namespace MyLab.Mq.PubSub
             IMqInitialConsumerRegistry initialConsumerRegistry,
             IServiceProvider serviceProvider,
             IMqStatusService mqStatusService,
+            IEnabledIndicatorService enabledIndicatorService = null,
             ILogger<MqConsumerHost> logger = null)
         {
-
-            var messageProcessor = new QueueMessageProcessor(mqStatusService, serviceProvider, _runConsumers);
+            _logger = logger?.Dsl();
+            var messageProcessor = new QueueMessageProcessor(mqStatusService, serviceProvider, _runConsumers)
+            {
+                Logger = _logger
+            };
             _channelMessageReceivingController = new ChannelMessageReceivingController(messageProcessor);
             _channelCallbackExceptionLogger = new ChannelCallbackExceptionLogger(logger);
             _channelProvider = channelProvider ?? throw new ArgumentNullException(nameof(channelProvider));
             _initialConsumerRegistry = initialConsumerRegistry ?? throw new ArgumentNullException(nameof(initialConsumerRegistry));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _mqStatusService = mqStatusService;
-            _logger = logger?.Dsl();
+            _enabledIndicatorService = enabledIndicatorService;
         }
 
         public void Start()
         {
+            if (_enabledIndicatorService != null && !_enabledIndicatorService.ShouldBeEnabled())
+            {
+                _logger
+                    .Warning("Enabled indicator service indicate `false`. Consuming is not started.")
+                    .Write();
+                return;
+            }
+
             if (_state != MqConsumerHostState.Stopped)
             {
                 _logger
@@ -72,6 +85,8 @@ namespace MyLab.Mq.PubSub
             }
 
             _state = MqConsumerHostState.Running;
+
+            _logger.Action("Consuming started").Write();
         }
 
         public void Stop()
@@ -85,6 +100,8 @@ namespace MyLab.Mq.PubSub
             }
 
             StopCore();
+
+            _logger.Action("Consuming stopped").Write();
         }
 
         public IDisposable AddConsumer(MqConsumer consumer)
@@ -122,6 +139,10 @@ namespace MyLab.Mq.PubSub
 
             _mqStatusService.QueueConnected(consumer.Queue);
             _runConsumers.Add(consumer.Queue, consumer);
+
+            _logger.Action("Consumer enabled")
+                .AndFactIs("queue", consumer.Queue)
+                .Write();
         }
 
         public void StopCore()
@@ -132,7 +153,15 @@ namespace MyLab.Mq.PubSub
             {
                 _channelCallbackExceptionLogger.Clear();
                 _channelMessageReceivingController.Clear();
-                _mqStatusService.AllQueueDisconnected();
+
+                try
+                {
+                    _mqStatusService.AllQueueDisconnected();
+                }
+                catch (ObjectDisposedException)
+                {
+                    //Ignore it
+                }
 
                 var runConsumers = _runConsumers.Values.ToArray();
                 _runConsumers.Clear();
@@ -163,6 +192,10 @@ namespace MyLab.Mq.PubSub
             }
 
             _runConsumers.Remove(queueName);
+
+            _logger.Action("Consumer disabled")
+                .AndFactIs("queue", queueName)
+                .Write();
         }
 
         class ConsumerUnregistrar : IDisposable
