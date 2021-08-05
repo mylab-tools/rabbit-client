@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MyLab.Log;
 using MyLab.Log.Dsl;
+using Newtonsoft.Json;
 
 namespace MyLab.Mq.PubSub
 {
@@ -71,7 +72,17 @@ namespace MyLab.Mq.PubSub
         {
             try
             {
-                var msgObj = consumingContext.GetMessage<TMsgPayload>();
+                MqMessage<TMsgPayload> msgObj;
+                try
+                {
+                    msgObj = consumingContext.GetMessage<TMsgPayload>();
+                }
+                catch (JsonMessageSerializationException e)
+                {
+                    e.AndFactIs("dump", e.Content);
+                    throw;
+                }
+
                 var logic = _singletonLogic ?? consumingContext.CreateLogic<TLogic>();
 
                 await logic.Consume(msgObj);

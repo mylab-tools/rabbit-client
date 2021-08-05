@@ -30,12 +30,12 @@
             Default implementation for <see cref="T:MyLab.Mq.Communication.IMqConnectionProvider"/>
             </summary>
         </member>
-        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.Mq.MqOptions})">
+        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.Mq.MqOptions},Microsoft.Extensions.Logging.ILogger{MyLab.Mq.Communication.DefaultMqConnectionProvider})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.Communication.DefaultMqConnectionProvider"/>
             </summary>
         </member>
-        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(MyLab.Mq.MqOptions)">
+        <member name="M:MyLab.Mq.Communication.DefaultMqConnectionProvider.#ctor(MyLab.Mq.MqOptions,Microsoft.Extensions.Logging.ILogger{MyLab.Mq.Communication.DefaultMqConnectionProvider})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.Mq.Communication.DefaultMqConnectionProvider"/>
             </summary>
