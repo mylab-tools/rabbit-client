@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Andrey O.</Authors>
+    <Description>RabbitMQ client library for .NET 5+</Description>
+    <Copyright>Copyright (c) 2021 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <PackageProjectUrl>https://github.com/mylab-tools/rebbit-client</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mylab-tools/rebbit-client.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>tools.png</PackageIcon>
+    <PackageIconUrl />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>.\MyLab.RabbitClient.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>.\MyLab.RabbitClient.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="tools.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
