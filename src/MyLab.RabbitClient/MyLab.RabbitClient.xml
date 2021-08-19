@@ -1,0 +1,377 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MyLab.RabbitClient</name>
+    </assembly>
+    <members>
+        <member name="T:MyLab.RabbitClient.AppIntegration">
+            <summary>
+            Contains extension methods for integration into application
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,MyLab.RabbitClient.Consuming.IRabbitConsumer)">
+            <summary>
+            Registers consumer with specified consumer for specified queue
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumer``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Registers consumer with specified consumer for specified queue type
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumers``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds consumer registrar which allow to registers several consumers depends on dependent options and services
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumers(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IRabbitConsumerRegistrar)">
+            <summary>
+            Adds consumer registrar which allow to registers several consumers depends on dependent options and services
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            Configures Rabbit Client
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.RabbitClient.RabbitOptions})">
+            <summary>
+            Configures Rabbit Client
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Connection.IRabbitChannelProvider">
+            <summary>
+            Provides channels
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.IRabbitChannelProvider.Provide">
+            <summary>
+            Provide channel using
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.IRabbitChannelProvider.Use(System.Action{RabbitMQ.Client.IModel})">
+            <summary>
+            Safe channel using with auto-free
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.IRabbitChannelProvider.UseAsync(System.Func{RabbitMQ.Client.IModel,System.Threading.Tasks.Task})">
+            <summary>
+            Safe async channel using with auto-free
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Connection.IRabbitConnectionProvider">
+            <summary>
+            Provides connection to RabbitMQ
+            </summary>
+        </member>
+        <member name="E:MyLab.RabbitClient.Connection.IRabbitConnectionProvider.Reconnected">
+            <summary>
+            Occurs when new connection created 
+            </summary>
+            <remarks>
+            It means that old connection no longer available
+            </remarks>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.IRabbitConnectionProvider.Provide">
+            <summary>
+            Provides Mq connection
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Connection.RabbitChannelProvider">
+            <summary>
+            Manages and provides Rabbit channels
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelProvider.#ctor(MyLab.RabbitClient.Connection.IRabbitConnectionProvider)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitChannelProvider"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelProvider.Provide">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelProvider.Use(System.Action{RabbitMQ.Client.IModel})">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelProvider.UseAsync(System.Func{RabbitMQ.Client.IModel,System.Threading.Tasks.Task})">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Connection.RabbitChannelUsing">
+            <summary>
+            Contains RabbitMQ channel
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Connection.RabbitChannelUsing.Channel">
+            <summary>
+            Rabbit channel
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelUsing.#ctor(RabbitMQ.Client.IModel,System.IDisposable)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitChannelUsing"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelUsing.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider">
+            <summary>
+            Manages and provides Rabbit connection
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.RabbitClient.RabbitOptions},Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.RabbitConnectionProvider})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.#ctor(MyLab.RabbitClient.RabbitOptions,Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.RabbitConnectionProvider})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.#ctor(RabbitMQ.Client.ConnectionFactory)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider"/>
+            </summary>
+        </member>
+        <member name="E:MyLab.RabbitClient.Connection.RabbitConnectionProvider.Reconnected">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.Provide">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.ConsumedMessage`1">
+            <summary>
+            Contains consumer message data
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Consuming.ConsumedMessage`1.Queue">
+            <summary>
+            The queue which from message was received
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Consuming.ConsumedMessage`1.BasicProperties">
+            <summary>
+            The content header of the message
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Consuming.ConsumedMessage`1.Content">
+            <summary>
+            Deserialized message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.ConsumedMessage`1.#ctor(`0,RabbitMQ.Client.Events.BasicDeliverEventArgs)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.ConsumedMessage`1"/>
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumer">
+            <summary>
+            Defines consumer logic interface
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IRabbitConsumer.ConsumeAsync(RabbitMQ.Client.Events.BasicDeliverEventArgs)">
+            <summary>
+            Override to implement consuming logic
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumerProvider">
+            <summary>
+            Provides consumer
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IRabbitConsumerProvider.Provide(System.IServiceProvider)">
+            <summary>
+            Provides consumer logic
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumerRegistrar">
+            <summary>
+            Registers consumers
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IRabbitConsumerRegistrar.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
+            <summary>
+            Override to register consumer into consumer registry 
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry">
+            <summary>
+            Registers consumers
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry.Register(System.String,MyLab.RabbitClient.Consuming.IRabbitConsumerProvider)">
+            <summary>
+            Registers consumer with specified logic for specified queue
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.RabbitConsumer`1">
+            <summary>
+            Provides deserialized consumed message to processing
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.RabbitConsumer`1.ConsumeAsync(RabbitMQ.Client.Events.BasicDeliverEventArgs)">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.RabbitConsumer`1.ConsumeMessageAsync(MyLab.RabbitClient.Consuming.ConsumedMessage{`0})">
+            <summary>
+            Override to implement consumed message processing
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.SingleConsumerProvider">
+            <summary>
+            Provides the one consumer always
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.SingleConsumerProvider.#ctor(MyLab.RabbitClient.Consuming.IRabbitConsumer)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.SingleConsumerProvider"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.SingleConsumerProvider.Provide(System.IServiceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1">
+            <summary>
+            Creates consumer instance with <see cref="T:System.IServiceProvider"/> and provides it
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1.#ctor(System.Object[])">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1.Provide(System.IServiceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Model.RabbitQueue">
+            <summary>
+            Represent Rabbit queue
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueue.Name">
+            <summary>
+            Queue name
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.#ctor(System.String,MyLab.RabbitClient.Connection.IRabbitChannelProvider)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueue"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.Publish(System.Object)">
+            <summary>
+            Publish object as JSON message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.Listen``1(System.Nullable{System.TimeSpan})">
+            <summary>
+            Listens next message synchronously 
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.BindToExchange(System.String,System.String)">
+            <summary>
+            Binds queue to exchange
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.IsExists">
+            <summary>
+            Gets 'true' if queue exists 
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.Remove">
+            <summary>
+            Remove queue
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Model.RabbitQueueFactory">
+            <summary>
+            Creates queue
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueueFactory.Prefix">
+            <summary>
+            Prefix for queue name 
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueueFactory.AutoDelete">
+            <summary>
+            Queue that has had at least one consumer is deleted when last consumer unsubscribes
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueueFactory.Durable">
+            <summary>
+            The queue will survive a broker restart
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueueFactory.Exclusive">
+            <summary>
+            Used by only one connection and the queue will be deleted when that connection closes
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueueFactory.DeadLetterExchange">
+            <summary>
+            Specifies a dead letter exchange
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitQueueFactory.DeadLetterRoutingKey">
+            <summary>
+            Specifies a dead letter routing key
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.CreateWithRandomId">
+            <summary>
+            Create queue with name = {Pattern}:{Guid.NewGuid().ToString("N")}
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.CreateWithId(System.String)">
+            <summary>
+            Create queue with name = {Pattern}:{id}
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.CreateWithName(System.String)">
+            <summary>
+            Create queue with name = {name}
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.#ctor(MyLab.RabbitClient.Connection.IRabbitChannelProvider)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueueFactory"/>
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.RabbitOptions">
+            <summary>
+            Contains connection options
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.Host">
+            <summary>
+            Server host
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.VHost">
+            <summary>
+            Virtual host
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.Port">
+            <summary>
+            Port
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.User">
+            <summary>
+            Login user
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.Password">
+            <summary>
+            Login password
+            </summary>
+        </member>
+    </members>
+</doc>

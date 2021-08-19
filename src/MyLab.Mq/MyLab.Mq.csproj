@@ -27,7 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MyLab.Log" Version="3.1.5" />
+    <PackageReference Include="MyLab.Log" Version="3.1.7" />
     <PackageReference Include="MyLab.Log.Dsl" Version="3.1.2" />
     <PackageReference Include="MyLab.StatusProvider" Version="1.5.9" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
