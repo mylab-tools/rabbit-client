@@ -27,5 +27,39 @@
         /// Login password
         /// </summary>
         public string Password { get; set; }
+        /// <summary>
+        /// Publish options
+        /// </summary>
+        public IdPublishOptions[] Pub { get; set; }
+        /// <summary>
+        /// Default publish options
+        /// </summary>
+        public PublishOptions DefaultPub { get; set; }
+    }
+
+    /// <summary>
+    /// Contains publish options
+    /// </summary>
+    public class PublishOptions
+    {
+        /// <summary>
+        /// Target exchange
+        /// </summary>
+        public string Exchange { get; set; }
+        /// <summary>
+        /// Routing key or Queue if Exchange is empty
+        /// </summary>
+        public string RoutingKey { get; set; }
+    }
+
+    /// <summary>
+    /// Contains publish options with identifier
+    /// </summary>
+    public class IdPublishOptions : PublishOptions
+    {
+        /// <summary>
+        /// Publish options identifier
+        /// </summary>
+        public string Id { get; set; }
     }
 }

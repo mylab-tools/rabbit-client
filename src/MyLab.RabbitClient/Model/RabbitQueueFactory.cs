@@ -42,15 +42,15 @@ namespace MyLab.RabbitClient.Model
         public string DeadLetterRoutingKey { get; set; }
 
         /// <summary>
-        /// Create queue with name = {Pattern}:{Guid.NewGuid().ToString("N")}
+        /// Create queue with name = {Prefix}:{Guid.NewGuid().ToString("N")}
         /// </summary>
         public RabbitQueue CreateWithRandomId()
         {
-            return CreateWithName(Guid.NewGuid().ToString("N"));
+            return CreateWithName((Prefix ?? string.Empty) + Guid.NewGuid().ToString("N"));
         }
 
         /// <summary>
-        /// Create queue with name = {Pattern}:{id}
+        /// Create queue with name = {Prefix}:{id}
         /// </summary>
         public RabbitQueue CreateWithId(string id)
         {

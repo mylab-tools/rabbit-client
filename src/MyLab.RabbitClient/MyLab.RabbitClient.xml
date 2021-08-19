@@ -4,39 +4,44 @@
         <name>MyLab.RabbitClient</name>
     </assembly>
     <members>
-        <member name="T:MyLab.RabbitClient.AppIntegration">
+        <member name="T:Microsoft.Extensions.DependencyInjection.AppIntegration">
             <summary>
             Contains extension methods for integration into application
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,MyLab.RabbitClient.Consuming.IRabbitConsumer)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,MyLab.RabbitClient.Consuming.IRabbitConsumer)">
             <summary>
             Registers consumer with specified consumer for specified queue
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumer``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
             <summary>
             Registers consumer with specified consumer for specified queue type
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumers``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumers``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.AppIntegration.AddRabbitConsumers(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IRabbitConsumerRegistrar)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumers(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IRabbitConsumerRegistrar)">
             <summary>
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
             <summary>
             Configures Rabbit Client
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.RabbitClient.RabbitOptions})">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.RabbitClient.RabbitOptions})">
             <summary>
             Configures Rabbit Client
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitPublisher(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add publisher service
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Connection.IRabbitChannelProvider">
@@ -325,12 +330,12 @@
         </member>
         <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.CreateWithRandomId">
             <summary>
-            Create queue with name = {Pattern}:{Guid.NewGuid().ToString("N")}
+            Create queue with name = {Prefix}:{Guid.NewGuid().ToString("N")}
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.CreateWithId(System.String)">
             <summary>
-            Create queue with name = {Pattern}:{id}
+            Create queue with name = {Prefix}:{id}
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.CreateWithName(System.String)">
@@ -341,6 +346,91 @@
         <member name="M:MyLab.RabbitClient.Model.RabbitQueueFactory.#ctor(MyLab.RabbitClient.Connection.IRabbitChannelProvider)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueueFactory"/>
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Publishing.IRabbitPublisher">
+            <summary>
+            Provides abilities to publish messages
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IRabbitPublisher.IntoDefault(System.String)">
+            <summary>
+            Create publish builder for target from default publish options
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IRabbitPublisher.IntoQueue(System.String)">
+            <summary>
+            Create publish builder for specified queue
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IRabbitPublisher.IntoExchange(System.String,System.String)">
+            <summary>
+            Create publish builder for specified exchange
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IRabbitPublisher.Into``1(System.String)">
+            <summary>
+            Create publish builder for target from model referenced options
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IRabbitPublisher.Into(System.String,System.String)">
+            <summary>
+            Create publish builder for target from referenced options
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Publishing.RabbitConfigIdAttribute">
+            <summary>
+            Specifies key for config reference
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Publishing.RabbitConfigIdAttribute.ConfigId">
+            <summary>
+            Gets configuration identifier
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitConfigIdAttribute.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Publishing.RabbitConfigIdAttribute"/>
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder">
+            <summary>
+            Build parameters for publishing and perform publish
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.#ctor(MyLab.RabbitClient.Connection.IRabbitChannelProvider,System.String,System.String)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.AndProperty(System.Action{RabbitMQ.Client.IBasicProperties})">
+            <summary>
+            Adds property assignation
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.AndHeader(System.String,System.Object)">
+            <summary>
+            Add header
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SendJson(System.Object)">
+            <summary>
+            Use object as json as message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SendBinary(System.Byte[])">
+            <summary>
+            Use binary as message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SendString(System.String)">
+            <summary>
+            Use string as message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.Publish">
+            <summary>
+            Publish message
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.RabbitOptions">
@@ -371,6 +461,41 @@
         <member name="P:MyLab.RabbitClient.RabbitOptions.Password">
             <summary>
             Login password
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.Pub">
+            <summary>
+            Publish options
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.DefaultPub">
+            <summary>
+            Default publish options
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.PublishOptions">
+            <summary>
+            Contains publish options
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.PublishOptions.Exchange">
+            <summary>
+            Target exchange
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.PublishOptions.RoutingKey">
+            <summary>
+            Routing key or Queue if Exchange is empty
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.IdPublishOptions">
+            <summary>
+            Contains publish options with identifier
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.IdPublishOptions.Id">
+            <summary>
+            Publish options identifier
             </summary>
         </member>
     </members>
