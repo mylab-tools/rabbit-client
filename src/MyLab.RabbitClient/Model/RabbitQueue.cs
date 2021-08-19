@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualBasic;
 using MyLab.RabbitClient.Connection;
 using MyLab.RabbitClient.Consuming;
 using Newtonsoft.Json;
@@ -112,6 +110,14 @@ namespace MyLab.RabbitClient.Model
         public void BindToExchange(string exchangeName, string routingKey = null)
         {
             _channelProvider.Use(ch => ch.QueueBind(Name, exchangeName, routingKey ?? "", null));
+        }
+
+        /// <summary>
+        /// Binds queue to exchange
+        /// </summary>
+        public void BindToExchange(RabbitExchange exchange, string routingKey = null)
+        {
+            BindToExchange(exchange.Name, routingKey);
         }
 
         /// <summary>

@@ -46,7 +46,7 @@ namespace MyLab.RabbitClient.Model
         /// </summary>
         public RabbitQueue CreateWithRandomId()
         {
-            return CreateWithName((Prefix ?? string.Empty) + Guid.NewGuid().ToString("N"));
+            return CreateWithId(Guid.NewGuid().ToString("N"));
         }
 
         /// <summary>

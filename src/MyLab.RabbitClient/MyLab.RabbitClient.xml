@@ -252,6 +252,86 @@
         <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1.Provide(System.IServiceProvider)">
             <inheritdoc />
         </member>
+        <member name="T:MyLab.RabbitClient.Model.RabbitExchange">
+            <summary>
+            Provides abilities to work with Rabbit exchange
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitExchange.Name">
+            <summary>
+            Exchange name
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchange.#ctor(System.String,MyLab.RabbitClient.Connection.IRabbitChannelProvider)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitExchange"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchange.Publish(System.Object,System.String)">
+            <summary>
+            Publish object as JSON message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchange.IsExists">
+            <summary>
+            Gets 'true' if queue exists 
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchange.Remove">
+            <summary>
+            Remove exchange
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Model.RabbitExchangeFactory">
+            <summary>
+            Creates Rabbit exchanges
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitExchangeFactory.Prefix">
+            <summary>
+            Prefix for exchange name 
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitExchangeFactory.AutoDelete">
+            <summary>
+            Queue that has had at least one consumer is deleted when last consumer unsubscribes
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitExchangeFactory.Durable">
+            <summary>
+            The queue will survive a broker restart
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Model.RabbitExchangeFactory.ExchangeType">
+            <summary>
+            Exchange type
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchangeFactory.#ctor(MyLab.RabbitClient.Model.RabbitExchangeType,MyLab.RabbitClient.Connection.IRabbitChannelProvider)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitExchangeFactory"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchangeFactory.CreateWithRandomId">
+            <summary>
+            Creates exchange with name = {Prefix}:{Guid.NewGuid().ToString("N")}
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchangeFactory.CreateWithId(System.String)">
+            <summary>
+            Creates exchange with name = {Prefix}:{id}
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchangeFactory.CreateWithName(System.String)">
+            <summary>
+            Creates exchange  with name = {name}
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Model.RabbitExchangeType">
+            <summary>
+            Declare exchange types
+            </summary>
+        </member>
         <member name="T:MyLab.RabbitClient.Model.RabbitQueue">
             <summary>
             Represent Rabbit queue
@@ -278,6 +358,11 @@
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Model.RabbitQueue.BindToExchange(System.String,System.String)">
+            <summary>
+            Binds queue to exchange
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.BindToExchange(MyLab.RabbitClient.Model.RabbitExchange,System.String)">
             <summary>
             Binds queue to exchange
             </summary>
