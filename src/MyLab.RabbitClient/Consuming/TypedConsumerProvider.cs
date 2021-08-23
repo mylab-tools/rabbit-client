@@ -9,6 +9,7 @@ namespace MyLab.RabbitClient.Consuming
     public class TypedConsumerProvider<TConsumer> : IRabbitConsumerProvider
         where TConsumer : class, IRabbitConsumer
     {
+        private readonly object[] _emptyArgs = new object[0];
         private readonly object[] _ctorArgs;
 
         /// <summary>
@@ -16,7 +17,7 @@ namespace MyLab.RabbitClient.Consuming
         /// </summary>
         public TypedConsumerProvider(object[] ctorArgs = null)
         {
-            _ctorArgs = ctorArgs;
+            _ctorArgs = ctorArgs ?? _emptyArgs;
         }
 
 
