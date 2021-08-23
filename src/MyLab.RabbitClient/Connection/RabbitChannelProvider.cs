@@ -10,11 +10,13 @@ namespace MyLab.RabbitClient.Connection
     /// </summary>
     public class RabbitChannelProvider : IRabbitChannelProvider
     {
+        private const int MaxChannelCounter = 100;
+
         private IConnection _connection;
         private readonly object _lock = new object();
 
-        readonly Queue<IModel> _freeChannels = new Queue<IModel>();
-        readonly List<IModel> _usedChannels = new List<IModel>();
+        readonly Queue<ChannelUnit> _freeChannels = new Queue<ChannelUnit>();
+        readonly List<ChannelUnit> _usedChannels = new List<ChannelUnit>();
 
         /// <summary>
         /// Initializes a new instance of <see cref="RabbitChannelProvider"/>
@@ -30,7 +32,7 @@ namespace MyLab.RabbitClient.Connection
         public RabbitChannelUsing Provide()
         {
             var ch = TakeChannel();
-            return new RabbitChannelUsing(ch, new Liberator(ch, FreeChannel));
+            return new RabbitChannelUsing(ch.Channel, new Liberator(ch, FreeChannel));
         }
 
         /// <inheritdoc />
@@ -39,7 +41,7 @@ namespace MyLab.RabbitClient.Connection
             var ch = TakeChannel();
             try
             {
-                act(ch);
+                act(ch.Channel);
             }
             finally
             {
@@ -53,7 +55,7 @@ namespace MyLab.RabbitClient.Connection
             var ch = TakeChannel();
             try
             {
-                await act(ch);
+                await act(ch.Channel);
             }
             finally
             {
@@ -61,13 +63,13 @@ namespace MyLab.RabbitClient.Connection
             }
         }
 
-        IModel TakeChannel()
+        ChannelUnit TakeChannel()
         {
             lock (_lock)
             {
                 if (!_freeChannels.TryDequeue(out var channel))
                 {
-                    channel = _connection.CreateModel();
+                    channel = new ChannelUnit(_connection.CreateModel());
                 }
 
                 _usedChannels.Add(channel);
@@ -76,12 +78,22 @@ namespace MyLab.RabbitClient.Connection
             }
         }
 
-        void FreeChannel(IModel channel)
+        void FreeChannel(ChannelUnit channel)
         {
             lock (_lock)
             {
                 _usedChannels.Remove(channel);
-                _freeChannels.Enqueue(channel);
+
+                if (channel.Counter >= MaxChannelCounter)
+                {
+                    channel.Channel.Close();
+                    channel.Channel.Dispose();
+                }
+                else
+                {
+                    _freeChannels.Enqueue(channel);
+                    channel.Counter += 1;
+                }
             }
         }
 
@@ -99,10 +111,10 @@ namespace MyLab.RabbitClient.Connection
 
         class Liberator : IDisposable
         {
-            private readonly IModel _channel;
-            private readonly Action<IModel> _liberateAct;
+            private readonly ChannelUnit _channel;
+            private readonly Action<ChannelUnit> _liberateAct;
 
-            public Liberator(IModel channel, Action<IModel> liberateAct)
+            public Liberator(ChannelUnit channel, Action<ChannelUnit> liberateAct)
             {
                 _channel = channel;
                 _liberateAct = liberateAct;
@@ -111,6 +123,17 @@ namespace MyLab.RabbitClient.Connection
             public void Dispose()
             {
                 _liberateAct(_channel);
+            }
+        }
+
+        class ChannelUnit
+        {
+            public IModel Channel { get; }
+            public int Counter { get; set; } = 0;
+
+            public ChannelUnit(IModel channel)
+            {
+                Channel = channel;
             }
         }
     }

@@ -19,28 +19,28 @@ namespace LoadTest.Publisher
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            int index = 0;
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var model = new Model
-                {
-                    Id = 0 + "-" + index,
-                    Value = index.ToString()
-                };
+            //int index = 0;
+            //while (!stoppingToken.IsCancellationRequested)
+            //{
+            //    var model = new Model
+            //    {
+            //        Id = 0 + "-" + index,
+            //        Value = index.ToString()
+            //    };
 
-                _pub.IntoDefault().SendJson(model).Publish();
+            //    _pub.IntoDefault().SendJson(model).Publish();
 
-                index++;
-            }
+            //    index++;
+            //}
 
-            //ThreadPool.SetMinThreads(100, 100);
+            ThreadPool.SetMinThreads(100, 100);
 
-            //Task[] tasks = Enumerable.Repeat("", 100).Select((s, i) => new Task(() => PerformTask(i), stoppingToken)).ToArray();
+            Task[] tasks = Enumerable.Repeat("", 100).Select((s, i) => new Task(() => PerformTask(i), stoppingToken)).ToArray();
 
-            //foreach (var task in tasks)
-            //    task.Start();
+            foreach (var task in tasks)
+                task.Start();
 
-            //Task.WaitAll(tasks, stoppingToken);
+            Task.WaitAll(tasks, stoppingToken);
 
             return Task.CompletedTask;
         }
@@ -48,7 +48,7 @@ namespace LoadTest.Publisher
         private void PerformTask(in int i)
         {
             int index = 0;
-            while (true)
+            while (index < 10000)
             {
                 var model = new Model
                 {

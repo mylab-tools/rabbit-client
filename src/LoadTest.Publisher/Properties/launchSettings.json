@@ -2,7 +2,7 @@
   "profiles": {
     "LoadTest.Publisher": {
       "commandName": "Project",
-      "commandLineArgs": "loadtest-b85e9508840c4e26b230848744845232"
+      "commandLineArgs": "loadtest-1d37d659abf54362b7362b16751cebbe"
     }
   }
 }
