@@ -1,217 +1,93 @@
-﻿using System;
+using System;
+using System.ComponentModel.Design;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MyLab.Mq;
-using MyLab.Mq.PubSub;
-using Newtonsoft.Json;
-using Tests.Common;
-using TestServer;
+using MyLab.RabbitClient;
+using MyLab.RabbitClient.Consuming;
+using MyLab.RabbitClient.Model;
+using RabbitMQ.Client.Events;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public partial class ConsumingBehavior : IClassFixture<WebApplicationFactory<Startup>>
+    public class ConsumingBehavior
     {
+        private readonly ITestOutputHelper _output;
 
-        [Fact]
-        public async Task ShouldConsumeSimpleMessage()
+        public ConsumingBehavior(ITestOutputHelper output)
         {
-            //Arrange
-            using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogic>(queue, _output);
-
-            //Act
-            await PublishMessages(queue, "foo");
-            
-            var resp = await client.GetAsync("test/single");
-            var respStr = await resp.Content.ReadAsStringAsync();
-
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
-
-            var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
-
-            //Assert
-            Assert.NotNull(testBox.AckMsg);
-            Assert.Equal("foo", testBox.AckMsg.Payload.Content);
-            Assert.Null(testBox.RejectedMsg);
-
-            await PrintStatus(client);
+            _output = output;
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task ShouldNotConsumeWhenNotConfigured(bool optional)
+        [Fact]
+        public async Task ShouldReceiveMessage()
         {
             //Arrange
-            using var queue = CreateTestQueue();
 
-            var consumer = new MqConsumer<TestMqMsg, TestSimpleMqLogic>(queue.Name);
-
-            using var client = _appFactory.WithWebHostBuilder(builder =>
+            var testEntity = new TestEntity
             {
-                builder.ConfigureServices(services =>
-                {
-                    services.AddLogging(b => b
-                        .SetMinimumLevel(LogLevel.Trace)
-                        .AddFilter(level => level >= LogLevel.Debug)
-                        .AddXUnit(_output));
-                    services.AddMqConsuming(registrar =>
-                    {
-                        registrar.RegisterConsumer(consumer);
-                    }, optional);
-                });
-            }).CreateClient();
+                Id = 1,
+                Value = "foo"
+            };
+
+            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
+            {
+                AutoDelete = true,
+                Prefix = "test"
+            }.CreateWithRandomId();
+
+            var consumer = new TestConsumer();
+
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
+
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices(srv => srv
+                    .ConfigureRabbitClient(TestTools.OptionsConfigureAct)
+                    .AddRabbitConsumer(queue.Name, consumer)
+                    .AddLogging(l=> l.AddXUnit(_output).AddFilter(l => true)))
+                .Build();
+
+            //await host.RunAsync(cancellationToken);
+            await host.StartAsync(cancellationToken);
 
             //Act
-            await PublishMessages(queue, "foo");
+            queue.Publish(testEntity);
 
-            var resp = await client.GetAsync("test/single");
-            var respStr = await resp.Content.ReadAsStringAsync();
+            await Task.Delay(500);
 
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
+            cancellationSource.Cancel();
 
-            var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
+            await host.StopAsync();
+
+            host.Dispose();
 
             //Assert
-            Assert.Null(testBox.AckMsg);
+            Assert.NotNull(consumer.LastMessage);
+            Assert.Equal(1, consumer.LastMessage.Id);
+            Assert.Equal("foo", consumer.LastMessage.Value);
         }
 
-        [Fact]
-        public async Task ShouldRejectSimpleMessage()
+        class TestConsumer : RabbitConsumer<TestEntity>
         {
-            //Arrange
-            using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithSingleConsumer<TestSimpleMqLogicWithReject>(queue, _output);
+            public TestEntity LastMessage { get; private set; }
 
-            //Act
-            await PublishMessages(queue, "foo");
+            protected override Task ConsumeMessageAsync(ConsumedMessage<TestEntity> consumedMessage)
+            {
+                LastMessage = consumedMessage.Content;
 
-            var resp = await client.GetAsync("test/single-with-reject");
-            var respStr = await resp.Content.ReadAsStringAsync();
-
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
-
-            var testBox = JsonConvert.DeserializeObject<SingleMessageTestBox>(respStr);
-
-            //Assert
-            Assert.Null(testBox.AckMsg);
-            Assert.NotNull(testBox.RejectedMsg);
-            Assert.Equal("foo", testBox.RejectedMsg.Payload.Content);
-
-            await PrintStatus(client);
+                return Task.CompletedTask;
+            }
         }
 
-        [Fact]
-        public async Task ShouldConsumeMessageBatch()
+        class TestEntity
         {
-            //Arrange
-            using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue, _output);
-
-            //Act
-            await PublishMessages(queue, "foo", "bar");
-
-            var resp = await client.GetAsync("test/batch");
-            var respStr = await resp.Content.ReadAsStringAsync();
-
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
-
-            var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
-
-            ////Assert
-            Assert.Null(testBox.RejectedMsgs);
-            Assert.NotNull(testBox.AckMsgs);
-            Assert.Equal(2, testBox.AckMsgs.Length);
-            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
-            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
-
-            await PrintStatus(client);
-        }
-
-        [Fact]
-        public async Task ShouldConsumeIncompleteMessageBatch()
-        {
-            //Arrange
-            using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogic>(queue, _output, size: 5);
-
-            //Act
-            await PublishMessages(queue, "foo", "bar");
-            await Task.Delay(TimeSpan.FromSeconds(3));
-
-            var resp = await client.GetAsync("test/batch");
-            var respStr = await resp.Content.ReadAsStringAsync();
-
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
-
-            var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
-
-            ////Assert
-            Assert.Null(testBox.RejectedMsgs);
-            Assert.Equal(2, testBox.AckMsgs.Length);
-            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "foo");
-            Assert.Contains(testBox.AckMsgs, m => m.Payload.Content == "bar");
-
-            await PrintStatus(client);
-        }
-
-        [Fact]
-        public async Task ShouldRejectMessageBatch()
-        {
-            //Arrange
-            using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithBatchConsumer<TestBatchMqLogicWithReject>(queue, _output);
-
-            //Act
-            await PublishMessages(queue, "foo", "bar");
-
-            var resp = await client.GetAsync("test/batch-with-reject");
-            var respStr = await resp.Content.ReadAsStringAsync();
-
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
-
-            var testBox = JsonConvert.DeserializeObject<BatchMessageTestBox>(respStr);
-
-            //Assert
-            Assert.Null(testBox.AckMsgs);
-            Assert.NotNull(testBox.RejectedMsgs);
-            Assert.Equal(2, testBox.RejectedMsgs.Length);
-            Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "foo");
-            Assert.Contains(testBox.RejectedMsgs, m => m.Payload.Content == "bar");
-
-            await PrintStatus(client);
-        }
-
-        [Fact]
-        public async Task ShouldUseIncomingMessageScopeServices()
-        {
-            //Arrange
-            using var queue = CreateTestQueue();
-            using var client = CreateTestClientWithSingleConsumer<MqLogicWithScopedDependency>(queue, _output);
-
-            //Act
-            await PublishMessages(queue, "foo");
-
-            var resp = await client.GetAsync("test/from-scope");
-            var respStr = await resp.Content.ReadAsStringAsync();
-
-            _output.WriteLine(respStr);
-            resp.EnsureSuccessStatusCode();
-
-            //Assert
-            Assert.Equal("foo", respStr);
-
-            await PrintStatus(client);
+            public int Id { get; set; }
+            public string Value { get; set; }
         }
     }
 }

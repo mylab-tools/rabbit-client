@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Andrey O.</Authors>
+    <Description>RabbitMQ client library for .NET 5+</Description>
+    <Copyright>Copyright (c) 2021 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <PackageProjectUrl>https://github.com/mylab-tools/rebbit-client</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mylab-tools/rebbit-client.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageIcon>tools.png</PackageIcon>
+    <PackageIconUrl />
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.2408</AssemblyVersion>
+    <FileVersion>2.0.0.2408</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>.\MyLab.RabbitClient.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>.\MyLab.RabbitClient.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="tools.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="MyLab.Log" Version="3.1.7" />
+    <PackageReference Include="MyLab.Log.Dsl" Version="3.1.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
+  </ItemGroup>
+
+</Project>
