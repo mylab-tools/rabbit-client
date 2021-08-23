@@ -24,7 +24,7 @@ namespace MyLab.RabbitClient.Consuming
         /// <inheritdoc />
         public IRabbitConsumer Provide(IServiceProvider serviceProvider)
         {
-            return (IRabbitConsumer) ActivatorUtilities.CreateInstance(serviceProvider, typeof(TConsumer), _ctorArgs);
+            return ActivatorUtilities.CreateInstance<TConsumer>(serviceProvider, _ctorArgs);
         }
     }
 }
