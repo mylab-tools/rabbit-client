@@ -16,7 +16,7 @@ namespace IntegrationTests
             Options = new RabbitOptions
             {
                 Host = "localhost",
-                Port = 5672,
+                Port = 10160,
                 User = "guest",
                 Password = "guest"
             };

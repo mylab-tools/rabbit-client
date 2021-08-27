@@ -1,9 +1,7 @@
-using System;
-using System.Net.Http.Headers;
 using RabbitMQ.Client;
 using Xunit;
 
-namespace UnitTests
+namespace IntegrationTests
 {
     public class BasicPropertiesResearch
     {
@@ -11,10 +9,8 @@ namespace UnitTests
         public void ShouldNotFillHeadersWhenInitProperties()
         {
             //Arrange
-            var connectionFactory = new ConnectionFactory();
-            IConnection connection = connectionFactory.CreateConnection();
-            IModel channel = connection.CreateModel();
-            IBasicProperties basicProperties = channel.CreateBasicProperties();
+            IBasicProperties basicProperties = null;
+            TestTools.ChannelProvider.Use(ch => basicProperties = ch.CreateBasicProperties());
 
             //Act
             basicProperties.AppId = "foo";
