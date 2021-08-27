@@ -2,8 +2,7 @@
 [![NuGet Version and Downloads count](https://buildstats.info/nuget/MyLab.RabbitClient)](https://www.nuget.org/packages/MyLab.RabbitClient)
 
 ```
-Поддерживаемые платформы: 
-.NET 5.0+
+Поддерживаемые платформы: .NET Core 3.1, .NET 5.0
 ```
 Ознакомьтесь с последними изменениями в [журнале изменений](/changelog.md).
 
