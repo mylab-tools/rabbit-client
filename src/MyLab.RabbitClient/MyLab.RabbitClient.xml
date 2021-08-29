@@ -11,12 +11,17 @@
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,MyLab.RabbitClient.Consuming.IRabbitConsumer)">
             <summary>
-            Registers consumer with specified consumer for specified queue
+            Registers consumer for specified queue
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
             <summary>
-            Registers consumer with specified consumer for specified queue type
+            Registers consumer type for specified queue 
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer``2(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{``0,System.String})">
+            <summary>
+            Registers consumer for queue which retrieve from options
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumers``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
@@ -213,6 +218,21 @@
             Registers consumer with specified logic for specified queue
             </summary>
         </member>
+        <member name="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2">
+            <summary>
+            Registers consumer with options
+            </summary>
+            <typeparam name="TOptions">options type</typeparam>
+            <typeparam name="TConsumer">consumer type</typeparam>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2.#ctor(System.Func{`0,System.String})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
+            <inheritdoc />
+        </member>
         <member name="T:MyLab.RabbitClient.Consuming.RabbitConsumer`1">
             <summary>
             Provides deserialized consumed message to processing
@@ -239,6 +259,19 @@
         <member name="M:MyLab.RabbitClient.Consuming.SingleConsumerProvider.Provide(System.IServiceProvider)">
             <inheritdoc />
         </member>
+        <member name="T:MyLab.RabbitClient.Consuming.SingleConsumerRegistrar">
+            <summary>
+            Registers  single consumer
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.SingleConsumerRegistrar.#ctor(System.String,MyLab.RabbitClient.Consuming.IRabbitConsumer)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.SingleConsumerRegistrar"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.SingleConsumerRegistrar.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
+            <inheritdoc />
+        </member>
         <member name="T:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1">
             <summary>
             Creates consumer instance with <see cref="T:System.IServiceProvider"/> and provides it
@@ -250,6 +283,20 @@
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerProvider`1.Provide(System.IServiceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1">
+            <summary>
+            Registers consumer by type
+            </summary>
+            <typeparam name="TConsumer">consumer type</typeparam>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
             <inheritdoc />
         </member>
         <member name="T:MyLab.RabbitClient.Model.RabbitExchange">

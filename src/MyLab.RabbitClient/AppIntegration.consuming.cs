@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using MyLab.RabbitClient.Connection;
 using MyLab.RabbitClient.Consuming;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static partial class AppIntegration
     {
         /// <summary>
-        /// Registers consumer with specified consumer for specified queue
+        /// Registers consumer for specified queue
         /// </summary>
         public static IServiceCollection AddRabbitConsumer(this IServiceCollection srvColl, string queue, IRabbitConsumer consumer)
         {
@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Registers consumer with specified consumer for specified queue type
+        /// Registers consumer type for specified queue 
         /// </summary>
         public static IServiceCollection AddRabbitConsumer<TConsumer>(this IServiceCollection srvColl, string queue)
             where TConsumer : class, IRabbitConsumer
@@ -28,6 +28,19 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAddConsuming()
                 .TryAddCommon()
                 .AddRabbitConsumers(new TypedConsumerRegistrar<TConsumer>(queue));
+        }
+
+        /// <summary>
+        /// Registers consumer for queue which retrieve from options
+        /// </summary>
+        public static IServiceCollection AddRabbitConsumer<TOptions,TConsumer>(this IServiceCollection srvColl, Func<TOptions, string> queueProvider)
+            where TOptions : class
+            where TConsumer : class, IRabbitConsumer
+        {
+            return srvColl
+                .TryAddConsuming()
+                .TryAddCommon()
+                .AddRabbitConsumers(new OptionsConsumerRegistrar<TOptions, TConsumer>(queueProvider));
         }
 
         /// <summary>
