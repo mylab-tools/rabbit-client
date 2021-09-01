@@ -45,7 +45,15 @@ namespace MyLab.RabbitClient.Consuming
             try
             {
                 RegisterConsumers();
-                ConnectToQueues();
+
+                if (_consumerRegistry.Count != 0)
+                {
+                    ConnectToQueues();
+                }
+                else
+                {
+                    _log?.Warning("No consumer registered. No connection will be created").Write();
+                }
             }
             catch (Exception e)
             {
