@@ -19,7 +19,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddRabbitPublisher();					// 1
+        services.AddRabbitPublisher();			// 1
         services.ConfigureRabbitClient(Configuration);	// 2
     }
 }
@@ -45,8 +45,8 @@ class Service
     public SendMessage(string msgContent)
     {
         _mq.IntoQueue("my-test-queue")	// 2
-           .SendString(msgContent)		// 3
-           .Publish();					// 4
+           .SendString(msgContent)	// 3
+           .Publish();			// 4
     }
 }
 ```
