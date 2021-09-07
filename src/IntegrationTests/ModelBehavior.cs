@@ -24,14 +24,11 @@ namespace IntegrationTests
             //Act
             try
             {
-                queue.Publish("foo");
-                queue.Publish("bar");
-                queue.Publish("foo");
-                queue.Publish("bar");
-                queue.Publish("foo");
-                queue.Publish("bar");
-                queue.Publish("foo");
-                queue.Publish("bar");
+                for (int i = 0; i < 5; i++)
+                {
+                    queue.Publish("msg-" + i);
+                }
+
                 msg1 = queue.Listen<string>();
                 msg2 = queue.Listen<string>();
             }
@@ -41,8 +38,8 @@ namespace IntegrationTests
             }
 
             //Assert
-            Assert.Equal("foo", msg1.Content);
-            Assert.Equal("bar", msg2.Content);
+            Assert.Equal("msg-0", msg1.Content);
+            Assert.Equal("msg-1", msg2.Content);
         }
 
         [Fact]

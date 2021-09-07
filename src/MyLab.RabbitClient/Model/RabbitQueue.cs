@@ -69,7 +69,7 @@ namespace MyLab.RabbitClient.Model
 
             var consumerTag = chUsing.Channel.BasicConsume(queue: Name, consumer: consumer, autoAck: false);
 
-            var isTimeout = !consumeBlock.WaitOne(timeout ?? TimeSpan.FromSeconds(100));
+            var isTimeout = !consumeBlock.WaitOne(timeout ?? TimeSpan.FromSeconds(1));
 
             chUsing.Channel.BasicCancel(consumerTag);
 
@@ -93,7 +93,8 @@ namespace MyLab.RabbitClient.Model
 
                     result = new ConsumedMessage<T>(payload, ea);
 
-                    chUsing.Channel.BasicAck(ea.DeliveryTag, false);
+                    //Strange hack with delivery tag. I don't know why it works.
+                    ((AsyncEventingBasicConsumer)model).Model.BasicAck(ea.DeliveryTag-1, false);
                 }
                 catch (Exception exception)
                 {
