@@ -19,6 +19,8 @@ namespace MyLab.RabbitClient.Model
     {
         private readonly IRabbitChannelProvider _channelProvider;
 
+        private RabbitChannelUsing _listenChannel;
+
         /// <summary>
         /// Queue name
         /// </summary>
@@ -59,13 +61,13 @@ namespace MyLab.RabbitClient.Model
             Exception e = null;
             ConsumedMessage<T> result = null;
 
-            using var chUsing = _channelProvider.Provide();
+            var chUsing = _listenChannel ??= _channelProvider.Provide();
 
             var consumer = new AsyncEventingBasicConsumer(chUsing.Channel);
 
             consumer.Received += OnConsumerOnReceived;
 
-            var consumerTag = chUsing.Channel.BasicConsume(queue: Name, consumer: consumer, autoAck: true);
+            var consumerTag = chUsing.Channel.BasicConsume(queue: Name, consumer: consumer, autoAck: false);
 
             var isTimeout = !consumeBlock.WaitOne(timeout ?? TimeSpan.FromSeconds(1));
 
@@ -90,6 +92,9 @@ namespace MyLab.RabbitClient.Model
                     var payload = JsonConvert.DeserializeObject<T>(message);
 
                     result = new ConsumedMessage<T>(payload, ea);
+
+                    //Strange hack with delivery tag. I don't know why it works.
+                    ((AsyncEventingBasicConsumer)model).Model.BasicAck(ea.DeliveryTag-1, false);
                 }
                 catch (Exception exception)
                 {
@@ -143,6 +148,7 @@ namespace MyLab.RabbitClient.Model
         /// </summary>
         public void Remove()
         {
+            _listenChannel?.Dispose();
             _channelProvider.Use(ch => ch.QueueDelete(Name, false, false));
         }
     }
