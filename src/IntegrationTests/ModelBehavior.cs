@@ -1,4 +1,5 @@
 ﻿using System;
+using MyLab.RabbitClient.Consuming;
 using MyLab.RabbitClient.Model;
 using Xunit;
 
@@ -7,13 +8,48 @@ namespace IntegrationTests
     public class ModelBehavior
     {
         [Fact]
+        public void ShouldConsumeOneAtTime()
+        {
+            //Arrange
+            var queueFactory = new RabbitQueueFactory(TestTools.ChannelProvider)
+            {
+                AutoDelete = false,
+                Prefix ="test-"
+            };
+
+            var queue = queueFactory.CreateWithRandomId();
+
+            ConsumedMessage<string> msg1, msg2;
+
+            //Act
+            try
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    queue.Publish("msg-" + i);
+                }
+
+                msg1 = queue.Listen<string>();
+                msg2 = queue.Listen<string>();
+            }
+            finally
+            {
+                queue.Remove();
+            }
+
+            //Assert
+            Assert.Equal("msg-0", msg1.Content);
+            Assert.Equal("msg-1", msg2.Content);
+        }
+
+        [Fact]
         public void ShouldDeliverWithQueue()
         {
             //Arrange
             var queueFactory = new RabbitQueueFactory(TestTools.ChannelProvider)
             {
                 AutoDelete = true,
-                Prefix ="test-"
+                Prefix = "test-"
             };
             var queue = queueFactory.CreateWithRandomId();
 

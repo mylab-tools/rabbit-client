@@ -69,7 +69,10 @@ namespace MyLab.RabbitClient.Connection
             {
                 if (!_freeChannels.TryDequeue(out var channel))
                 {
-                    channel = new ChannelUnit(_connection.CreateModel());
+                    var newChannel = _connection.CreateModel();
+                    newChannel.BasicQos(0, 1, false);
+
+                    channel = new ChannelUnit(newChannel);
                 }
 
                 _usedChannels.Add(channel);
