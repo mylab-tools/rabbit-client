@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using MyLab.RabbitClient;
 using MyLab.RabbitClient.Model;
 using MyLab.RabbitClient.Publishing;
 using Xunit;
@@ -25,8 +26,8 @@ namespace IntegrationTests
             }.CreateWithRandomId();
 
             var sp = new ServiceCollection()
-                .AddRabbitPublisher()
-                .ConfigureRabbitClient(TestTools.OptionsConfigureAct)
+                .AddRabbit()
+                .ConfigureRabbit(TestTools.OptionsConfigureAct)
                 .BuildServiceProvider();
 
             var publisher = sp.GetService<IRabbitPublisher>();

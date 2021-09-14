@@ -21,7 +21,7 @@ namespace IntegrationTests
                 Password = "guest"
             };
 
-            var connProvider = new RabbitConnectionProvider(Options);
+            var connProvider = new LazyRabbitConnectionProvider(Options);
             ChannelProvider = new RabbitChannelProvider(connProvider);
 
             OptionsConfigureAct = opts =>

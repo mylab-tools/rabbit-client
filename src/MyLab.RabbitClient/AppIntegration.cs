@@ -13,9 +13,31 @@ namespace Microsoft.Extensions.DependencyInjection
     public static partial class AppIntegration
     {
         /// <summary>
+        /// Adds Rabbit services
+        /// </summary>
+        public static IServiceCollection AddRabbit(this IServiceCollection srv, RabbitConnectionStrategy connectionStrategy = RabbitConnectionStrategy.Lazy)
+        {
+            srv.AddSingleton<IRabbitChannelProvider, RabbitChannelProvider>()
+                .AddSingleton<IRabbitPublisher, RabbitPublisher>();
+            
+            switch (connectionStrategy)
+            {
+                case RabbitConnectionStrategy.Lazy:
+                    srv.AddSingleton<IRabbitConnectionProvider, LazyRabbitConnectionProvider>();
+                    break;
+                case RabbitConnectionStrategy.Background:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(connectionStrategy), "Rabbit connection strategy must be defined");
+            }
+
+            return srv;
+        }
+
+        /// <summary>
         /// Configures Rabbit Client
         /// </summary>
-        public static IServiceCollection ConfigureRabbitClient(this IServiceCollection srv, IConfiguration cfg, string sectionName = "MQ")
+        public static IServiceCollection ConfigureRabbit(this IServiceCollection srv, IConfiguration cfg, string sectionName = "MQ")
         {
             return srv.Configure<RabbitOptions>(cfg.GetSection(sectionName));
         }
@@ -23,17 +45,9 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Configures Rabbit Client
         /// </summary>
-        public static IServiceCollection ConfigureRabbitClient(this IServiceCollection srv, Action<RabbitOptions> configureAct)
+        public static IServiceCollection ConfigureRabbit(this IServiceCollection srv, Action<RabbitOptions> configureAct)
         {
             return srv.Configure(configureAct);
-        }
-
-        private static IServiceCollection TryAddCommon(this IServiceCollection srvColl)
-        {
-            srvColl.TryAddSingleton<IRabbitConnectionProvider, RabbitConnectionProvider>();
-            srvColl.TryAddSingleton<IRabbitChannelProvider, RabbitChannelProvider>();
-
-            return srvColl;
         }
     }
 }

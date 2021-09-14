@@ -9,7 +9,7 @@ namespace MyLab.RabbitClient.Connection
     /// <summary>
     /// Manages and provides Rabbit connection
     /// </summary>
-    public class RabbitConnectionProvider : IRabbitConnectionProvider, IDisposable
+    public class LazyRabbitConnectionProvider : IRabbitConnectionProvider, IDisposable
     {
         private readonly ConnectionFactory _factory;
         private readonly object _lock = new object();
@@ -19,21 +19,21 @@ namespace MyLab.RabbitClient.Connection
         private readonly RabbitOptions _options;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="RabbitConnectionProvider"/>
+        /// Initializes a new instance of <see cref="LazyRabbitConnectionProvider"/>
         /// </summary>
-        public RabbitConnectionProvider(
+        public LazyRabbitConnectionProvider(
             IOptions<RabbitOptions> options,
-            ILogger<RabbitConnectionProvider> logger = null)
+            ILogger<LazyRabbitConnectionProvider> logger = null)
             : this(options.Value, logger)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="RabbitConnectionProvider"/>
+        /// Initializes a new instance of <see cref="LazyRabbitConnectionProvider"/>
         /// </summary>
-        public RabbitConnectionProvider(
+        public LazyRabbitConnectionProvider(
             RabbitOptions options,
-            ILogger<RabbitConnectionProvider> logger = null)
+            ILogger<LazyRabbitConnectionProvider> logger = null)
             : this(OptionToConnectionFactory(options))
         {
             _log = logger?.Dsl();
@@ -41,9 +41,9 @@ namespace MyLab.RabbitClient.Connection
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="RabbitConnectionProvider"/>
+        /// Initializes a new instance of <see cref="LazyRabbitConnectionProvider"/>
         /// </summary>
-        public RabbitConnectionProvider(ConnectionFactory connectionFactory)
+        public LazyRabbitConnectionProvider(ConnectionFactory connectionFactory)
         {
             _factory = connectionFactory;
         }

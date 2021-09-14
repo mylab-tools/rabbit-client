@@ -18,8 +18,7 @@ namespace LoadTest.Publisher
 
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices(srv => srv
-                    .AddRabbitPublisher()
-                    .ConfigureRabbitClient(opt =>
+                    .ConfigureRabbit(opt =>
                     {
                         opt.Host = "localhost";
                         opt.Port = 5672;

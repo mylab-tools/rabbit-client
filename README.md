@@ -19,16 +19,16 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddRabbitPublisher();					// 1
-        services.ConfigureRabbitClient(Configuration);	// 2
+        services.AddRabbit();						// 1
+        services.ConfigureRabbit(Configuration);	// 2
     }
 }
 ```
 
 , где:
 
-* `1` - добавление сервисов публикации сообщений;
-* `2` - добавление конфигурации `MyLab.RabbitClient`.
+* `1` - добавление сервисов работы с `Rabbit`;
+* `2` - конфигурирование сервисов работы с `Rabbit`;
 
 Пример публикации сообщения:
 
@@ -70,16 +70,18 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddRabbitConsumer<MyConsumer>("my-queue");	// 1
-        services.ConfigureRabbitClient(Configuration);		// 2
+        services.AddRabbit();								// 1
+        services.ConfigureRabbit(Configuration);			// 2
+        services.AddRabbitConsumer<MyConsumer>("my-queue");	// 3
     }
 }
 ```
 
 , где:
 
-* `1` - добавление потребителя сообщений очереди `my-queue`;
-* `2` - добавление конфигурации `MyLab.RabbitClient`.
+* `1` - добавление сервисов работы с `Rabbit`;
+* `2` - конфигурирование сервисов работы с `Rabbit`;
+* `1` - добавление потребителя сообщений очереди `my-queue`.
 
 Пример потребителя сообщения:
 
@@ -123,8 +125,8 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.ConfigureRabbitClient(Configuration);				// "MQ" by default
-        services.ConfigureRabbitClient(Configuration, "Rabbit");	
+        services.ConfigureRabbit(Configuration);				// "MQ" by default
+        services.ConfigureRabbit(Configuration, "Rabbit");	
     }
 }
 ```
@@ -138,7 +140,7 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.ConfigureRabbitClient(opt => opt.Host = "localhost");
+        services.ConfigureRabbit(opt => opt.Host = "localhost");
     }
 }
 ```
@@ -147,7 +149,7 @@ public class Startup
 
 #### Любые другие способы
 
-Доступны любые другие поддерживаемые в `.NET5+`  способы конфигурирования с использованием объекта [MyLab.RabbitClient.RabbitOptions](./src/MyLab.RabbitClient/RabbitOptions.cs).
+Доступны любые другие поддерживаемые в `.NET Core 3.1+`  способы конфигурирования с использованием объекта [MyLab.RabbitClient.RabbitOptions](./src/MyLab.RabbitClient/RabbitOptions.cs).
 
 ## Публикация
 

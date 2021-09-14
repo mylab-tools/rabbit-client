@@ -21,7 +21,7 @@ namespace LoadTest.Listener
             using var host = Host.CreateDefaultBuilder()
                 .ConfigureServices(srv => srv
                     .AddRabbitConsumer<TestConsumer>(queueName)
-                    .ConfigureRabbitClient(opt =>
+                    .ConfigureRabbit(opt =>
                     {
                         opt.Host = "localhost";
                         opt.Port = 5672;
@@ -49,7 +49,7 @@ namespace LoadTest.Listener
                 Password = "guest"
             };
 
-            var connProvider = new RabbitConnectionProvider(opts);
+            var connProvider = new LazyRabbitConnectionProvider(opts);
             var chProvider = new RabbitChannelProvider(connProvider);
 
             var queueFactory = new RabbitQueueFactory(chProvider)
