@@ -19,16 +19,16 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddRabbitPublisher();			// 1
-        services.ConfigureRabbitClient(Configuration);	// 2
+        services.AddRabbit();						// 1
+        services.ConfigureRabbit(Configuration);	// 2
     }
 }
 ```
 
 , где:
 
-* `1` - добавление сервисов публикации сообщений;
-* `2` - добавление конфигурации `MyLab.RabbitClient`.
+* `1` - добавление сервисов работы с `Rabbit`;
+* `2` - конфигурирование сервисов работы с `Rabbit`;
 
 Пример публикации сообщения:
 
@@ -45,8 +45,8 @@ class Service
     public SendMessage(string msgContent)
     {
         _mq.IntoQueue("my-test-queue")	// 2
-           .SendString(msgContent)	// 3
-           .Publish();			// 4
+           .SendString(msgContent)		// 3
+           .Publish();					// 4
     }
 }
 ```
@@ -70,16 +70,18 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddRabbitConsumer<MyConsumer>("my-queue");	// 1
-        services.ConfigureRabbitClient(Configuration);		// 2
+        services.AddRabbit();								// 1
+        services.ConfigureRabbit(Configuration);			// 2
+        services.AddRabbitConsumer<MyConsumer>("my-queue");	// 3
     }
 }
 ```
 
 , где:
 
-* `1` - добавление потребителя сообщений очереди `my-queue`;
-* `2` - добавление конфигурации `MyLab.RabbitClient`.
+* `1` - добавление сервисов работы с `Rabbit`;
+* `2` - конфигурирование сервисов работы с `Rabbit`;
+* `1` - добавление потребителя сообщений очереди `my-queue`.
 
 Пример потребителя сообщения:
 
@@ -93,6 +95,38 @@ class MyConsumer : RabbitConsumer<string>
 }
 ```
 
+## Интеграция
+
+Интеграция осуществляется стандартным способом - добавлением сервисов библиотеки в коллекцию сервисов в методе  `ConfigureService` стартового класса приложения.
+
+```C#
+public class Startup
+{
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        //...
+        
+        serviceCollection.AddRabbit();
+         
+        serviceCollection.AddRabbit(RedisConnectionStrategy.Lazy);
+            
+        //...
+    }
+}
+```
+
+В методе `AddRedis` можно указать стратегию подключения к `Rabbit`  типа `RabbitConnectionStrategy`:
+
+* `Lazy` - (по умолчанию) подключение устанавливается при попытке отправить запрос в ``Rabbit`  `, если подключение не установлено. Особенности:
+  * происодит блокировка потоков в момент проверки состояния подключения и на время процесса подключения;
+  * попытка подключения происходит по требованию: если `Rabbit` не используется, то и подключение не будет установлено;
+* `Background` - подключение устанавливается сразу после запуска приложения. Особенности:
+  * при неудачах, повторные попытки первичного подключения будут повторяться бесконечно;
+  * при разрыве по инициативе сервера, будут осуществляться бесконечные попытки восстановить подключение;
+  * при попытке сделать запрос в `Rabbit`, если подключение не установлено, будет выдано исключение `RabbitConnectionStrategy`.
+
 ## Конфигурация
 
 ### Параметры конфигурации
@@ -104,6 +138,7 @@ class MyConsumer : RabbitConsumer<string>
 * `Port` - порт. `5672` - по умолчанию;
 * `User` - имя пользователя;
 * `Password` - пароль;
+* `BackgroundRetryPeriodSec` - период повторных попыток подключения в фоновом режиме. 10 по умолчанию;
 * `Pub[]`: - настройки публикации
   * `Id` - идентификатор 
   * `Exchange` - имя обменника или не указан, если публикация в очередь;
@@ -123,8 +158,8 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.ConfigureRabbitClient(Configuration);				// "MQ" by default
-        services.ConfigureRabbitClient(Configuration, "Rabbit");	
+        services.ConfigureRabbit(Configuration);				// "MQ" by default
+        services.ConfigureRabbit(Configuration, "Rabbit");	
     }
 }
 ```
@@ -138,7 +173,7 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.ConfigureRabbitClient(opt => opt.Host = "localhost");
+        services.ConfigureRabbit(opt => opt.Host = "localhost");
     }
 }
 ```
@@ -147,7 +182,7 @@ public class Startup
 
 #### Любые другие способы
 
-Доступны любые другие поддерживаемые в `.NET5+`  способы конфигурирования с использованием объекта [MyLab.RabbitClient.RabbitOptions](./src/MyLab.RabbitClient/RabbitOptions.cs).
+Доступны любые другие поддерживаемые в `.NET Core 3.1+`  способы конфигурирования с использованием объекта [MyLab.RabbitClient.RabbitOptions](./src/MyLab.RabbitClient/RabbitOptions.cs).
 
 ## Публикация
 

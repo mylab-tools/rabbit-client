@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using MyLab.RabbitClient.Consuming;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static partial class AppIntegration
@@ -14,7 +15,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return srvColl
                 .TryAddConsuming()
-                .TryAddCommon()
                 .AddRabbitConsumers(new SingleConsumerRegistrar(queue, consumer));
         }
 
@@ -26,7 +26,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return srvColl
                 .TryAddConsuming()
-                .TryAddCommon()
                 .AddRabbitConsumers(new TypedConsumerRegistrar<TConsumer>(queue));
         }
 
@@ -39,7 +38,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return srvColl
                 .TryAddConsuming()
-                .TryAddCommon()
                 .AddRabbitConsumers(new OptionsConsumerRegistrar<TOptions, TConsumer>(queueProvider));
         }
 
@@ -51,7 +49,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return srvColl
                 .TryAddConsuming()
-                .TryAddCommon()
                 .AddRabbitConsumers(new WrapperConsumerRegistrar<TRegistrar>());
         }
 
@@ -62,7 +59,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return srvColl
                 .TryAddConsuming()
-                .TryAddCommon()
                 .Configure<ConsumerRegistrarSource>(s => s.Add(registrar));
         }
 

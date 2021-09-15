@@ -48,7 +48,8 @@ namespace IntegrationTests
 
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices(srv => srv
-                    .ConfigureRabbitClient(TestTools.OptionsConfigureAct)
+                    .AddRabbit()
+                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
                     .AddRabbitConsumer(queue.Name, consumer)
                     .AddLogging(l=> l.AddXUnit(_output).AddFilter(l => true)))
                 .Build();
@@ -105,7 +106,8 @@ namespace IntegrationTests
 
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices(srv => srv
-                    .ConfigureRabbitClient(TestTools.OptionsConfigureAct)
+                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
+                    .AddRabbit()
                     .AddRabbitConsumer(queue.Name, consumer)
                     .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
                 .Build();

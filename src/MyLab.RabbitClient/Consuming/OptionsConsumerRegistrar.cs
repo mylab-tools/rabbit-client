@@ -13,13 +13,15 @@ namespace MyLab.RabbitClient.Consuming
         where TOptions : class 
         where TConsumer : class, IRabbitConsumer
     {
+        private readonly bool _optional;
         private readonly Func<TOptions, string> _queueProvider;
 
         /// <summary>
         /// Initializes a new instance of <see cref="OptionsConsumerRegistrar{TOptions, TConsumer}"/>
         /// </summary>
-        public OptionsConsumerRegistrar(Func<TOptions, string> queueProvider)
+        public OptionsConsumerRegistrar(Func<TOptions, string> queueProvider, bool optional = false)
         {
+            _optional = optional;
             _queueProvider = queueProvider ?? throw new ArgumentNullException(nameof(queueProvider));
         }
 
@@ -29,6 +31,12 @@ namespace MyLab.RabbitClient.Consuming
             var options = serviceProvider.GetService<IOptions<TOptions>>();
 
             var queue = _queueProvider(options.Value);
+
+            if (string.IsNullOrEmpty(queue))
+            {
+                if(_optional) return;
+                throw new InvalidOperationException("Queue name for consuming is not specified");
+            }
 
             registry.Register(queue, new TypedConsumerProvider<TConsumer>());
         }

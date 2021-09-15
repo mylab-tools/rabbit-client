@@ -34,19 +34,39 @@
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.RabbitConnectionStrategy)">
+            <summary>
+            Adds Rabbit services
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.ConfigureRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
             <summary>
             Configures Rabbit Client
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.ConfigureRabbitClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.RabbitClient.RabbitOptions})">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.ConfigureRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{MyLab.RabbitClient.RabbitOptions})">
             <summary>
             Configures Rabbit Client
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitPublisher(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="T:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager">
             <summary>
-            Add publisher service
+            Manages background connection
+            </summary>
+        </member>
+        <member name="E:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.Connected">
+            <summary>
+            Occurred when Rabbit connected
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.ProvideConnection">
+            <summary>
+            Provides established connection
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.Connect">
+            <summary>
+            Initiate connection
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Connection.IRabbitChannelProvider">
@@ -87,6 +107,20 @@
             Provides Mq connection
             </summary>
         </member>
+        <member name="T:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider">
+            <summary>
+            Manages and provides Rabbit connection
+            </summary>
+        </member>
+        <member name="E:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider.Reconnected">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider.Provide">
+            <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider.Dispose">
+            <inheritdoc />
+        </member>
         <member name="T:MyLab.RabbitClient.Connection.RabbitChannelProvider">
             <summary>
             Manages and provides Rabbit channels
@@ -124,34 +158,15 @@
         <member name="M:MyLab.RabbitClient.Connection.RabbitChannelUsing.Dispose">
             <inheritdoc />
         </member>
-        <member name="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider">
+        <member name="T:MyLab.RabbitClient.Connection.RabbitNotConnectedException">
             <summary>
-            Manages and provides Rabbit connection
+            Occurred when Rabbit connection is not established
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.RabbitClient.RabbitOptions},Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.RabbitConnectionProvider})">
+        <member name="M:MyLab.RabbitClient.Connection.RabbitNotConnectedException.#ctor">
             <summary>
-            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider"/>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitNotConnectedException"/>
             </summary>
-        </member>
-        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.#ctor(MyLab.RabbitClient.RabbitOptions,Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.RabbitConnectionProvider})">
-            <summary>
-            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider"/>
-            </summary>
-        </member>
-        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.#ctor(RabbitMQ.Client.ConnectionFactory)">
-            <summary>
-            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitConnectionProvider"/>
-            </summary>
-        </member>
-        <member name="E:MyLab.RabbitClient.Connection.RabbitConnectionProvider.Reconnected">
-            <inheritdoc />
-        </member>
-        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.Provide">
-            <inheritdoc />
-        </member>
-        <member name="M:MyLab.RabbitClient.Connection.RabbitConnectionProvider.Dispose">
-            <inheritdoc />
         </member>
         <member name="T:MyLab.RabbitClient.Consuming.ConsumedMessage`1">
             <summary>
@@ -225,7 +240,7 @@
             <typeparam name="TOptions">options type</typeparam>
             <typeparam name="TConsumer">consumer type</typeparam>
         </member>
-        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2.#ctor(System.Func{`0,System.String})">
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2.#ctor(System.Func{`0,System.String},System.Boolean)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2"/>
             </summary>
@@ -565,6 +580,26 @@
             Publish message
             </summary>
         </member>
+        <member name="T:MyLab.RabbitClient.RabbitConnectionStrategy">
+            <summary>
+            Rabbit connection establish strategy
+            </summary>
+        </member>
+        <member name="F:MyLab.RabbitClient.RabbitConnectionStrategy.Undefined">
+            <summary>
+            Undefined
+            </summary>
+        </member>
+        <member name="F:MyLab.RabbitClient.RabbitConnectionStrategy.Lazy">
+            <summary>
+            When requested
+            </summary>
+        </member>
+        <member name="F:MyLab.RabbitClient.RabbitConnectionStrategy.Background">
+            <summary>
+            In background when application started
+            </summary>
+        </member>
         <member name="T:MyLab.RabbitClient.RabbitOptions">
             <summary>
             Contains connection options
@@ -603,6 +638,11 @@
         <member name="P:MyLab.RabbitClient.RabbitOptions.DefaultPub">
             <summary>
             Default publish options
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.RabbitOptions.BackgroundRetryPeriodSec">
+            <summary>
+            Retry period in seconds when background connection mode
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.PublishOptions">

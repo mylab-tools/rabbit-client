@@ -35,6 +35,11 @@
         /// Default publish options
         /// </summary>
         public PublishOptions DefaultPub { get; set; }
+
+        /// <summary>
+        /// Retry period in seconds when background connection mode
+        /// </summary>
+        public int BackgroundRetryPeriodSec { get; set; } = 10;
     }
 
     /// <summary>
