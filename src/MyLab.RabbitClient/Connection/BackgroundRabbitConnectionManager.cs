@@ -51,12 +51,16 @@ namespace MyLab.RabbitClient.Connection
             {
                 try
                 {
-                    await Task.Delay(_retryDelay);
-                    _log?.Action("Connection retrying")
-                        .Write();
+                    if (hasError)
+                    {
+                        await Task.Delay(_retryDelay);
+                        _log?.Action("Connection retrying")
+                            .Write();
+                    }
+
                     _connection = await _connector.ConnectAsync();
-                    _log?.Action("Connection established")
-                        .Write();
+
+                    hasError = false;
                 }
                 catch (Exception e)
                 {
@@ -79,7 +83,7 @@ namespace MyLab.RabbitClient.Connection
 
             if (e.Initiator == ShutdownInitiator.Peer)
             {
-                _log.Action("Connection retry")
+                _log.Action("Connection retrying after shutdown by peer")
                     .Write();
 
                 _connector.Connect();
