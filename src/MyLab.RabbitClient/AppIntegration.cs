@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using MyLab.RabbitClient;
 using MyLab.RabbitClient.Connection;
 using MyLab.RabbitClient.Publishing;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
@@ -26,6 +26,9 @@ namespace Microsoft.Extensions.DependencyInjection
                     srv.AddSingleton<IRabbitConnectionProvider, LazyRabbitConnectionProvider>();
                     break;
                 case RabbitConnectionStrategy.Background:
+                    srv.AddSingleton<IRabbitConnectionProvider, BackgroundRabbitConnectionProvider>()
+                        .AddSingleton<IBackgroundRabbitConnectionManager, BackgroundRabbitConnectionManager>()
+                        .AddHostedService<RabbitConnectionStarter>();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(connectionStrategy), "Rabbit connection strategy must be defined");
