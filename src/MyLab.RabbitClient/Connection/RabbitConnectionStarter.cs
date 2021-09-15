@@ -23,9 +23,7 @@ namespace MyLab.RabbitClient.Connection
         {
             _log?.Action("Try to establish initial connect").Write();
 
-            _connectionManager.Connect();
-
-            return Task.CompletedTask;
+            return _connectionManager.ConnectAsync();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

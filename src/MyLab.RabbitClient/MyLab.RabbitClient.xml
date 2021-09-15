@@ -64,7 +64,7 @@
             Provides established connection
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.Connect">
+        <member name="M:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.ConnectAsync">
             <summary>
             Initiate connection
             </summary>

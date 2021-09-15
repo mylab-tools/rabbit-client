@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyLab.Log.Dsl;
@@ -10,7 +11,7 @@ namespace MyLab.RabbitClient.Connection
     class BackgroundRabbitConnectionManager : IBackgroundRabbitConnectionManager, IDisposable
     {
         private readonly RabbitConnector _connector;
-        private IDslLogger _log;
+        private readonly IDslLogger _log;
         private IConnection _connection;
         private readonly TimeSpan _retryDelay;
 
@@ -43,17 +44,17 @@ namespace MyLab.RabbitClient.Connection
             return _connection;
         }
 
-        public void Connect()
+        public async Task ConnectAsync()
         {
             bool hasError = false;
             do
             {
                 try
                 {
-                    Thread.Sleep(_retryDelay);
+                    await Task.Delay(_retryDelay);
                     _log?.Action("Connection retrying")
                         .Write();
-                    _connection = _connector.Connect();
+                    _connection = await _connector.ConnectAsync();
                     _log?.Action("Connection established")
                         .Write();
                 }
@@ -81,7 +82,7 @@ namespace MyLab.RabbitClient.Connection
                 _log.Action("Connection retry")
                     .Write();
 
-                Connect();
+                _connector.Connect();
             }
         }
 
