@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static IServiceCollection TryAddConsuming(this IServiceCollection srvColl)
         {
-            srvColl.TryAddSingleton<IHostedService, ConsumerHost>();
+            srvColl.AddHostedService<ConsumerHost>();
             srvColl.TryAddSingleton<IConsumerManager, ConsumerManager>();
 
             return srvColl;
