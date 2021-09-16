@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Registers consumer for queue which retrieve from options
         /// </summary>
         public static IServiceCollection AddRabbitConsumer<TOptions,TConsumer>(this IServiceCollection srvColl, Func<TOptions, string> queueProvider)
-            where TOptions : class
+            where TOptions : class, new()
             where TConsumer : class, IRabbitConsumer
         {
             return srvColl
@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static IServiceCollection TryAddConsuming(this IServiceCollection srvColl)
         {
-            srvColl.TryAddSingleton<IHostedService, ConsumerHost>();
+            srvColl.AddHostedService<ConsumerHost>();
             srvColl.TryAddSingleton<IConsumerManager, ConsumerManager>();
 
             return srvColl;

@@ -49,6 +49,16 @@
             Configures Rabbit Client
             </summary>
         </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.HealthChecksBuilderExtensions">
+            <summary>
+            Extensions for <see cref="T:Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder"/>
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.HealthChecksBuilderExtensions.AddRabbit(Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder)">
+            <summary>
+            Adds Rabbit checks
+            </summary>
+        </member>
         <member name="T:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager">
             <summary>
             Manages background connection
@@ -64,7 +74,7 @@
             Provides established connection
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.Connect">
+        <member name="M:MyLab.RabbitClient.Connection.IBackgroundRabbitConnectionManager.ConnectAsync">
             <summary>
             Initiate connection
             </summary>
@@ -313,6 +323,9 @@
         </member>
         <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
             <inheritdoc />
+        </member>
+        <member name="M:MyLab.RabbitClient.HealthCheck.RabbitConnectionHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext,System.Threading.CancellationToken)">
+            <inheritdoc/>
         </member>
         <member name="T:MyLab.RabbitClient.Model.RabbitExchange">
             <summary>

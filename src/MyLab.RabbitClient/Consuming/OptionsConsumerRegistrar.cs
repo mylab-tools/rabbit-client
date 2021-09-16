@@ -10,7 +10,7 @@ namespace MyLab.RabbitClient.Consuming
     /// <typeparam name="TOptions">options type</typeparam>
     /// <typeparam name="TConsumer">consumer type</typeparam>
     public class OptionsConsumerRegistrar<TOptions, TConsumer> : IRabbitConsumerRegistrar 
-        where TOptions : class 
+        where TOptions : class, new()
         where TConsumer : class, IRabbitConsumer
     {
         private readonly bool _optional;

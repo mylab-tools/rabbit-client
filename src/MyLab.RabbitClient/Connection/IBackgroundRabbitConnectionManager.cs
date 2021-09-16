@@ -22,6 +22,6 @@ namespace MyLab.RabbitClient.Connection
         /// <summary>
         /// Initiate connection
         /// </summary>
-        void Connect();
+        Task ConnectAsync();
     }
 }

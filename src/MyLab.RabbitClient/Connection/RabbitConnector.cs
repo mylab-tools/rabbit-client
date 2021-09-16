@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MyLab.Log.Dsl;
 using RabbitMQ.Client;
 
@@ -41,6 +42,11 @@ namespace MyLab.RabbitClient.Connection
                 .Write();
 
             return c;
+        }
+
+        public Task<IConnection> ConnectAsync()
+        {
+            return Task.Run(Connect);
         }
 
         private void ConnectionOnConnectionShutdown(object sender, ShutdownEventArgs e)
