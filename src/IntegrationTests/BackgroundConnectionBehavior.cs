@@ -7,8 +7,6 @@ using Microsoft.Extensions.Logging;
 using MyLab.RabbitClient;
 using MyLab.RabbitClient.Connection;
 using MyLab.RabbitClient.Model;
-using MyLab.RabbitClient.Publishing;
-using RabbitMQ.Client;
 using Xunit;
 using Xunit.Abstractions;
 
