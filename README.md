@@ -466,7 +466,7 @@ var queue = queueFactory.CreateWithRandomId();
 
 ### Проверка работоспособности
 
-Проверка работоспособности заключается в проверке наличия подключения к RabbitMQ и осуществляется через механизм [HealthCheck](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-3.1).
+Проверка работоспособности заключается в проверке наличия подключения к `RabbitMQ` и осуществляется через механизм [HealthCheck](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-3.1).
 
 Для подключения проверки необходимо использовать метод `AddRabbit` для построителя проверок, как показано на примере ниже:
 
