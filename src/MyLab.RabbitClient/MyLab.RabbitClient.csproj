@@ -11,9 +11,9 @@
     <RepositoryType>git</RepositoryType>
     <PackageIcon>tools.png</PackageIcon>
     <PackageIconUrl />
-    <Version>2.2.8</Version>
-    <AssemblyVersion>2.2.8.1609</AssemblyVersion>
-    <FileVersion>2.2.8.1609</FileVersion>
+    <Version>2.3.8</Version>
+    <AssemblyVersion>2.3.8.1609</AssemblyVersion>
+    <FileVersion>2.3.8.1609</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
