@@ -19,7 +19,7 @@
             Registers consumer type for specified queue 
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer``2(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{``0,System.String})">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer``2(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Func{``0,System.String},System.Boolean)">
             <summary>
             Registers consumer for queue which retrieve from options
             </summary>

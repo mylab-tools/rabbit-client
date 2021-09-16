@@ -32,13 +32,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Registers consumer for queue which retrieve from options
         /// </summary>
-        public static IServiceCollection AddRabbitConsumer<TOptions,TConsumer>(this IServiceCollection srvColl, Func<TOptions, string> queueProvider)
+        public static IServiceCollection AddRabbitConsumer<TOptions,TConsumer>(this IServiceCollection srvColl, Func<TOptions, string> queueProvider, bool optional = false)
             where TOptions : class, new()
             where TConsumer : class, IRabbitConsumer
         {
             return srvColl
                 .TryAddConsuming()
-                .AddRabbitConsumers(new OptionsConsumerRegistrar<TOptions, TConsumer>(queueProvider));
+                .AddRabbitConsumers(new OptionsConsumerRegistrar<TOptions, TConsumer>(queueProvider, optional));
         }
 
         /// <summary>
