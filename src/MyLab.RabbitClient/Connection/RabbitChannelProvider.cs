@@ -10,9 +10,9 @@ namespace MyLab.RabbitClient.Connection
     /// </summary>
     public class RabbitChannelProvider : IRabbitChannelProvider
     {
+        private readonly IRabbitConnectionProvider _connectionProvider;
         private const int MaxChannelCounter = 100;
 
-        private IConnection _connection;
         private readonly object _lock = new object();
 
         readonly Queue<ChannelUnit> _freeChannels = new Queue<ChannelUnit>();
@@ -23,9 +23,8 @@ namespace MyLab.RabbitClient.Connection
         /// </summary>
         public RabbitChannelProvider(IRabbitConnectionProvider connectionProvider)
         {
+            _connectionProvider = connectionProvider;
             connectionProvider.Reconnected += Reconnected;
-
-            _connection = connectionProvider.Provide();
         }
 
         /// <inheritdoc />
@@ -69,7 +68,7 @@ namespace MyLab.RabbitClient.Connection
             {
                 if (!_freeChannels.TryDequeue(out var channel))
                 {
-                    var newChannel = _connection.CreateModel();
+                    var newChannel = _connectionProvider.Provide().CreateModel();
                     newChannel.BasicQos(0, 1, false);
 
                     channel = new ChannelUnit(newChannel);
@@ -106,9 +105,6 @@ namespace MyLab.RabbitClient.Connection
             {
                 _freeChannels.Clear();
                 _usedChannels.Clear();
-
-                var cp = (IRabbitConnectionProvider)sender;
-                _connection = cp.Provide();
             }
         }
 
