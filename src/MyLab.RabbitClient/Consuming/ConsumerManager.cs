@@ -12,7 +12,7 @@ namespace MyLab.RabbitClient.Consuming
     class ConsumerManager : IConsumerManager
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IRabbitConnectionProvider _connectionProvider;
+        private readonly IRabbitChannelProvider _channelProvider;
         private readonly ConsumerRegistrarSource _consumerRegistrarSource;
         private readonly IDslLogger _log;
 
@@ -25,12 +25,12 @@ namespace MyLab.RabbitClient.Consuming
 
         public ConsumerManager(
             IServiceProvider serviceProvider,
-            IRabbitConnectionProvider connectionProvider,
+            IRabbitChannelProvider channelProvider,
             IOptions<ConsumerRegistrarSource> consumerRegistrarSource,
             ILogger<ConsumerManager> logger = null)
         {
             _serviceProvider = serviceProvider;
-            _connectionProvider = connectionProvider;
+            _channelProvider = channelProvider;
             _consumerRegistrarSource = consumerRegistrarSource.Value;
             _log = logger?.Dsl();
 
@@ -91,17 +91,16 @@ namespace MyLab.RabbitClient.Consuming
         {
             var qList = _consumerRegistry.ToArray();
 
-            var connection = _connectionProvider.Provide();
-
             foreach (var queue in qList)
             {
-                var channel = connection.CreateModel();
+                var channel = _channelProvider.Provide();
 
-                var exceptionHandlingDisposer = _exceptionReceiver.StartListen(channel);
-                var messageHandlingDisposer = _messageReceiver.StartListen(queue.Key, channel);
+                var exceptionHandlingDisposer = _exceptionReceiver.StartListen(channel.Channel);
+                var messageHandlingDisposer = _messageReceiver.StartListen(queue.Key, channel.Channel);
 
                 _listenDisposers.Add(exceptionHandlingDisposer);
                 _listenDisposers.Add(messageHandlingDisposer);
+                _listenDisposers.Add(channel);
             }
         }
     }
