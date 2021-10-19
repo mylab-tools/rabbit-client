@@ -16,20 +16,26 @@ namespace MyLab.RabbitClient.Publishing
         private readonly IRabbitChannelProvider _channelProvider;
         private readonly string _exchange;
         private readonly string _routingKey;
+        private readonly IEnumerable<IPublishingMessageProcessor> _msgProcessors;
 
         private readonly byte[] _content;
 
         readonly List<Action<IBasicProperties>> _configActions;
         readonly IDictionary<string, object> _headers;
-
+        
         /// <summary>
         /// Initializes a new instance of <see cref="RabbitPublisherBuilder"/>
         /// </summary>
-        public RabbitPublisherBuilder(IRabbitChannelProvider channelProvider, string exchange, string routingKey)
+        public RabbitPublisherBuilder(
+            IRabbitChannelProvider channelProvider,
+            string exchange, 
+            string routingKey,
+            IEnumerable<IPublishingMessageProcessor> msgProcessors)
         {
             _channelProvider = channelProvider;
             _exchange = exchange;
             _routingKey = routingKey;
+            _msgProcessors = msgProcessors;
 
             _configActions = new List<Action<IBasicProperties>>();
             _headers = new Dictionary<string, object>();
@@ -44,6 +50,7 @@ namespace MyLab.RabbitClient.Publishing
             _channelProvider = initial._channelProvider;
             _exchange = initial._exchange;
             _routingKey = initial._routingKey;
+            _msgProcessors = initial._msgProcessors;
 
             if (_exchange == null && _routingKey == null)
                 throw new InvalidOperationException("No one target parameter specified");
@@ -128,20 +135,27 @@ namespace MyLab.RabbitClient.Publishing
 
             _channelProvider.Use(ch =>
             {
-                var basicProps = ch.CreateBasicProperties();
+                var basicProperties = ch.CreateBasicProperties();
+
+                basicProperties.ContentType = "application/json";
+                basicProperties.Headers = _headers;
 
                 foreach (var configAction in _configActions)
-                    configAction(basicProps);
+                    configAction(basicProperties);
 
-                basicProps.Headers = _headers;
+                var localContent = _content;
 
-                basicProps.ContentType = "application/json";
+                if (_msgProcessors != null)
+                {
+                    foreach (var messageProcessor in _msgProcessors) 
+                        messageProcessor.Process(basicProperties, ref localContent);
+                }
 
                 ch.BasicPublish(
                     _exchange ?? "",
                     _routingKey ?? "",
-                    basicProps,
-                    _content
+                    basicProperties,
+                    localContent
                 );
             });
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MyLab.RabbitClient;
 using MyLab.RabbitClient.Connection;
 using MyLab.RabbitClient.Publishing;
@@ -51,6 +52,15 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection ConfigureRabbit(this IServiceCollection srv, Action<RabbitOptions> configureAct)
         {
             return srv.Configure(configureAct);
+        }
+
+        /// <summary>
+        /// Adds processor for publishing message
+        /// </summary>
+        public static IServiceCollection AddRabbitPublishingMessageProcessor<T>(this IServiceCollection srv)
+            where T : class, IPublishingMessageProcessor
+        {
+            return srv.AddSingleton<IPublishingMessageProcessor, T>();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,15 +14,18 @@ namespace MyLab.RabbitClient.Consuming
     {
         private readonly IRabbitConsumerRegistry _consumerRegistry;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IEnumerable<IConsumedMessageProcessor> _messageProcessors;
 
         public IDslLogger Log { get; set; }
 
         public RabbitChannelMessageReceiver(
             IRabbitConsumerRegistry consumerRegistry,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            IEnumerable<IConsumedMessageProcessor> messageProcessors)
         {
             _consumerRegistry = consumerRegistry;
             _serviceProvider = serviceProvider;
+            _messageProcessors = messageProcessors;
         }
 
         public IDisposable StartListen(string queue, IModel channel)
@@ -59,6 +63,12 @@ namespace MyLab.RabbitClient.Consuming
 
                 if(!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
                     throw new InvalidOperationException("Consumer not found");
+
+                if (_messageProcessors != null)
+                {
+                    foreach (var messageProcessor in _messageProcessors)
+                        messageProcessor.Process(args);
+                }
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
