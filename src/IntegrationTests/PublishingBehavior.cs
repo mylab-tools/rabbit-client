@@ -79,8 +79,6 @@ namespace IntegrationTests
             var gotMsg = queue.Listen<TestEntity>(TimeSpan.FromSeconds(1));
 
             //Assert
-            Assert.Equal(1, gotMsg.Content.Id);
-            Assert.Equal("foo", gotMsg.Content.Value);
             Assert.True(gotMsg.BasicProperties.Headers.TryGetValue("foo", out var barValue));
             Assert.Equal("bar", Encoding.UTF8.GetString((byte[])barValue));
         }

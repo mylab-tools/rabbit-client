@@ -27,6 +27,7 @@ namespace MyLab.RabbitClient.Consuming
             IServiceProvider serviceProvider,
             IRabbitChannelProvider channelProvider,
             IOptions<ConsumerRegistrarSource> consumerRegistrarSource,
+            IEnumerable<IConsumedMessageProcessor> consumedMessageProcessors,
             ILogger<ConsumerManager> logger = null)
         {
             _serviceProvider = serviceProvider;
@@ -35,7 +36,7 @@ namespace MyLab.RabbitClient.Consuming
             _log = logger?.Dsl();
 
             _exceptionReceiver = new RabbitChannelExceptionReceiver(_log);
-            _messageReceiver = new RabbitChannelMessageReceiver(_consumerRegistry, _serviceProvider)
+            _messageReceiver = new RabbitChannelMessageReceiver(_consumerRegistry, _serviceProvider, consumedMessageProcessors)
             {
                 Log = _log
             };

@@ -34,6 +34,11 @@
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
             </summary>
         </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumedMessageProcessor``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds consumed message processor
+            </summary>
+        </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.RabbitConnectionStrategy)">
             <summary>
             Adds Rabbit services
@@ -206,6 +211,16 @@
         <member name="M:MyLab.RabbitClient.Consuming.ConsumedMessage`1.#ctor(`0,RabbitMQ.Client.Events.BasicDeliverEventArgs)">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.ConsumedMessage`1"/>
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IConsumedMessageProcessor">
+            <summary>
+            Processed consumed message
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IConsumedMessageProcessor.Process(RabbitMQ.Client.Events.BasicDeliverEventArgs)">
+            <summary>
+            Processes consumed message
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumer">

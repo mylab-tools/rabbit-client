@@ -287,7 +287,7 @@ publisher
   .Publish();
 ```
 
-### Предобработка сообщений
+### Внедрение в подготовку
 
 Поддерживается внедрение в процесс подготовки отправляемого сообщения. Можно изменять `basic properties` и содержание отправляемого сообщения.
 
@@ -308,7 +308,7 @@ publisher
   }
   ```
 
-* зарегистрировать его в сервисах:
+* зарегистрировать его в сервисах приложения:
 
   ```C#
   services.AddRabbitPublishingMessageProcessor<MyCustomPubMsgProc>();
@@ -397,6 +397,33 @@ class MyConsumerRegistrar : IRabbitConsumerRegistrar
     }
 }
 ```
+
+### Внедрение в обработку
+
+Поддерживается внедрение в обработку полученного сообщения. Можно изменять все свойства объекта [BasicDeliverEventArgs](https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/master/projects/RabbitMQ.Client/client/events/BasicDeliverEventArgs.cs).
+
+Для этого потребуется:
+
+* реализовать класс логики обработки, реализующий интерфейс `IConsumedMessageProcessor`:
+
+  ```C#
+  /// <summary>
+  /// Processed consumed message
+  /// </summary>
+  public interface IConsumedMessageProcessor
+  {
+      /// <summary>
+      /// Processes consumed message
+      /// </summary>
+      public void Process(BasicDeliverEventArgs deliverEventArgs);
+  }
+  ```
+
+* добавить его в сервисы приложения:
+
+  ```c#
+  services.AddRabbitConsumedMessageProcessor<MyCustomMessagePRocessor>();
+  ```
 
 ## Объектная модель RabbitMQ
 

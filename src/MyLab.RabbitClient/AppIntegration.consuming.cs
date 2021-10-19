@@ -62,6 +62,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 .Configure<ConsumerRegistrarSource>(s => s.Add(registrar));
         }
 
+        /// <summary>
+        /// Adds consumed message processor
+        /// </summary>
+        public static IServiceCollection AddRabbitConsumedMessageProcessor<T>(this IServiceCollection srvColl)
+            where T : class, IConsumedMessageProcessor
+        {
+            return srvColl.AddSingleton<IConsumedMessageProcessor, T>();
+        }
+
         private static IServiceCollection TryAddConsuming(this IServiceCollection srvColl)
         {
             srvColl.AddHostedService<ConsumerHost>();
