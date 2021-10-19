@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Options;
 using MyLab.Log;
@@ -9,13 +10,16 @@ namespace MyLab.RabbitClient.Publishing
     class RabbitPublisher : IRabbitPublisher
     {
         private readonly IRabbitChannelProvider _channelProvider;
+        private readonly IEnumerable<IPublishingMessageProcessor> _publishingMessageProcessors;
         private readonly RabbitOptions _options;
 
         public RabbitPublisher(
             IOptions<RabbitOptions> options,
-            IRabbitChannelProvider channelProvider)
+            IRabbitChannelProvider channelProvider,
+            IEnumerable<IPublishingMessageProcessor> publishingMessageProcessors)
         {
             _channelProvider = channelProvider;
+            _publishingMessageProcessors = publishingMessageProcessors;
             _options = options.Value;
         }
 
@@ -36,7 +40,7 @@ namespace MyLab.RabbitClient.Publishing
 
         public RabbitPublisherBuilder IntoExchange(string exchange, string routingKey = null)
         {
-            return new RabbitPublisherBuilder(_channelProvider, exchange, routingKey);
+            return new RabbitPublisherBuilder(_channelProvider, exchange, routingKey, _publishingMessageProcessors);
         }
 
         public RabbitPublisherBuilder Into(string configId, string routingKey = null)
@@ -46,7 +50,7 @@ namespace MyLab.RabbitClient.Publishing
                 throw new InvalidOperationException("Publish config for message model not found")
                     .AndFactIs("config-id", configId);
 
-            return new RabbitPublisherBuilder(_channelProvider, pubCfg.Exchange, routingKey ?? pubCfg.RoutingKey);
+            return new RabbitPublisherBuilder(_channelProvider, pubCfg.Exchange, routingKey ?? pubCfg.RoutingKey, _publishingMessageProcessors);
         }
 
         public RabbitPublisherBuilder Into<TMsg>(string routingKey = null)

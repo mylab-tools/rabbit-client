@@ -287,6 +287,33 @@ publisher
   .Publish();
 ```
 
+### Предобработка сообщений
+
+Поддерживается внедрение в процесс подготовки отправляемого сообщения. Можно изменять `basic properties` и содержание отправляемого сообщения.
+
+Для этого необходимо:
+
+* реализовать класс с логикой обработки, реализующий `IPublishingMessageProcessor`:
+
+  ```C#
+  /// <summary>
+  /// Processes message before publishing
+  /// </summary>
+  public interface IPublishingMessageProcessor
+  {
+      /// <summary>
+      /// Process a message
+      /// </summary>
+      void Process(IBasicProperties basicProperties, ref byte[] content);
+  }
+  ```
+
+* зарегистрировать его в сервисах:
+
+  ```C#
+  services.AddRabbitPublishingMessageProcessor<MyCustomPubMsgProc>();
+  ```
+
 ## Потребление
 
 ### Потребители
