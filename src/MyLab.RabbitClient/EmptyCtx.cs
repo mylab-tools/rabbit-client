@@ -1,18 +1,18 @@
 ﻿using System;
 
-namespace MyLab.RabbitClient.Publishing
+namespace MyLab.RabbitClient
 {
     /// <summary>
     /// Empty publishing context
     /// </summary>
-    public class EmptyPubCtx : IDisposable
+    public class EmptyCtx : IDisposable
     {
         /// <summary>
         /// Static singleton
         /// </summary>
-        public static readonly IDisposable Instance  = new EmptyPubCtx();
+        public static readonly IDisposable Instance  = new EmptyCtx();
 
-        EmptyPubCtx()
+        EmptyCtx()
         {
             
         }

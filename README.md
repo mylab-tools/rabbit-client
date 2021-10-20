@@ -310,12 +310,12 @@ publisher
   }
   ```
 
-* в методе `Set` выполнять действия, связанные с установкой контекста и возвращать объект `IDisposable`, у которого по завершению отправки сообщения будет вызван метод `Dispose`. Для случаев, когда не требуются действия при освобождении контекста, можно возвращать статический экземпляр пустого объекта контекста `EmptyPubCtx.Instance`;
+* в методе `Set` выполнять действия, связанные с установкой контекста и возвращать объект `IDisposable`, у которого по завершению отправки сообщения будет вызван метод `Dispose`. Для случаев, когда не требуются действия при освобождении контекста, можно возвращать статический экземпляр пустого объекта контекста `EmptyCtx.Instance`;
 
 * зарегистрировать его в сервисах приложения:
 
   ```C#
-  services.AddRabbitPublishingContext<MyCustomPubCtx>();
+  services.AddRabbitPublishingContext<MyPublishingCtx>();
   ```
 
 Объект контекста отправления сообщений имеет время жизни `singleton`.
@@ -404,34 +404,38 @@ class MyConsumerRegistrar : IRabbitConsumerRegistrar
 }
 ```
 
-### Внедрение в обработку
+### Контекст потребления
 
-Поддерживается внедрение в обработку полученного сообщения. Можно изменять все свойства объекта [BasicDeliverEventArgs](https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/master/projects/RabbitMQ.Client/client/events/BasicDeliverEventArgs.cs).
+Поддерживается установка контекста при получении и обработке сообщения. Все контексты устанавливаются перед обработкой каждого  полученного сообщения. А после обработки - освобождаются.
+
+При установке контекста можно изменять все свойства объекта [BasicDeliverEventArgs](https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/master/projects/RabbitMQ.Client/client/events/BasicDeliverEventArgs.cs).
 
 Для этого потребуется:
 
-* реализовать класс логики обработки, реализующий интерфейс `IConsumedMessageProcessor`:
+* реализовать класс логики обработки, реализующий интерфейс `IConsumingContext`:
 
   ```C#
   /// <summary>
-  /// Processed consumed message
+  /// Sets and release consuming context
   /// </summary>
-  public interface IConsumedMessageProcessor
+  public interface IConsumingContext 
   {
       /// <summary>
-      /// Processes consumed message
+      /// Set context
       /// </summary>
-      public void Process(BasicDeliverEventArgs deliverEventArgs);
+      public IDisposable Set(BasicDeliverEventArgs deliverEventArgs);
   }
   ```
+
+* в методе `Set` выполнять действия, связанные с установкой контекста и возвращать объект `IDisposable`, у которого по завершению обработки сообщения будет вызван метод `Dispose`. Для случаев, когда не требуются действия при освобождении контекста, можно возвращать статический экземпляр пустого объекта контекста `EmptyCtx.Instance`;
 
 * добавить его в сервисы приложения:
 
   ```c#
-  services.AddRabbitConsumedMessageProcessor<MyCustomMessagePRocessor>();
+  services.AddRabbitConsumingContext<MyConsumingCtx>();
   ```
 
-Объект логики обработки отправляемых сообщений имеет время жизни `scoped`.
+Объект логики обработки отправляемых сообщений имеет время жизни `singleton`.
 
 ## Объектная модель RabbitMQ
 

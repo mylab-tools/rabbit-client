@@ -61,17 +61,34 @@ namespace MyLab.RabbitClient.Consuming
                 if(!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
                     throw new InvalidOperationException("Consumer not found");
 
-                using (var scope = _serviceProvider.CreateScope())
+                var cContexts = new List<IDisposable>();
+
+                var consumingContests = _serviceProvider.GetServices<IConsumingContext>();
+                if (consumingContests != null)
                 {
-                    var messageProcessors = scope.ServiceProvider.GetServices<IConsumedMessageProcessor>();
-                    if (messageProcessors != null)
-                    {
-                        foreach (var messageProcessor in messageProcessors)
-                            messageProcessor.Process(args);
-                    }
+                    cContexts.AddRange(consumingContests.Select(c => c.Set(args)));
+                }
+
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
 
                     var consumer = consumerProvider.Provide(scope.ServiceProvider);
                     await consumer.ConsumeAsync(args);
+                }
+                finally
+                {
+                    foreach (var context in cContexts)
+                    {
+                        try
+                        {
+                            context.Dispose();
+                        }
+                        catch (Exception e)
+                        {
+                            Log?.Error("Consuming context releasing error", e).Write();
+                        }
+                    }
                 }
 
                 channel.BasicAck(args.DeliveryTag, false);

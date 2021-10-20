@@ -34,7 +34,7 @@
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumedMessageProcessor``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumingContext``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Adds consumed message processor
             </summary>
@@ -213,14 +213,14 @@
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.ConsumedMessage`1"/>
             </summary>
         </member>
-        <member name="T:MyLab.RabbitClient.Consuming.IConsumedMessageProcessor">
+        <member name="T:MyLab.RabbitClient.Consuming.IConsumingContext">
             <summary>
-            Processed consumed message
+            Sets and release consuming context
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Consuming.IConsumedMessageProcessor.Process(RabbitMQ.Client.Events.BasicDeliverEventArgs)">
+        <member name="M:MyLab.RabbitClient.Consuming.IConsumingContext.Set(RabbitMQ.Client.Events.BasicDeliverEventArgs)">
             <summary>
-            Processes consumed message
+            Set context
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumer">
@@ -342,6 +342,19 @@
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.EmptyCtx">
+            <summary>
+            Empty publishing context
+            </summary>
+        </member>
+        <member name="F:MyLab.RabbitClient.EmptyCtx.Instance">
+            <summary>
+            Static singleton
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.EmptyCtx.Dispose">
             <inheritdoc />
         </member>
         <member name="M:MyLab.RabbitClient.HealthCheck.RabbitConnectionHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext,System.Threading.CancellationToken)">
@@ -527,19 +540,6 @@
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueueFactory"/>
             </summary>
-        </member>
-        <member name="T:MyLab.RabbitClient.Publishing.EmptyPubCtx">
-            <summary>
-            Empty publishing context
-            </summary>
-        </member>
-        <member name="F:MyLab.RabbitClient.Publishing.EmptyPubCtx.Instance">
-            <summary>
-            Static singleton
-            </summary>
-        </member>
-        <member name="M:MyLab.RabbitClient.Publishing.EmptyPubCtx.Dispose">
-            <inheritdoc />
         </member>
         <member name="T:MyLab.RabbitClient.Publishing.IPublishingContext">
             <summary>

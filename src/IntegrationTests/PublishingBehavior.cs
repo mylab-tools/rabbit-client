@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using MyLab.RabbitClient;
 using MyLab.RabbitClient.Model;
 using MyLab.RabbitClient.Publishing;
 using RabbitMQ.Client;
@@ -95,7 +96,7 @@ namespace IntegrationTests
             {
                 publishingMessage.BasicProperties.Headers.Add("foo", "bar");
 
-                return EmptyPubCtx.Instance;
+                return EmptyCtx.Instance;
             }
         }
     }

@@ -163,7 +163,7 @@ namespace IntegrationTests
                     .AddRabbit()
                     .ConfigureRabbit(TestTools.OptionsConfigureAct)
                     .AddRabbitConsumer(queue.Name, consumer)
-                    .AddRabbitConsumedMessageProcessor<AddFoobarHeaderPostProcessor>()
+                    .AddRabbitConsumingContext<AddFoobarHeaderPostProcessor>()
                     .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
                 .Build();
 
@@ -187,14 +187,16 @@ namespace IntegrationTests
             Assert.Equal("bar", barValue);
         }
 
-        class AddFoobarHeaderPostProcessor : IConsumedMessageProcessor
+        class AddFoobarHeaderPostProcessor : IConsumingContext
         {
-            public void Process(BasicDeliverEventArgs deliverEventArgs)
+            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
             {
                 deliverEventArgs.BasicProperties.Headers = new Dictionary<string, object>
-                    {
-                        {"foo", "bar"}
-                    };
+                {
+                    {"foo", "bar"}
+                };
+
+                return EmptyCtx.Instance;
             }
         }
 
