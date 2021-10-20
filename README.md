@@ -314,6 +314,8 @@ publisher
   services.AddRabbitPublishingMessageProcessor<MyCustomPubMsgProc>();
   ```
 
+Объект логики обработки отправляемых сообщений имеет время жизни `singleton`.
+
 ## Потребление
 
 ### Потребители
@@ -424,6 +426,8 @@ class MyConsumerRegistrar : IRabbitConsumerRegistrar
   ```c#
   services.AddRabbitConsumedMessageProcessor<MyCustomMessagePRocessor>();
   ```
+
+Объект логики обработки отправляемых сообщений имеет время жизни `scoped`.
 
 ## Объектная модель RabbitMQ
 
