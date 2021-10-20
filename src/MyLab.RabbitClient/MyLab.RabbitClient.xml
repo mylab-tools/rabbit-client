@@ -54,7 +54,7 @@
             Configures Rabbit Client
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitPublishingMessageProcessor``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitPublishingContext``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Adds processor for publishing message
             </summary>
@@ -528,14 +528,27 @@
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueueFactory"/>
             </summary>
         </member>
-        <member name="T:MyLab.RabbitClient.Publishing.IPublishingMessageProcessor">
+        <member name="T:MyLab.RabbitClient.Publishing.EmptyPubCtx">
             <summary>
-            Processes message before publishing
+            Empty publishing context
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Publishing.IPublishingMessageProcessor.Process(RabbitMQ.Client.IBasicProperties,System.Byte[]@)">
+        <member name="F:MyLab.RabbitClient.Publishing.EmptyPubCtx.Instance">
             <summary>
-            Process a message
+            Static singleton
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.EmptyPubCtx.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:MyLab.RabbitClient.Publishing.IPublishingContext">
+            <summary>
+            Set context for publishing message
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IPublishingContext.Set(MyLab.RabbitClient.Publishing.RabbitPublishingMessage)">
+            <summary>
+            Set context
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Publishing.IRabbitPublisher">
@@ -588,7 +601,12 @@
             Build parameters for publishing and perform publish
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.#ctor(MyLab.RabbitClient.Connection.IRabbitChannelProvider,System.String,System.String,System.Collections.Generic.IEnumerable{MyLab.RabbitClient.Publishing.IPublishingMessageProcessor})">
+        <member name="P:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.Log">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.#ctor(MyLab.RabbitClient.Connection.IRabbitChannelProvider,System.String,System.String,System.Collections.Generic.IEnumerable{MyLab.RabbitClient.Publishing.IPublishingContext})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder"/>
             </summary>
@@ -621,6 +639,31 @@
         <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.Publish">
             <summary>
             Publish message
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Publishing.RabbitPublishingMessage">
+            <summary>
+            Publishing message parameters
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Publishing.RabbitPublishingMessage.BasicProperties">
+            <summary>
+            Basic properties
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Publishing.RabbitPublishingMessage.Content">
+            <summary>
+            Binary content
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Publishing.RabbitPublishingMessage.RoutingKey">
+            <summary>
+            Routing key or queue name
+            </summary>
+        </member>
+        <member name="P:MyLab.RabbitClient.Publishing.RabbitPublishingMessage.Exchange">
+            <summary>
+            Exchange name
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.RabbitConnectionStrategy">

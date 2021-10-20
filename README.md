@@ -287,34 +287,38 @@ publisher
   .Publish();
 ```
 
-### Внедрение в подготовку
+### Контекст отправки
 
-Поддерживается внедрение в процесс подготовки отправляемого сообщения. Можно изменять `basic properties` и содержание отправляемого сообщения.
+Поддерживается установка контекста при отправке сообщения. Все контексты устанавливаются перед отправкой каждого сообщения. А после отправки - освобождаются.
 
-Для этого необходимо:
+При установке контекста доступны для изменения все параметры отправляемого сообщения.
 
-* реализовать класс с логикой обработки, реализующий `IPublishingMessageProcessor`:
+Для внедрения контекста необходимо:
+
+* реализовать класс контекста отправки, реализующий `IPublishingContext`:
 
   ```C#
   /// <summary>
-  /// Processes message before publishing
+  /// Set context for publishing message
   /// </summary>
-  public interface IPublishingMessageProcessor
+  public interface IPublishingContext
   {
       /// <summary>
-      /// Process a message
+      /// Set context
       /// </summary>
-      void Process(IBasicProperties basicProperties, ref byte[] content);
+      IDisposable Set(RabbitPublishingMessage publishingMessage);
   }
   ```
+
+* в методе `Set` выполнять действия, связанные с установкой контекста и возвращать объект `IDisposable`, у которого по завершению отправки сообщения будет вызван метод `Dispose`. Для случаев, когда не требуются действия при освобождении контекста, можно возвращать статический экземпляр пустого объекта контекста `EmptyPubCtx.Instance`;
 
 * зарегистрировать его в сервисах приложения:
 
   ```C#
-  services.AddRabbitPublishingMessageProcessor<MyCustomPubMsgProc>();
+  services.AddRabbitPublishingContext<MyCustomPubCtx>();
   ```
 
-Объект логики обработки отправляемых сообщений имеет время жизни `singleton`.
+Объект контекста отправления сообщений имеет время жизни `singleton`.
 
 ## Потребление
 

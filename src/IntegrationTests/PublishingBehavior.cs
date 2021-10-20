@@ -65,7 +65,7 @@ namespace IntegrationTests
             var sp = new ServiceCollection()
                 .AddRabbit()
                 .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                .AddRabbitPublishingMessageProcessor<AddFoobarHeaderProcessor>()
+                .AddRabbitPublishingContext<AddFoobarHeaderPubCtx>()
                 .BuildServiceProvider();
 
             var publisher = sp.GetService<IRabbitPublisher>();
@@ -89,11 +89,13 @@ namespace IntegrationTests
             public string Value { get; set; }
         }
 
-        class AddFoobarHeaderProcessor : IPublishingMessageProcessor
+        class AddFoobarHeaderPubCtx : IPublishingContext
         {
-            public void Process(IBasicProperties basicProperties, ref byte[] content)
+            public IDisposable Set(RabbitPublishingMessage publishingMessage)
             {
-                basicProperties.Headers.Add("foo", "bar");
+                publishingMessage.BasicProperties.Headers.Add("foo", "bar");
+
+                return EmptyPubCtx.Instance;
             }
         }
     }
