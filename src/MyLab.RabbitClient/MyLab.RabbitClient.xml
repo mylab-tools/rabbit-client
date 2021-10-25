@@ -344,19 +344,6 @@
         <member name="M:MyLab.RabbitClient.Consuming.TypedConsumerRegistrar`1.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
             <inheritdoc />
         </member>
-        <member name="T:MyLab.RabbitClient.EmptyCtx">
-            <summary>
-            Empty publishing context
-            </summary>
-        </member>
-        <member name="F:MyLab.RabbitClient.EmptyCtx.Instance">
-            <summary>
-            Static singleton
-            </summary>
-        </member>
-        <member name="M:MyLab.RabbitClient.EmptyCtx.Dispose">
-            <inheritdoc />
-        </member>
         <member name="M:MyLab.RabbitClient.HealthCheck.RabbitConnectionHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext,System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>

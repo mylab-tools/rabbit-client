@@ -66,7 +66,11 @@ namespace MyLab.RabbitClient.Consuming
                 var consumingContests = _serviceProvider.GetServices<IConsumingContext>();
                 if (consumingContests != null)
                 {
-                    cContexts.AddRange(consumingContests.Select(c => c.Set(args)));
+                    var gotContexts = consumingContests
+                        .Select(c => c.Set(args))
+                        .Where(c => c != null);
+
+                    cContexts.AddRange(gotContexts);
                 }
 
                 try

@@ -137,7 +137,7 @@ namespace IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldApplyConsumedMessageProcessor()
+        public async Task ShouldUseConsumingCtx()
         {
             //Arrange
 
@@ -163,7 +163,7 @@ namespace IntegrationTests
                     .AddRabbit()
                     .ConfigureRabbit(TestTools.OptionsConfigureAct)
                     .AddRabbitConsumer(queue.Name, consumer)
-                    .AddRabbitConsumingContext<AddFoobarHeaderPostProcessor>()
+                    .AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>()
                     .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
                 .Build();
 
@@ -187,7 +187,63 @@ namespace IntegrationTests
             Assert.Equal("bar", barValue);
         }
 
-        class AddFoobarHeaderPostProcessor : IConsumingContext
+        [Fact]
+        public async Task ShouldUseNullConsumingCtx()
+        {
+            //Arrange
+            var testEntity = new TestEntity
+            {
+                Id = 10
+            };
+
+            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
+            {
+                AutoDelete = true,
+                Prefix = "test"
+            }.CreateWithRandomId();
+
+            var consumer = new TestConsumer();
+
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
+
+            var logErrorCatcher = new LogErrorCatcher();
+            var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
+
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices(srv => srv
+                    .AddRabbit()
+                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
+                    .AddRabbitConsumer(queue.Name, consumer)
+                    .AddRabbitConsumingContext<NullConsumingCtx>()
+                    .AddLogging(l => l
+                        .AddXUnit(_output)
+                        .AddFilter(l => true)
+                        .AddProvider(logErrorCatcherProvider)))
+                .Build();
+
+            await host.StartAsync(cancellationToken);
+
+            //Act
+            queue.Publish(testEntity);
+
+            await Task.Delay(500);
+
+            cancellationSource.Cancel();
+
+            await host.StopAsync();
+
+            host.Dispose();
+
+            var gotMsg = consumer.LastMessages.Dequeue();
+
+            //Assert
+            Assert.Null(logErrorCatcher.LastError);
+            Assert.NotNull(gotMsg);
+            Assert.Equal(10, gotMsg.Content.Id);
+        }
+
+        class AddFoobarHeaderConsumingCtx : IConsumingContext
         {
             public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
             {
@@ -196,7 +252,22 @@ namespace IntegrationTests
                     {"foo", "bar"}
                 };
 
-                return EmptyCtx.Instance;
+                return new EmptyCtx();
+            }
+
+            class EmptyCtx : IDisposable
+            {
+                public void Dispose()
+                {
+                }
+            }
+        }
+
+        class NullConsumingCtx : IConsumingContext
+        {
+            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
+            {
+                return null;
             }
         }
 
