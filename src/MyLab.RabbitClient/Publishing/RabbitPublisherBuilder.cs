@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using MyLab.Log.Dsl;
 using MyLab.RabbitClient.Connection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -16,13 +18,18 @@ namespace MyLab.RabbitClient.Publishing
         private readonly IRabbitChannelProvider _channelProvider;
         private readonly string _exchange;
         private readonly string _routingKey;
-        private readonly IEnumerable<IPublishingMessageProcessor> _msgProcessors;
+        private readonly IEnumerable<IPublishingContext> _pubContexts;
 
         private readonly byte[] _content;
 
         readonly List<Action<IBasicProperties>> _configActions;
         readonly IDictionary<string, object> _headers;
-        
+
+        /// <summary>
+        /// Logger
+        /// </summary>
+        public IDslLogger Log { get; set; }
+
         /// <summary>
         /// Initializes a new instance of <see cref="RabbitPublisherBuilder"/>
         /// </summary>
@@ -30,12 +37,12 @@ namespace MyLab.RabbitClient.Publishing
             IRabbitChannelProvider channelProvider,
             string exchange, 
             string routingKey,
-            IEnumerable<IPublishingMessageProcessor> msgProcessors)
+            IEnumerable<IPublishingContext> pubContexts)
         {
             _channelProvider = channelProvider;
             _exchange = exchange;
             _routingKey = routingKey;
-            _msgProcessors = msgProcessors;
+            _pubContexts = pubContexts;
 
             _configActions = new List<Action<IBasicProperties>>();
             _headers = new Dictionary<string, object>();
@@ -50,7 +57,7 @@ namespace MyLab.RabbitClient.Publishing
             _channelProvider = initial._channelProvider;
             _exchange = initial._exchange;
             _routingKey = initial._routingKey;
-            _msgProcessors = initial._msgProcessors;
+            _pubContexts = initial._pubContexts;
 
             if (_exchange == null && _routingKey == null)
                 throw new InvalidOperationException("No one target parameter specified");
@@ -69,7 +76,10 @@ namespace MyLab.RabbitClient.Publishing
             
             var propActs = new List<Action<IBasicProperties>>(_configActions){ propAct };
 
-            return new RabbitPublisherBuilder(this, _content, propActs, _headers);
+            return new RabbitPublisherBuilder(this, _content, propActs, _headers)
+            {
+                Log = Log
+            };
         }
 
         /// <summary>
@@ -85,7 +95,10 @@ namespace MyLab.RabbitClient.Publishing
                 { name, value }
             };
 
-            return new RabbitPublisherBuilder(this, _content, _configActions, newHeaders);
+            return new RabbitPublisherBuilder(this, _content, _configActions, newHeaders)
+            {
+                Log = Log
+            };
         }
 
         /// <summary>
@@ -101,7 +114,10 @@ namespace MyLab.RabbitClient.Publishing
             });
             var newContent = Encoding.UTF8.GetBytes(json);
 
-            return new RabbitPublisherBuilder(this, newContent, _configActions, _headers);
+            return new RabbitPublisherBuilder(this, newContent, _configActions, _headers)
+            {
+                Log = Log
+            };
         }
 
         /// <summary>
@@ -111,7 +127,10 @@ namespace MyLab.RabbitClient.Publishing
         {
             if (binData == null) throw new ArgumentNullException(nameof(binData));
 
-            return new RabbitPublisherBuilder(this, binData, _configActions, _headers);
+            return new RabbitPublisherBuilder(this, binData, _configActions, _headers)
+            {
+                Log = Log
+            };
         }
 
         /// <summary>
@@ -122,7 +141,10 @@ namespace MyLab.RabbitClient.Publishing
             if (strData == null) throw new ArgumentNullException(nameof(strData));
 
             var newContent = Encoding.UTF8.GetBytes(strData);
-            return new RabbitPublisherBuilder(this, newContent, _configActions, _headers);
+            return new RabbitPublisherBuilder(this, newContent, _configActions, _headers)
+            {
+                Log = Log
+            };
         }
 
         /// <summary>
@@ -143,20 +165,49 @@ namespace MyLab.RabbitClient.Publishing
                 foreach (var configAction in _configActions)
                     configAction(basicProperties);
 
-                var localContent = _content;
-
-                if (_msgProcessors != null)
+                
+                var publishingMessage = new RabbitPublishingMessage
                 {
-                    foreach (var messageProcessor in _msgProcessors) 
-                        messageProcessor.Process(basicProperties, ref localContent);
+                    Content = _content,
+                    RoutingKey = _routingKey,
+                    Exchange = _exchange,
+                    BasicProperties = basicProperties
+                };
+
+                var publishingContexts = new List<IDisposable>();
+
+                if (_pubContexts != null)
+                {
+                    var pubContexts = _pubContexts
+                        .Select(f => f.Set(publishingMessage))
+                        .Where(c => c != null);
+
+                    publishingContexts.AddRange(pubContexts);
                 }
 
-                ch.BasicPublish(
-                    _exchange ?? "",
-                    _routingKey ?? "",
-                    basicProperties,
-                    localContent
-                );
+                try
+                {
+                    ch.BasicPublish(
+                        publishingMessage.Exchange ?? "",
+                        publishingMessage.RoutingKey ?? "",
+                        publishingMessage.BasicProperties,
+                        publishingMessage.Content
+                    );
+                }
+                finally
+                {
+                    foreach (var ctx in publishingContexts)
+                    {
+                        try
+                        {
+                            ctx.Dispose();
+                        }
+                        catch (Exception e)
+                        {
+                            Log?.Error("Closing rabbit publishing context error", e).Write();
+                        }
+                    }
+                }
             });
         }
     }

@@ -14,18 +14,15 @@ namespace MyLab.RabbitClient.Consuming
     {
         private readonly IRabbitConsumerRegistry _consumerRegistry;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IEnumerable<IConsumedMessageProcessor> _messageProcessors;
 
         public IDslLogger Log { get; set; }
 
         public RabbitChannelMessageReceiver(
             IRabbitConsumerRegistry consumerRegistry,
-            IServiceProvider serviceProvider,
-            IEnumerable<IConsumedMessageProcessor> messageProcessors)
+            IServiceProvider serviceProvider)
         {
             _consumerRegistry = consumerRegistry;
             _serviceProvider = serviceProvider;
-            _messageProcessors = messageProcessors;
         }
 
         public IDisposable StartListen(string queue, IModel channel)
@@ -64,16 +61,38 @@ namespace MyLab.RabbitClient.Consuming
                 if(!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
                     throw new InvalidOperationException("Consumer not found");
 
-                if (_messageProcessors != null)
+                var cContexts = new List<IDisposable>();
+
+                var consumingContests = _serviceProvider.GetServices<IConsumingContext>();
+                if (consumingContests != null)
                 {
-                    foreach (var messageProcessor in _messageProcessors)
-                        messageProcessor.Process(args);
+                    var gotContexts = consumingContests
+                        .Select(c => c.Set(args))
+                        .Where(c => c != null);
+
+                    cContexts.AddRange(gotContexts);
                 }
 
-                using (var scope = _serviceProvider.CreateScope())
+                try
                 {
+                    using var scope = _serviceProvider.CreateScope();
+
                     var consumer = consumerProvider.Provide(scope.ServiceProvider);
                     await consumer.ConsumeAsync(args);
+                }
+                finally
+                {
+                    foreach (var context in cContexts)
+                    {
+                        try
+                        {
+                            context.Dispose();
+                        }
+                        catch (Exception e)
+                        {
+                            Log?.Error("Consuming context releasing error", e).Write();
+                        }
+                    }
                 }
 
                 channel.BasicAck(args.DeliveryTag, false);

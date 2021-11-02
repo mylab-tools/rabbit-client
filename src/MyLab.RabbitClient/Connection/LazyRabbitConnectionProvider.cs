@@ -18,18 +18,18 @@ namespace MyLab.RabbitClient.Connection
 
         public LazyRabbitConnectionProvider(
             IOptions<RabbitOptions> options,
-            ILogger<LazyRabbitConnectionProvider> logger = null)
+            IDslLogger<LazyRabbitConnectionProvider> logger = null)
             : this(options.Value, logger)
         {
         }
 
         public LazyRabbitConnectionProvider(
             RabbitOptions options,
-            ILogger<LazyRabbitConnectionProvider> logger = null)
+            IDslLogger<LazyRabbitConnectionProvider> logger = null)
         {
             _connector = new RabbitConnector(options)
             {
-                Log = logger?.Dsl()
+                Log = logger
             };
         }
 

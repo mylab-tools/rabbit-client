@@ -57,10 +57,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Adds processor for publishing message
         /// </summary>
-        public static IServiceCollection AddRabbitPublishingMessageProcessor<T>(this IServiceCollection srv)
-            where T : class, IPublishingMessageProcessor
+        public static IServiceCollection AddRabbitPublishingContext<T>(this IServiceCollection srv)
+            where T : class, IPublishingContext
         {
-            return srv.AddSingleton<IPublishingMessageProcessor, T>();
+            return srv.AddSingleton<IPublishingContext, T>();
         }
     }
 }
