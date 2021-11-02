@@ -20,12 +20,12 @@ namespace MyLab.RabbitClient.Publishing
             IOptions<RabbitOptions> options,
             IRabbitChannelProvider channelProvider,
             IEnumerable<IPublishingContext> publishingMessageProcessors,
-            ILogger<RabbitPublisher> logger= null)
+            IDslLogger<RabbitPublisher> logger= null)
         {
             _channelProvider = channelProvider;
             _pubContexts = publishingMessageProcessors;
             _options = options.Value;
-            _log = logger?.Dsl();
+            _log = logger;
         }
 
         public RabbitPublisherBuilder IntoDefault(string routingKey = null)

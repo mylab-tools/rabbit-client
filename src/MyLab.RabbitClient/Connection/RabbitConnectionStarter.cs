@@ -13,10 +13,10 @@ namespace MyLab.RabbitClient.Connection
 
         public RabbitConnectionStarter(
             IBackgroundRabbitConnectionManager connectionManager,
-            ILogger<RabbitConnectionStarter> logger = null)
+            IDslLogger<RabbitConnectionStarter> logger = null)
         {
             _connectionManager = connectionManager;
-            _log = logger.Dsl();
+            _log = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
