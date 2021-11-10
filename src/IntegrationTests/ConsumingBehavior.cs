@@ -1,30 +1,17 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MyLab.RabbitClient;
-using MyLab.RabbitClient.Consuming;
-using MyLab.RabbitClient.Model;
-using RabbitMQ.Client.Events;
+using MyLab.Log;
 using Xunit;
-using Xunit.Abstractions;
+using LogLabels = MyLab.RabbitClient.LogLabels;
 
 namespace IntegrationTests
 {
-    public class ConsumingBehavior
+    public partial class ConsumingBehavior
     {
-        private readonly ITestOutputHelper _output;
-
-        public ConsumingBehavior(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         [Fact]
         public async Task ShouldReceiveMessage()
         {
@@ -36,25 +23,12 @@ namespace IntegrationTests
                 Value = "foo"
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var host = CreateHost(queue.Name, consumer);
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .AddRabbit()
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddLogging(l=> l.AddXUnit(_output).AddFilter(l => true)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -93,25 +67,12 @@ namespace IntegrationTests
                 Value = "bar"
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var host = CreateHost(queue.Name, consumer);
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbit()
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -147,26 +108,13 @@ namespace IntegrationTests
                 Value = "foo"
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var host = CreateHost(queue.Name, consumer, srv =>
+                srv.AddRabbitCtx<AddHeaderConsumingCtx>());
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .AddRabbit()
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>()
-                    .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -196,32 +144,17 @@ namespace IntegrationTests
                 Id = 10
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
-
-            var cancellationSource = new CancellationTokenSource();
-            var cancellationToken = cancellationSource.Token;
-
             var logErrorCatcher = new LogErrorCatcher();
             var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
 
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .AddRabbit()
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddRabbitConsumingContext<NullConsumingCtx>()
-                    .AddLogging(l => l
-                        .AddXUnit(_output)
-                        .AddFilter(l => true)
-                        .AddProvider(logErrorCatcherProvider)))
-                .Build();
+            var host = CreateHost(queue.Name, consumer, 
+                srv => srv.AddRabbitCtx<AddHeaderConsumingCtx>(),
+                log => log.AddProvider(logErrorCatcherProvider));
 
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -243,50 +176,52 @@ namespace IntegrationTests
             Assert.Equal(10, gotMsg.Content.Id);
         }
 
-        class AddFoobarHeaderConsumingCtx : IConsumingContext
+        [Fact]
+        public async Task ShouldLogConsumingCtxWhenConsumingError()
         {
-            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
-            {
-                deliverEventArgs.BasicProperties.Headers = new Dictionary<string, object>
-                {
-                    {"foo", "bar"}
-                };
+            //Arrange
+            var testEntity = new TestEntity();
 
-                return new EmptyCtx();
-            }
+            var queue = CreateQueue();
+            var consumer = new BrokenConsumer();
+            var logErrorCatcher = new LogErrorCatcher();
+            var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
 
-            class EmptyCtx : IDisposable
-            {
-                public void Dispose()
-                {
-                }
-            }
-        }
+            var ctxKey = "ctxKey-" + Guid.NewGuid().ToString("N");
+            var ctxValue = "ctxValue-" + Guid.NewGuid().ToString("N");
 
-        class NullConsumingCtx : IConsumingContext
-        {
-            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
-            {
-                return null;
-            }
-        }
+            var consumingContext = new AddHeaderConsumingCtx(ctxKey, ctxValue);
+            var logContext = new AddFoobarLoggerCtx(consumingContext);
 
-        class TestConsumer : RabbitConsumer<TestEntity>
-        {
-            public Queue<ConsumedMessage<TestEntity>> LastMessages { get; } = new Queue<ConsumedMessage<TestEntity>>();
+            var host = CreateHost(queue.Name, consumer,
+                srv => srv.AddRabbitCtx(consumingContext),
+                l => l.AddProvider(logErrorCatcherProvider).AddDslCtx(logContext));
 
-            protected override Task ConsumeMessageAsync(ConsumedMessage<TestEntity> consumedMessage)
-            {
-                LastMessages.Enqueue(consumedMessage);
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
+            await host.StartAsync(cancellationToken);
 
-                return Task.CompletedTask;
-            }
-        }
+            //Act
+            queue.Publish(testEntity);
 
-        class TestEntity
-        {
-            public int Id { get; set; }
-            public string Value { get; set; }
+            await Task.Delay(500);
+
+            cancellationSource.Cancel();
+
+            await host.StopAsync();
+
+            host.Dispose();
+
+            var log = logErrorCatcher.LastError;
+
+            //Assert
+            Assert.NotNull(log);
+
+            Assert.NotNull(log.Facts);
+            Assert.Equal(ctxValue, log.Facts[ctxKey]);
+
+            Assert.NotNull(log.Labels);
+            Assert.True(log.Labels.ContainsKey(LogLabels.ConsumingError));
         }
     }
 }

@@ -47,8 +47,10 @@ namespace MyLab.RabbitClient.Consuming
             }
 
             var channel = asyncBasicConsumer.Model;
-
             var queue = args.ConsumerTag;
+            
+            List<IDisposable> cContexts = null;
+
             try
             {
                 Log?.Debug("Message received")
@@ -58,42 +60,15 @@ namespace MyLab.RabbitClient.Consuming
                     .AndFactIs("Exchange", args.Exchange)
                     .Write();
 
-                if(!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
+                if (!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
                     throw new InvalidOperationException("Consumer not found");
 
-                var cContexts = new List<IDisposable>();
+                cContexts = SetLogContexts(args);
 
-                var consumingContests = _serviceProvider.GetServices<IConsumingContext>();
-                if (consumingContests != null)
-                {
-                    var gotContexts = consumingContests
-                        .Select(c => c.Set(args))
-                        .Where(c => c != null);
+                using var scope = _serviceProvider.CreateScope();
 
-                    cContexts.AddRange(gotContexts);
-                }
-
-                try
-                {
-                    using var scope = _serviceProvider.CreateScope();
-
-                    var consumer = consumerProvider.Provide(scope.ServiceProvider);
-                    await consumer.ConsumeAsync(args);
-                }
-                finally
-                {
-                    foreach (var context in cContexts)
-                    {
-                        try
-                        {
-                            context.Dispose();
-                        }
-                        catch (Exception e)
-                        {
-                            Log?.Error("Consuming context releasing error", e).Write();
-                        }
-                    }
-                }
+                var consumer = consumerProvider.Provide(scope.ServiceProvider);
+                await consumer.ConsumeAsync(args);
 
                 channel.BasicAck(args.DeliveryTag, false);
             }
@@ -101,10 +76,50 @@ namespace MyLab.RabbitClient.Consuming
             {
                 Log.Error(e)
                     .AndFactIs("queue", queue)
+                    .AndLabel(LogLabels.ConsumingError)
                     .Write();
 
                 channel.BasicNack(args.DeliveryTag, false, false);
             }
+            finally
+            {
+                if (cContexts != null)
+                {
+                    ResetLogContexts(cContexts);
+                }
+            }
+        }
+
+        void ResetLogContexts(List<IDisposable> contexts)
+        {
+            foreach (var context in contexts)
+            {
+                try
+                {
+                    context.Dispose();
+                }
+                catch (Exception e)
+                {
+                    Log?.Error("Consuming context releasing error", e).Write();
+                }
+            }
+        }
+
+        private List<IDisposable> SetLogContexts(BasicDeliverEventArgs args)
+        {
+            var cContexts = new List<IDisposable>();
+
+            var consumingContexts = _serviceProvider.GetServices<IConsumingContext>();
+            if (consumingContexts != null)
+            {
+                var gotContexts = consumingContexts
+                    .Select(c => c.Set(args))
+                    .Where(c => c != null);
+
+                cContexts.AddRange(gotContexts);
+            }
+
+            return cContexts;
         }
 
         class Disposer : IDisposable

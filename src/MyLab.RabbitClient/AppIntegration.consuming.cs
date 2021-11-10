@@ -65,10 +65,18 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Adds consumed message processor
         /// </summary>
-        public static IServiceCollection AddRabbitConsumingContext<T>(this IServiceCollection srvColl)
+        public static IServiceCollection AddRabbitCtx<T>(this IServiceCollection srvColl)
             where T : class, IConsumingContext
         {
             return srvColl.AddSingleton<IConsumingContext, T>();
+        }
+
+        /// <summary>
+        /// Adds consumed message processor
+        /// </summary>
+        public static IServiceCollection AddRabbitCtx(this IServiceCollection srvColl, IConsumingContext context)
+        {
+            return srvColl.AddSingleton<IConsumingContext>(context);
         }
 
         private static IServiceCollection TryAddConsuming(this IServiceCollection srvColl)

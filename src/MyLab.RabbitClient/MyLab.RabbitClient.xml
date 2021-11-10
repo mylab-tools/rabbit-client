@@ -34,7 +34,12 @@
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
             </summary>
         </member>
-        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumingContext``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds consumed message processor
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IConsumingContext)">
             <summary>
             Adds consumed message processor
             </summary>
@@ -346,6 +351,16 @@
         </member>
         <member name="M:MyLab.RabbitClient.HealthCheck.RabbitConnectionHealthCheck.CheckHealthAsync(Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext,System.Threading.CancellationToken)">
             <inheritdoc/>
+        </member>
+        <member name="T:MyLab.RabbitClient.LogLabels">
+            <summary>
+            Rabbit client log labels
+            </summary>
+        </member>
+        <member name="F:MyLab.RabbitClient.LogLabels.ConsumingError">
+            <summary>
+            Adds when error consuming has occurred
+            </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Model.RabbitExchange">
             <summary>
