@@ -16,15 +16,8 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class ConsumingBehavior
+    public partial class ConsumingBehavior
     {
-        private readonly ITestOutputHelper _output;
-
-        public ConsumingBehavior(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         [Fact]
         public async Task ShouldReceiveMessage()
         {
@@ -36,25 +29,12 @@ namespace IntegrationTests
                 Value = "foo"
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var host = CreateHost(queue.Name, consumer);
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .AddRabbit()
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddLogging(l=> l.AddXUnit(_output).AddFilter(l => true)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -93,25 +73,12 @@ namespace IntegrationTests
                 Value = "bar"
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var host = CreateHost(queue.Name, consumer);
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbit()
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -147,26 +114,13 @@ namespace IntegrationTests
                 Value = "foo"
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var host = CreateHost(queue.Name, consumer, srv =>
+                srv.AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>());
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .AddRabbit()
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>()
-                    .AddLogging(l => l.AddXUnit(_output).AddFilter(l => true)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -196,32 +150,16 @@ namespace IntegrationTests
                 Id = 10
             };
 
-            var queue = new RabbitQueueFactory(TestTools.ChannelProvider)
-            {
-                AutoDelete = true,
-                Prefix = "test"
-            }.CreateWithRandomId();
-
+            var queue = CreateQueue();
             var consumer = new TestConsumer();
+            var logErrorCatcher = new LogErrorCatcher();
+            var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
+            var host = CreateHost(queue.Name, consumer, 
+                srv => srv.AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>(),
+                log => log.AddProvider(logErrorCatcherProvider));
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
-
-            var logErrorCatcher = new LogErrorCatcher();
-            var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
-
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices(srv => srv
-                    .AddRabbit()
-                    .ConfigureRabbit(TestTools.OptionsConfigureAct)
-                    .AddRabbitConsumer(queue.Name, consumer)
-                    .AddRabbitConsumingContext<NullConsumingCtx>()
-                    .AddLogging(l => l
-                        .AddXUnit(_output)
-                        .AddFilter(l => true)
-                        .AddProvider(logErrorCatcherProvider)))
-                .Build();
-
             await host.StartAsync(cancellationToken);
 
             //Act
@@ -241,52 +179,6 @@ namespace IntegrationTests
             Assert.Null(logErrorCatcher.LastError);
             Assert.NotNull(gotMsg);
             Assert.Equal(10, gotMsg.Content.Id);
-        }
-
-        class AddFoobarHeaderConsumingCtx : IConsumingContext
-        {
-            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
-            {
-                deliverEventArgs.BasicProperties.Headers = new Dictionary<string, object>
-                {
-                    {"foo", "bar"}
-                };
-
-                return new EmptyCtx();
-            }
-
-            class EmptyCtx : IDisposable
-            {
-                public void Dispose()
-                {
-                }
-            }
-        }
-
-        class NullConsumingCtx : IConsumingContext
-        {
-            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
-            {
-                return null;
-            }
-        }
-
-        class TestConsumer : RabbitConsumer<TestEntity>
-        {
-            public Queue<ConsumedMessage<TestEntity>> LastMessages { get; } = new Queue<ConsumedMessage<TestEntity>>();
-
-            protected override Task ConsumeMessageAsync(ConsumedMessage<TestEntity> consumedMessage)
-            {
-                LastMessages.Enqueue(consumedMessage);
-
-                return Task.CompletedTask;
-            }
-        }
-
-        class TestEntity
-        {
-            public int Id { get; set; }
-            public string Value { get; set; }
         }
     }
 }
