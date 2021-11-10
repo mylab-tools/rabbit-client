@@ -1,18 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MyLab.RabbitClient;
-using MyLab.RabbitClient.Consuming;
-using MyLab.RabbitClient.Model;
-using RabbitMQ.Client.Events;
+using MyLab.Log;
 using Xunit;
-using Xunit.Abstractions;
+using LogLabels = MyLab.RabbitClient.LogLabels;
 
 namespace IntegrationTests
 {
@@ -117,7 +111,7 @@ namespace IntegrationTests
             var queue = CreateQueue();
             var consumer = new TestConsumer();
             var host = CreateHost(queue.Name, consumer, srv =>
-                srv.AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>());
+                srv.AddRabbitCtx<AddHeaderConsumingCtx>());
 
             var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
@@ -154,8 +148,9 @@ namespace IntegrationTests
             var consumer = new TestConsumer();
             var logErrorCatcher = new LogErrorCatcher();
             var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
+
             var host = CreateHost(queue.Name, consumer, 
-                srv => srv.AddRabbitConsumingContext<AddFoobarHeaderConsumingCtx>(),
+                srv => srv.AddRabbitCtx<AddHeaderConsumingCtx>(),
                 log => log.AddProvider(logErrorCatcherProvider));
 
             var cancellationSource = new CancellationTokenSource();
@@ -179,6 +174,54 @@ namespace IntegrationTests
             Assert.Null(logErrorCatcher.LastError);
             Assert.NotNull(gotMsg);
             Assert.Equal(10, gotMsg.Content.Id);
+        }
+
+        [Fact]
+        public async Task ShouldLogConsumingCtxWhenConsumingError()
+        {
+            //Arrange
+            var testEntity = new TestEntity();
+
+            var queue = CreateQueue();
+            var consumer = new BrokenConsumer();
+            var logErrorCatcher = new LogErrorCatcher();
+            var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
+
+            var ctxKey = "ctxKey-" + Guid.NewGuid().ToString("N");
+            var ctxValue = "ctxValue-" + Guid.NewGuid().ToString("N");
+
+            var consumingContext = new AddHeaderConsumingCtx(ctxKey, ctxValue);
+            var logContext = new AddFoobarLoggerCtx(consumingContext);
+
+            var host = CreateHost(queue.Name, consumer,
+                srv => srv.AddRabbitCtx(consumingContext),
+                l => l.AddProvider(logErrorCatcherProvider).AddDslCtx(logContext));
+
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
+            await host.StartAsync(cancellationToken);
+
+            //Act
+            queue.Publish(testEntity);
+
+            await Task.Delay(500);
+
+            cancellationSource.Cancel();
+
+            await host.StopAsync();
+
+            host.Dispose();
+
+            var log = logErrorCatcher.LastError;
+
+            //Assert
+            Assert.NotNull(log);
+
+            Assert.NotNull(log.Facts);
+            Assert.Equal(ctxValue, log.Facts[ctxKey]);
+
+            Assert.NotNull(log.Labels);
+            Assert.True(log.Labels.ContainsKey(LogLabels.ConsumingError));
         }
     }
 }

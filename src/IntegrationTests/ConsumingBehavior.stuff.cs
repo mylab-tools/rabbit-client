@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MyLab.Log.Dsl;
 using MyLab.RabbitClient.Consuming;
 using MyLab.RabbitClient.Model;
 using RabbitMQ.Client.Events;
@@ -20,23 +21,46 @@ namespace IntegrationTests
             _output = output;
         }
 
-        private class AddFoobarHeaderConsumingCtx : IConsumingContext
+        private class AddHeaderConsumingCtx : IConsumingContext
         {
+            public string Key { get; }
+            public string Value { get; }
+
+            public AddHeaderConsumingCtx()
+                :this("foo", "bar")
+            {
+
+            }
+
+            public AddHeaderConsumingCtx(string key, string value)
+            {
+                Key = key;
+                Value = value;
+            }
+
             public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
             {
                 deliverEventArgs.BasicProperties.Headers = new Dictionary<string, object>
                 {
-                    {"foo", "bar"}
+                    {Key, Value}
                 };
 
-                return new EmptyCtx();
+                return null;
+            }
+        }
+
+        private class AddFoobarLoggerCtx : IDslLogContextApplier
+        {
+            private readonly AddHeaderConsumingCtx _addHeaderConsumingCtx;
+
+            public AddFoobarLoggerCtx(AddHeaderConsumingCtx addHeaderConsumingCtx)
+            {
+                _addHeaderConsumingCtx = addHeaderConsumingCtx;
             }
 
-            class EmptyCtx : IDisposable
+            public DslExpression Apply(DslExpression dslExpression)
             {
-                public void Dispose()
-                {
-                }
+                return dslExpression.AndFactIs(_addHeaderConsumingCtx.Key, _addHeaderConsumingCtx.Value);
             }
         }
 
@@ -49,7 +73,7 @@ namespace IntegrationTests
             }.CreateWithRandomId();
         }
 
-        IHost CreateHost(string queueName, TestConsumer consumer, Action<IServiceCollection> srvAct = null, Action<ILoggingBuilder> logAct = null)
+        IHost CreateHost(string queueName, IRabbitConsumer consumer, Action<IServiceCollection> srvAct = null, Action<ILoggingBuilder> logAct = null)
         {
             return Host.CreateDefaultBuilder()
                 .ConfigureServices(srv =>
@@ -60,7 +84,9 @@ namespace IntegrationTests
                         .AddRabbitConsumer(queueName, consumer)
                         .AddLogging(l =>
                         {
-                            l.AddXUnit(_output).AddFilter(l => true);
+                            l.AddXUnit(_output)
+                                .AddFilter(l => true)
+                                .AddDsl();
                             logAct?.Invoke(l);
                         });
 
@@ -86,6 +112,14 @@ namespace IntegrationTests
                 LastMessages.Enqueue(consumedMessage);
 
                 return Task.CompletedTask;
+            }
+        }
+
+        private class BrokenConsumer : RabbitConsumer<TestEntity>
+        {
+            protected override Task ConsumeMessageAsync(ConsumedMessage<TestEntity> consumedMessage)
+            {
+                throw new Exception("Test exception");
             }
         }
 
