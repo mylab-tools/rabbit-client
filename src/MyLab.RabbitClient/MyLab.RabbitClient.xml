@@ -137,6 +137,16 @@
             Manages and provides Rabbit connection
             </summary>
         </member>
+        <member name="M:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider.#ctor(Microsoft.Extensions.Options.IOptions{MyLab.RabbitClient.RabbitOptions},Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider.#ctor(MyLab.RabbitClient.RabbitOptions,Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider})">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider"/>
+            </summary>
+        </member>
         <member name="E:MyLab.RabbitClient.Connection.LazyRabbitConnectionProvider.Reconnected">
             <inheritdoc />
         </member>
