@@ -49,21 +49,6 @@ namespace IntegrationTests
             }
         }
 
-        private class AddFoobarLoggerCtx : IDslLogContextApplier
-        {
-            private readonly AddHeaderConsumingCtx _addHeaderConsumingCtx;
-
-            public AddFoobarLoggerCtx(AddHeaderConsumingCtx addHeaderConsumingCtx)
-            {
-                _addHeaderConsumingCtx = addHeaderConsumingCtx;
-            }
-
-            public DslExpression Apply(DslExpression dslExpression)
-            {
-                return dslExpression.AndFactIs(_addHeaderConsumingCtx.Key, _addHeaderConsumingCtx.Value);
-            }
-        }
-
         RabbitQueue CreateQueue()
         {
             return new RabbitQueueFactory(TestTools.ChannelProvider)
@@ -85,8 +70,7 @@ namespace IntegrationTests
                         .AddLogging(l =>
                         {
                             l.AddXUnit(_output)
-                                .AddFilter(l => true)
-                                .AddDsl();
+                                .AddFilter(l => true);
                             logAct?.Invoke(l);
                         });
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
 using MyLab.Log.Dsl;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -9,9 +10,9 @@ namespace MyLab.RabbitClient.Consuming
     {
         private readonly IDslLogger _log;
         
-        public RabbitChannelExceptionReceiver(IDslLogger log)
+        public RabbitChannelExceptionReceiver(ILogger log)
         {
-            _log = log;
+            _log = log.Dsl();
         }
 
         public IDisposable StartListen(IModel channel)
