@@ -9,13 +9,16 @@ namespace MyLab.RabbitClient.Connection
     /// <summary>
     /// Manages and provides Rabbit connection
     /// </summary>
-    class LazyRabbitConnectionProvider : IRabbitConnectionProvider, IDisposable
+    public class LazyRabbitConnectionProvider : IRabbitConnectionProvider, IDisposable
     {
         private readonly RabbitConnector _connector;
         private readonly object _lock = new object();
 
         private IConnection _currConnection;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="LazyRabbitConnectionProvider"/>
+        /// </summary>
         public LazyRabbitConnectionProvider(
             IOptions<RabbitOptions> options,
             ILogger<LazyRabbitConnectionProvider> logger = null)
@@ -23,6 +26,9 @@ namespace MyLab.RabbitClient.Connection
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="LazyRabbitConnectionProvider"/>
+        /// </summary>
         public LazyRabbitConnectionProvider(
             RabbitOptions options,
             ILogger<LazyRabbitConnectionProvider> logger = null)
