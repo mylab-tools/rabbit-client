@@ -11,9 +11,9 @@
     <RepositoryType>git</RepositoryType>
     <PackageIcon>tools.png</PackageIcon>
     <PackageIconUrl />
-    <Version>2.5.13</Version>
-    <AssemblyVersion>2.5.13.1111</AssemblyVersion>
-    <FileVersion>2.5.13.1111</FileVersion>
+    <Version>2.6.13</Version>
+    <AssemblyVersion>2.6.13.0312</AssemblyVersion>
+    <FileVersion>2.6.13.0312</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -35,8 +35,8 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="3.1.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.8" />
-    <PackageReference Include="MyLab.Log" Version="3.1.9" />
-    <PackageReference Include="MyLab.Log.Dsl" Version="3.4.3" />
+    <PackageReference Include="MyLab.Log" Version="3.2.10" />
+    <PackageReference Include="MyLab.Log.Dsl" Version="3.5.3" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
   </ItemGroup>
 

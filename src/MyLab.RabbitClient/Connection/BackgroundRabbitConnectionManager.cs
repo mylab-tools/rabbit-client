@@ -17,16 +17,16 @@ namespace MyLab.RabbitClient.Connection
 
         public BackgroundRabbitConnectionManager(
             IOptions<RabbitOptions> options,
-            IDslLogger<BackgroundRabbitConnectionManager> logger = null)
+            ILogger<BackgroundRabbitConnectionManager> logger = null)
             : this(options.Value, logger)
         {
         }
 
         public BackgroundRabbitConnectionManager(
             RabbitOptions options,
-            IDslLogger<BackgroundRabbitConnectionManager> logger = null)
+            ILogger<BackgroundRabbitConnectionManager> logger = null)
         {
-            _log = logger;
+            _log = logger?.Dsl();
             _connector = new RabbitConnector(options)
             {
                 Log = _log

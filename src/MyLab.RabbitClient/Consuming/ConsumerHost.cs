@@ -14,10 +14,10 @@ namespace MyLab.RabbitClient.Consuming
 
         public ConsumerHost(
             IConsumerManager consumerHost,
-            IDslLogger<ConsumerHost> logger = null)
+            ILogger<ConsumerHost> logger = null)
         {
             _consumerHost = consumerHost ?? throw new ArgumentNullException(nameof(consumerHost));
-            _log = logger;
+            _log = logger.Dsl();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
