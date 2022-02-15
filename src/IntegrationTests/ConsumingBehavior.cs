@@ -136,6 +136,44 @@ namespace IntegrationTests
         }
 
         [Fact]
+        public async Task ShouldBeNotifiedAboutContextException()
+        {
+            //Arrange
+
+            var testEntity = new TestEntity
+            {
+                Id = 1,
+                Value = "foo"
+            };
+
+            var queue = CreateQueue();
+            var testException = new Exception();
+            var consumer = new BrokenTestConsumer(testException);
+            var host = CreateHost(queue.Name, consumer, srv =>
+                srv.AddRabbitCtx<CatchUnhandledExceptionCtx>());
+
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
+            await host.StartAsync(cancellationToken);
+
+            //Act
+            queue.Publish(testEntity);
+
+            await Task.Delay(500);
+
+            cancellationSource.Cancel();
+
+            await host.StopAsync();
+
+            host.Dispose();
+
+            var caughtException = CatchUnhandledExceptionCtxInstance.LastException;
+
+            //Assert
+            Assert.Equal(testException, caughtException);
+        }
+
+        [Fact]
         public async Task ShouldUseNullConsumingCtx()
         {
             //Arrange

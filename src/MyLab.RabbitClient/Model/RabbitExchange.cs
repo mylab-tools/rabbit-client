@@ -31,7 +31,7 @@ namespace MyLab.RabbitClient.Model
         /// <summary>
         /// Publish object as JSON message content
         /// </summary>
-        public void Publish(object message, string routingKey = null)
+        public void Publish(object message, string routingKey = null, IBasicProperties basicProperties = null)
         {
             string messageStr = JsonConvert.SerializeObject(message);
             var messageBin = Encoding.UTF8.GetBytes(messageStr);
@@ -40,7 +40,8 @@ namespace MyLab.RabbitClient.Model
                 ch.BasicPublish(
                     exchange: Name,
                     routingKey: routingKey ?? "",
-                    body: messageBin)
+                    body: messageBin,
+                    basicProperties: basicProperties)
                 );
         }
 

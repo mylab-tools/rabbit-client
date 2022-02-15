@@ -49,7 +49,7 @@ namespace MyLab.RabbitClient.Consuming
             var channel = asyncBasicConsumer.Model;
             var queue = args.ConsumerTag;
             
-            List<IDisposable> cContexts = null;
+            List<IConsumingContextInstance> cContexts = null;
 
             try
             {
@@ -74,12 +74,17 @@ namespace MyLab.RabbitClient.Consuming
             }
             catch (Exception e)
             {
-                Log.Error(e)
+                Log?.Error(e)
                     .AndFactIs("queue", queue)
                     .AndLabel(LogLabels.ConsumingError)
                     .Write();
 
                 channel.BasicNack(args.DeliveryTag, false, false);
+
+                if (cContexts != null)
+                {
+                    NotifyContextError(cContexts, e);
+                }
             }
             finally
             {
@@ -90,7 +95,22 @@ namespace MyLab.RabbitClient.Consuming
             }
         }
 
-        void ResetLogContexts(List<IDisposable> contexts)
+        void NotifyContextError(List<IConsumingContextInstance> contexts, Exception unhandledException)
+        {
+            foreach (var context in contexts)
+            {
+                try
+                {
+                    context.NotifyUnhandledException(unhandledException);
+                }
+                catch (Exception e)
+                {
+                    Log?.Error("Consuming context error notification exception", e).Write();
+                }
+            }
+        }
+
+        void ResetLogContexts(List<IConsumingContextInstance> contexts)
         {
             foreach (var context in contexts)
             {
@@ -105,19 +125,17 @@ namespace MyLab.RabbitClient.Consuming
             }
         }
 
-        private List<IDisposable> SetLogContexts(BasicDeliverEventArgs args)
+        private List<IConsumingContextInstance> SetLogContexts(BasicDeliverEventArgs args)
         {
-            var cContexts = new List<IDisposable>();
+            var cContexts = new List<IConsumingContextInstance>();
 
             var consumingContexts = _serviceProvider.GetServices<IConsumingContext>();
-            if (consumingContexts != null)
-            {
-                var gotContexts = consumingContexts
-                    .Select(c => c.Set(args))
-                    .Where(c => c != null);
 
-                cContexts.AddRange(gotContexts);
-            }
+            var gotContexts = consumingContexts
+                .Select(c => c.Set(args))
+                .Where(c => c != null);
+
+            cContexts.AddRange(gotContexts);
 
             return cContexts;
         }

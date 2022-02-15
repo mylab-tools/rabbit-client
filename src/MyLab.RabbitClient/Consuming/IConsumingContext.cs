@@ -11,6 +11,17 @@ namespace MyLab.RabbitClient.Consuming
         /// <summary>
         /// Set context
         /// </summary>
-        public IDisposable Set(BasicDeliverEventArgs deliverEventArgs);
+        public IConsumingContextInstance Set(BasicDeliverEventArgs deliverEventArgs);
+    }
+
+    /// <summary>
+    /// Represents established consuming context instance
+    /// </summary>
+    public interface IConsumingContextInstance : IDisposable
+    {
+        /// <summary>
+        /// Notifies about unhandled exception which thrown in this context
+        /// </summary>
+        void NotifyUnhandledException(Exception exception);
     }
 }
