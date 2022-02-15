@@ -238,6 +238,16 @@
             Set context
             </summary>
         </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IConsumingContextInstance">
+            <summary>
+            Represents established consuming context instance
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IConsumingContextInstance.NotifyUnhandledException(System.Exception)">
+            <summary>
+            Notifies about unhandled exception which thrown in this context
+            </summary>
+        </member>
         <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumer">
             <summary>
             Defines consumer logic interface
@@ -387,7 +397,7 @@
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitExchange"/>
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Model.RabbitExchange.Publish(System.Object,System.String)">
+        <member name="M:MyLab.RabbitClient.Model.RabbitExchange.Publish(System.Object,System.String,RabbitMQ.Client.IBasicProperties)">
             <summary>
             Publish object as JSON message content
             </summary>
@@ -467,7 +477,7 @@
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueue"/>
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.Publish(System.Object)">
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.Publish(System.Object,RabbitMQ.Client.IBasicProperties)">
             <summary>
             Publish object as JSON message content
             </summary>

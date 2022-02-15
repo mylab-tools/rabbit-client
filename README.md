@@ -423,11 +423,11 @@ class MyConsumerRegistrar : IRabbitConsumerRegistrar
       /// <summary>
       /// Set context
       /// </summary>
-      public IDisposable Set(BasicDeliverEventArgs deliverEventArgs);
+      public IConsumingContextInstance Set(BasicDeliverEventArgs deliverEventArgs);
   }
   ```
 
-* в методе `Set` выполнять действия, связанные с установкой контекста и возвращать объект `IDisposable`, у которого по завершению обработки сообщения будет вызван метод `Dispose`. Для случаев, когда не требуются действия при освобождении контекста, можно возвращать `null`;
+* в методе `Set` выполнять действия, связанные с установкой контекста и возвращать объект `IConsumingContextInstance`, у которого по завершению обработки сообщения будет вызван метод `Dispose`. Для случаев, когда не требуются действия при освобождении контекста, можно возвращать `null`;
 
 * добавить его в сервисы приложения:
 

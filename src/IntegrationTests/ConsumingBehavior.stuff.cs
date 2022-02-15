@@ -21,6 +21,29 @@ namespace IntegrationTests
             _output = output;
         }
 
+        private class CatchUnhandledExceptionCtx : IConsumingContext
+        {
+            public IConsumingContextInstance Set(BasicDeliverEventArgs deliverEventArgs)
+            {
+                return new CatchUnhandledExceptionCtxInstance();
+            }
+        }
+
+        class CatchUnhandledExceptionCtxInstance : IConsumingContextInstance
+        {
+            public static Exception LastException { get; set; }
+
+            public void Dispose()
+            {
+
+            }
+
+            public void NotifyUnhandledException(Exception exception)
+            {
+                LastException = exception;
+            }
+        }
+
         private class AddHeaderConsumingCtx : IConsumingContext
         {
             public string Key { get; }
@@ -38,7 +61,7 @@ namespace IntegrationTests
                 Value = value;
             }
 
-            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
+            public IConsumingContextInstance Set(BasicDeliverEventArgs deliverEventArgs)
             {
                 deliverEventArgs.BasicProperties.Headers = new Dictionary<string, object>
                 {
@@ -81,9 +104,24 @@ namespace IntegrationTests
 
         private class NullConsumingCtx : IConsumingContext
         {
-            public IDisposable Set(BasicDeliverEventArgs deliverEventArgs)
+            public IConsumingContextInstance Set(BasicDeliverEventArgs deliverEventArgs)
             {
                 return null;
+            }
+        }
+
+        private class BrokenTestConsumer : RabbitConsumer<TestEntity>
+        {
+            private readonly Exception _exceptionForThrow;
+
+            public BrokenTestConsumer(Exception exceptionForThrow)
+            {
+                _exceptionForThrow = exceptionForThrow;
+            }
+
+            protected override Task ConsumeMessageAsync(ConsumedMessage<TestEntity> consumedMessage)
+            {
+                throw _exceptionForThrow;
             }
         }
 
