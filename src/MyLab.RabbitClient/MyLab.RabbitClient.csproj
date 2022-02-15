@@ -13,7 +13,7 @@
     <PackageIconUrl />
     <Version>2.7.13</Version>
     <AssemblyVersion>2.7.13.1502</AssemblyVersion>
-    <FileVersion>2.7.13.1102</FileVersion>
+    <FileVersion>2.7.13.1502</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
