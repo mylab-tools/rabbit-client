@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds processor for publishing message
+        /// Adds context for publishing message
         /// </summary>
         public static IServiceCollection AddRabbitPublishingContext<T>(this IServiceCollection srv)
             where T : class, IPublishingContext

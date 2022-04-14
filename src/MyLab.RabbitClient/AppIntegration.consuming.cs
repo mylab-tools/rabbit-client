@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds consumed message processor
+        /// Adds consumed message context
         /// </summary>
         public static IServiceCollection AddRabbitCtx<T>(this IServiceCollection srvColl)
             where T : class, IConsumingContext
@@ -72,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Adds consumed message processor
+        /// Adds consumed message context
         /// </summary>
         public static IServiceCollection AddRabbitCtx(this IServiceCollection srvColl, IConsumingContext context)
         {
