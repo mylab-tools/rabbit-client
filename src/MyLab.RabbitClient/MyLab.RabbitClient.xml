@@ -255,7 +255,7 @@
         </member>
         <member name="T:MyLab.RabbitClient.Consuming.IConsumingLogicStrategy">
             <summary>
-            Specifies consuming logic strategy
+            Receives an acknowledgment response to the received message
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Consuming.IConsumingLogicStrategy.Ack(System.UInt64)">
