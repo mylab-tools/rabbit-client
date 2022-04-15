@@ -532,7 +532,53 @@ var queue = queueFactory.CreateWithRandomId();
   void Remove()
   ```
 
-### Проверка работоспособности
+## Эмуляция
+
+В этом режиме публикуемые сообщения попадают в объекты-потребители в этом же приложении, не выходя за его пределы в реальный `RabbitMQ`. 
+
+Для включения режима Эмуляции, необходимо вызвать метод расширения коллекции сервисов `AddRabbitEmulation()` после всех остальных методов, связанных с настройкой механизмов `MyLab.RabbitMq`, кроме методов конфигурирования `ConfigureRabbit()` (от их очерёдности ничего не зависит).
+
+Пример включения режима Эмуляции:
+
+```C#
+ var services = new ServiceCollection()
+     .AddRabbit()
+     .ConfigureRabbit(options => options.DefaultPub =
+          new PublishOptions
+          {
+              RoutingKey = "foo-queue"
+          }
+     )
+     .AddRabbitConsumer("foo-queue", consumer)
+     .AddRabbitEmulation();
+```
+
+В метод расширения `AddRabbitEmulation()` можно передать объект, реализующий интерфейс `IConsumingLogicStrategy` для того, чтобы отследить реакцию подтверждения полученного сообщения. 
+
+```c#
+/// <summary>
+/// Receives an acknowledgment response to the received message
+/// </summary>
+public interface IConsumingLogicStrategy
+{
+    /// <summary>
+    /// Acknowledgement 
+    /// </summary>
+    void Ack(ulong deliveryTag);
+
+    /// <summary>
+    /// Negative acknowledgement
+    /// </summary>
+    void Nack(ulong deliveryTag);
+}
+```
+
+Особенности режима эмуляции:
+
+* сообщения маршрутизируются по `RoutingKey` (aka имя очереди), а указания `Excehange` игнорируются, что аналогично передаче через простую очередь;
+* в качестве `DeliveryTag` входящего сообщения всегда значение `0`(ноль).
+
+## Проверка работоспособности
 
 Проверка работоспособности заключается в проверке наличия подключения к `RabbitMQ` и осуществляется через механизм [HealthCheck](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/health-checks?view=aspnetcore-3.1).
 
