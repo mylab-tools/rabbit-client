@@ -187,7 +187,7 @@ namespace MyLab.RabbitClient.Publishing
 
                 try
                 {
-                    pBuilderUsing.PublishAsync(
+                    pBuilderUsing.Publish(
                         publishingMessage.Exchange ?? "",
                         publishingMessage.RoutingKey ?? "",
                         publishingMessage.BasicProperties,

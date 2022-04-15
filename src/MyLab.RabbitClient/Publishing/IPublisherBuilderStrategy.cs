@@ -29,7 +29,7 @@ namespace MyLab.RabbitClient.Publishing
         /// <summary>
         /// Publishes a message
         /// </summary>
-        Task PublishAsync(string exchange, string routingKey, IBasicProperties basicProperties, byte[] content);
+        void Publish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] content);
     }
 
     class ChannelBasedPublisherBuilderStrategy : IPublisherBuilderStrategy
@@ -66,7 +66,7 @@ namespace MyLab.RabbitClient.Publishing
             return _channel.CreateBasicProperties();
         }
 
-        public Task PublishAsync(string exchange, string routingKey, IBasicProperties basicProperties, byte[] content)
+        public void Publish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] content)
         {
             _channel.BasicPublish(
                 exchange ?? "",
@@ -74,8 +74,6 @@ namespace MyLab.RabbitClient.Publishing
                 basicProperties,
                 content
             );
-
-            return Task.CompletedTask;
         }
     }
 }

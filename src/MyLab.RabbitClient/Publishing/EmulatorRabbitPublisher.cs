@@ -77,11 +77,11 @@ namespace MyLab.RabbitClient.Publishing
             return new EmulatorBasicProperties();
         }
 
-        public async Task PublishAsync(string exchange, string routingKey, IBasicProperties basicProperties, byte[] content)
+        public void Publish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] content)
         {
             var eventArgs = new BasicDeliverEventArgs(routingKey, 0, false, exchange, routingKey, basicProperties, content);
 
-            await _consumingLogic.ConsumeMessageAsync(eventArgs, _consumingLogicStrategy);
+            _consumingLogic.ConsumeMessageAsync(eventArgs, _consumingLogicStrategy).Wait();
         }
     }
 
