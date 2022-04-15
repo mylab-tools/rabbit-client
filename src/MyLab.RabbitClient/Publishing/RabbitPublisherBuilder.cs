@@ -15,7 +15,7 @@ namespace MyLab.RabbitClient.Publishing
     /// </summary>
     public class RabbitPublisherBuilder
     {
-        private readonly IRabbitChannelProvider _channelProvider;
+        private readonly IPublisherBuilderStrategy _builderStrategy;
         private readonly string _exchange;
         private readonly string _routingKey;
         private readonly IEnumerable<IPublishingContext> _pubContexts;
@@ -34,12 +34,12 @@ namespace MyLab.RabbitClient.Publishing
         /// Initializes a new instance of <see cref="RabbitPublisherBuilder"/>
         /// </summary>
         public RabbitPublisherBuilder(
-            IRabbitChannelProvider channelProvider,
+            IPublisherBuilderStrategy builderStrategy,
             string exchange, 
             string routingKey,
             IEnumerable<IPublishingContext> pubContexts)
         {
-            _channelProvider = channelProvider;
+            _builderStrategy = builderStrategy;
             _exchange = exchange;
             _routingKey = routingKey;
             _pubContexts = pubContexts;
@@ -54,7 +54,7 @@ namespace MyLab.RabbitClient.Publishing
             List<Action<IBasicProperties>> newConfigActions,
             IDictionary<string, object> newHeaders)
         {
-            _channelProvider = initial._channelProvider;
+            _builderStrategy = initial._builderStrategy;
             _exchange = initial._exchange;
             _routingKey = initial._routingKey;
             _pubContexts = initial._pubContexts;
@@ -155,9 +155,9 @@ namespace MyLab.RabbitClient.Publishing
             if(_content == null)
                 throw new InvalidOperationException("Content not specified");
 
-            _channelProvider.Use(ch =>
+            _builderStrategy.Use(pBuilderUsing =>
             {
-                var basicProperties = ch.CreateBasicProperties();
+                var basicProperties = pBuilderUsing.CreateBasicProperties();
 
                 basicProperties.ContentType = "application/json";
                 basicProperties.Headers = _headers;
@@ -187,7 +187,7 @@ namespace MyLab.RabbitClient.Publishing
 
                 try
                 {
-                    ch.BasicPublish(
+                    pBuilderUsing.PublishAsync(
                         publishingMessage.Exchange ?? "",
                         publishingMessage.RoutingKey ?? "",
                         publishingMessage.BasicProperties,

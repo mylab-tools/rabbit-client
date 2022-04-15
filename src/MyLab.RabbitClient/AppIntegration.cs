@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using MyLab.RabbitClient;
 using MyLab.RabbitClient.Connection;
+using MyLab.RabbitClient.Consuming;
 using MyLab.RabbitClient.Publishing;
 
 // ReSharper disable once CheckNamespace
@@ -13,13 +13,15 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class AppIntegration
     {
+        static readonly ServiceDescriptor RabbitPublisherServiceDescriptor = new ServiceDescriptor(typeof(IRabbitPublisher), typeof(DefaultRabbitPublisher), ServiceLifetime.Singleton);
+
         /// <summary>
         /// Adds Rabbit services
         /// </summary>
         public static IServiceCollection AddRabbit(this IServiceCollection srv, RabbitConnectionStrategy connectionStrategy = RabbitConnectionStrategy.Lazy)
         {
-            srv.AddSingleton<IRabbitChannelProvider, RabbitChannelProvider>()
-                .AddSingleton<IRabbitPublisher, RabbitPublisher>();
+            srv.Add(RabbitPublisherServiceDescriptor);
+            srv.AddSingleton<IRabbitChannelProvider, RabbitChannelProvider>();
             
             switch (connectionStrategy)
             {
@@ -61,6 +63,21 @@ namespace Microsoft.Extensions.DependencyInjection
             where T : class, IPublishingContext
         {
             return srv.AddSingleton<IPublishingContext, T>();
+        }
+
+        /// <summary>
+        /// Adds emulation services and remove defaults
+        /// </summary>
+        public static IServiceCollection AddRabbitEmulation(this IServiceCollection srv, IConsumingLogicStrategy consumingLogicStrategy = null)
+        {
+            srv.Remove(ConsumerHostServiceDescriptor);
+            srv.Remove(ConsumerManagerServiceDescriptor);
+            srv.Remove(RabbitPublisherServiceDescriptor);
+
+            srv.AddSingleton<IRabbitPublisher, EmulatorRabbitPublisher>();
+            srv.AddSingleton<IConsumingLogicStrategy>(consumingLogicStrategy ?? new DefaultEmulatorConsumingLogicStrategy());
+
+            return srv;
         }
     }
 }

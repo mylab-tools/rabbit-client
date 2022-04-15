@@ -9,28 +9,44 @@ using MyLab.RabbitClient.Connection;
 
 namespace MyLab.RabbitClient.Publishing
 {
-    class RabbitPublisher : IRabbitPublisher
+    class DefaultRabbitPublisher : RabbitPublisher
     {
-        private readonly IRabbitChannelProvider _channelProvider;
+        public DefaultRabbitPublisher(
+            IOptions<RabbitOptions> options,
+            IRabbitChannelProvider channelProvider,
+            IEnumerable<IPublishingContext> publishingContexts,
+            ILogger<DefaultRabbitPublisher> logger= null)
+        : base(
+            new ChannelBasedPublisherBuilderStrategy(channelProvider),
+            options,
+            publishingContexts,
+            logger.Dsl())
+        {
+        }
+    }
+
+    abstract class RabbitPublisher : IRabbitPublisher
+    {
         private readonly IEnumerable<IPublishingContext> _pubContexts;
         private readonly RabbitOptions _options;
         private readonly IDslLogger _log;
+        private readonly IPublisherBuilderStrategy _publishBuilderStrategy;
 
-        public RabbitPublisher(
+        protected RabbitPublisher(
+            IPublisherBuilderStrategy publisherBuilderStrategy,
             IOptions<RabbitOptions> options,
-            IRabbitChannelProvider channelProvider,
-            IEnumerable<IPublishingContext> publishingMessageProcessors,
-            ILogger<RabbitPublisher> logger= null)
+            IEnumerable<IPublishingContext> publishingContexts = null,
+            IDslLogger logger = null)
         {
-            _channelProvider = channelProvider;
-            _pubContexts = publishingMessageProcessors;
+            _publishBuilderStrategy = publisherBuilderStrategy;
+            _pubContexts = publishingContexts;
             _options = options.Value;
-            _log = logger.Dsl();
+            _log = logger;
         }
 
         public RabbitPublisherBuilder IntoDefault(string routingKey = null)
         {
-            if(_options.DefaultPub == null)
+            if (_options.DefaultPub == null)
                 throw new InvalidOperationException("Default publish options not found");
 
             return IntoExchange(
@@ -45,7 +61,7 @@ namespace MyLab.RabbitClient.Publishing
 
         public RabbitPublisherBuilder IntoExchange(string exchange, string routingKey = null)
         {
-            return new RabbitPublisherBuilder(_channelProvider, exchange, routingKey, _pubContexts)
+            return new RabbitPublisherBuilder(_publishBuilderStrategy, exchange, routingKey, _pubContexts)
             {
                 Log = _log
             };
@@ -58,7 +74,7 @@ namespace MyLab.RabbitClient.Publishing
                 throw new InvalidOperationException("Publish config for message model not found")
                     .AndFactIs("config-id", configId);
 
-            return new RabbitPublisherBuilder(_channelProvider, pubCfg.Exchange, routingKey ?? pubCfg.RoutingKey, _pubContexts)
+            return new RabbitPublisherBuilder(_publishBuilderStrategy, pubCfg.Exchange, routingKey ?? pubCfg.RoutingKey, _pubContexts)
             {
                 Log = _log
             };
@@ -67,7 +83,7 @@ namespace MyLab.RabbitClient.Publishing
         public RabbitPublisherBuilder Into<TMsg>(string routingKey = null)
         {
             var confIdAttr = (RabbitConfigIdAttribute)Attribute.GetCustomAttribute(typeof(TMsg), typeof(RabbitConfigIdAttribute));
-            if(confIdAttr == null)
+            if (confIdAttr == null)
                 throw new InvalidOperationException("Message model should be marked by " + nameof(RabbitConfigIdAttribute))
                     .AndFactIs("msg-model", typeof(TMsg).FullName);
 

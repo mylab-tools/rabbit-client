@@ -2,9 +2,19 @@
 
 namespace MyLab.RabbitClient.Consuming
 {
-    interface IConsumingLogicStrategy
+    /// <summary>
+    /// Specifies consuming logic strategy
+    /// </summary>
+    public interface IConsumingLogicStrategy
     {
+        /// <summary>
+        /// Acknowledgement 
+        /// </summary>
         void Ack(ulong deliveryTag);
+
+        /// <summary>
+        /// Negative acknowledgement
+        /// </summary>
         void Nack(ulong deliveryTag);
     }
 
