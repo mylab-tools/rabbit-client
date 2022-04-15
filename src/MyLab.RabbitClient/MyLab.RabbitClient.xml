@@ -603,7 +603,7 @@
             Creates basic Rabbit properties
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategyUsing.PublishAsync(System.String,System.String,RabbitMQ.Client.IBasicProperties,System.Byte[])">
+        <member name="M:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategyUsing.Publish(System.String,System.String,RabbitMQ.Client.IBasicProperties,System.Byte[])">
             <summary>
             Publishes a message
             </summary>
