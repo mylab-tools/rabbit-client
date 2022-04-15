@@ -35,7 +35,13 @@ namespace MyLab.RabbitClient.Consuming
             _log = logger.Dsl();
 
             _exceptionReceiver = new RabbitChannelExceptionReceiver(logger);
-            _messageReceiver = new RabbitChannelMessageReceiver(_consumerRegistry, _serviceProvider)
+
+            var consumingLogic = new ConsumingLogic(_consumerRegistry, serviceProvider)
+            {
+                Log = _log
+            };
+
+            _messageReceiver = new RabbitChannelMessageReceiver(consumingLogic)
             {
                 Log = _log
             };
@@ -44,7 +50,7 @@ namespace MyLab.RabbitClient.Consuming
         {
             try
             {
-                RegisterConsumers();
+                _consumerRegistry.RegisterConsumersFromSource(_consumerRegistrarSource, _serviceProvider);
 
                 if (_consumerRegistry.Count != 0)
                 {
@@ -76,14 +82,6 @@ namespace MyLab.RabbitClient.Consuming
             {
                 _log.Error("Consuming stopping error", e)
                     .Write();
-            }
-        }
-
-        private void RegisterConsumers()
-        {
-            foreach (var consumerRegistrar in _consumerRegistrarSource)
-            {
-                consumerRegistrar.Register(_consumerRegistry, _serviceProvider);
             }
         }
 

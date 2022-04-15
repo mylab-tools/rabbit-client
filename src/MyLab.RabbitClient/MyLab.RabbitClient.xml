@@ -36,12 +36,12 @@
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds consumed message processor
+            Adds consumed message context
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IConsumingContext)">
             <summary>
-            Adds consumed message processor
+            Adds consumed message context
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.RabbitConnectionStrategy)">
@@ -61,7 +61,12 @@
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitPublishingContext``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds processor for publishing message
+            Adds context for publishing message
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitEmulation(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IConsumingLogicStrategy)">
+            <summary>
+            Adds emulation services and remove defaults
             </summary>
         </member>
         <member name="T:Microsoft.Extensions.DependencyInjection.HealthChecksBuilderExtensions">
@@ -246,6 +251,21 @@
         <member name="M:MyLab.RabbitClient.Consuming.IConsumingContextInstance.NotifyUnhandledException(System.Exception)">
             <summary>
             Notifies about unhandled exception which thrown in this context
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Consuming.IConsumingLogicStrategy">
+            <summary>
+            Receives an acknowledgment response to the received message
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IConsumingLogicStrategy.Ack(System.UInt64)">
+            <summary>
+            Acknowledgement 
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.IConsumingLogicStrategy.Nack(System.UInt64)">
+            <summary>
+            Negative acknowledgement
             </summary>
         </member>
         <member name="T:MyLab.RabbitClient.Consuming.IRabbitConsumer">
@@ -563,6 +583,31 @@
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Model.RabbitQueueFactory"/>
             </summary>
         </member>
+        <member name="T:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategy">
+            <summary>
+            Customize publisher builder logic
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategy.Use(System.Action{MyLab.RabbitClient.Publishing.IPublisherBuilderStrategyUsing})">
+            <summary>
+            Uses strategy logic
+            </summary>
+        </member>
+        <member name="T:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategyUsing">
+            <summary>
+            Custom publisher builder logic part
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategyUsing.CreateBasicProperties">
+            <summary>
+            Creates basic Rabbit properties
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.IPublisherBuilderStrategyUsing.PublishAsync(System.String,System.String,RabbitMQ.Client.IBasicProperties,System.Byte[])">
+            <summary>
+            Publishes a message
+            </summary>
+        </member>
         <member name="T:MyLab.RabbitClient.Publishing.IPublishingContext">
             <summary>
             Set context for publishing message
@@ -628,7 +673,7 @@
             Logger
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.#ctor(MyLab.RabbitClient.Connection.IRabbitChannelProvider,System.String,System.String,System.Collections.Generic.IEnumerable{MyLab.RabbitClient.Publishing.IPublishingContext})">
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.#ctor(MyLab.RabbitClient.Publishing.IPublisherBuilderStrategy,System.String,System.String,System.Collections.Generic.IEnumerable{MyLab.RabbitClient.Publishing.IPublishingContext})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder"/>
             </summary>

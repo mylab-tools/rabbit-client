@@ -15,5 +15,13 @@ namespace MyLab.RabbitClient.Consuming
 
             Add(queue, rabbitConsumerProvider);
         }
+
+        public void RegisterConsumersFromSource(ConsumerRegistrarSource consumerRegistrarSource, IServiceProvider serviceProvider)
+        {
+            foreach (var consumerRegistrar in consumerRegistrarSource)
+            {
+                consumerRegistrar.Register(this, serviceProvider);
+            }
+        } 
     }
 }
