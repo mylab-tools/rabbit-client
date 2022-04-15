@@ -3,7 +3,7 @@
 namespace MyLab.RabbitClient.Consuming
 {
     /// <summary>
-    /// Specifies consuming logic strategy
+    /// Receives an acknowledgment response to the received message
     /// </summary>
     public interface IConsumingLogicStrategy
     {
