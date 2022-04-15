@@ -36,12 +36,12 @@
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds consumed message processor
+            Adds consumed message context
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IConsumingContext)">
             <summary>
-            Adds consumed message processor
+            Adds consumed message context
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.RabbitConnectionStrategy)">
@@ -61,7 +61,7 @@
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitPublishingContext``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds processor for publishing message
+            Adds context for publishing message
             </summary>
         </member>
         <member name="T:Microsoft.Extensions.DependencyInjection.HealthChecksBuilderExtensions">

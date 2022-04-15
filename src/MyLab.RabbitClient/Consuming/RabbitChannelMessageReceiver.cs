@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MyLab.Log;
 using MyLab.Log.Dsl;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,17 +8,13 @@ namespace MyLab.RabbitClient.Consuming
 {
     class RabbitChannelMessageReceiver
     {
-        private readonly IRabbitConsumerRegistry _consumerRegistry;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ConsumingLogic _consumingLogic;
 
         public IDslLogger Log { get; set; }
 
-        public RabbitChannelMessageReceiver(
-            IRabbitConsumerRegistry consumerRegistry,
-            IServiceProvider serviceProvider)
+        public RabbitChannelMessageReceiver(ConsumingLogic consumingLogic)
         {
-            _consumerRegistry = consumerRegistry;
-            _serviceProvider = serviceProvider;
+            _consumingLogic = consumingLogic;
         }
 
         public IDisposable StartListen(string queue, IModel channel)
@@ -47,97 +39,8 @@ namespace MyLab.RabbitClient.Consuming
             }
 
             var channel = asyncBasicConsumer.Model;
-            var queue = args.ConsumerTag;
-            
-            List<IConsumingContextInstance> cContexts = null;
 
-            try
-            {
-                Log?.Debug("Message received")
-                    .AndFactIs("consumer-tag", args.ConsumerTag)
-                    .AndFactIs("delivery-tag", args.DeliveryTag)
-                    .AndFactIs("RoutingKey", args.RoutingKey)
-                    .AndFactIs("Exchange", args.Exchange)
-                    .Write();
-
-                if (!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
-                    throw new InvalidOperationException("Consumer not found");
-
-                cContexts = SetLogContexts(args);
-
-                using var scope = _serviceProvider.CreateScope();
-
-                var consumer = consumerProvider.Provide(scope.ServiceProvider);
-                await consumer.ConsumeAsync(args);
-
-                channel.BasicAck(args.DeliveryTag, false);
-            }
-            catch (Exception e)
-            {
-                Log?.Error(e)
-                    .AndFactIs("queue", queue)
-                    .AndLabel(LogLabels.ConsumingError)
-                    .Write();
-
-                channel.BasicNack(args.DeliveryTag, false, false);
-
-                if (cContexts != null)
-                {
-                    NotifyContextError(cContexts, e);
-                }
-            }
-            finally
-            {
-                if (cContexts != null)
-                {
-                    ResetLogContexts(cContexts);
-                }
-            }
-        }
-
-        void NotifyContextError(List<IConsumingContextInstance> contexts, Exception unhandledException)
-        {
-            foreach (var context in contexts)
-            {
-                try
-                {
-                    context.NotifyUnhandledException(unhandledException);
-                }
-                catch (Exception e)
-                {
-                    Log?.Error("Consuming context error notification exception", e).Write();
-                }
-            }
-        }
-
-        void ResetLogContexts(List<IConsumingContextInstance> contexts)
-        {
-            foreach (var context in contexts)
-            {
-                try
-                {
-                    context.Dispose();
-                }
-                catch (Exception e)
-                {
-                    Log?.Error("Consuming context releasing error", e).Write();
-                }
-            }
-        }
-
-        private List<IConsumingContextInstance> SetLogContexts(BasicDeliverEventArgs args)
-        {
-            var cContexts = new List<IConsumingContextInstance>();
-
-            var consumingContexts = _serviceProvider.GetServices<IConsumingContext>();
-
-            var gotContexts = consumingContexts
-                .Select(c => c.Set(args))
-                .Where(c => c != null);
-
-            cContexts.AddRange(gotContexts);
-
-            return cContexts;
+            await _consumingLogic.ConsumeMessageAsync(args, new DefaultConsumingLogicStrategy(channel));
         }
 
         class Disposer : IDisposable
