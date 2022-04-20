@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using MyLab.RabbitClient.Consuming;
@@ -84,8 +85,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static IServiceCollection TryAddConsuming(this IServiceCollection srvColl)
         {
-            srvColl.TryAdd(ConsumerHostServiceDescriptor);
-            srvColl.TryAdd(ConsumerManagerServiceDescriptor);
+            if(srvColl.All(d => d.ImplementationType != typeof(ConsumerHost)))
+                srvColl.Add(ConsumerHostServiceDescriptor);
+
+            if (srvColl.All(d => d.ImplementationType != typeof(ConsumerManager)))
+                srvColl.Add(ConsumerManagerServiceDescriptor);
 
             return srvColl;
         }
