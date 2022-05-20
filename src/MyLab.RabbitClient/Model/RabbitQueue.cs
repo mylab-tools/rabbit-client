@@ -152,5 +152,13 @@ namespace MyLab.RabbitClient.Model
             _listenChannel?.Dispose();
             _channelProvider.Use(ch => ch.QueueDelete(Name, false, false));
         }
+
+        /// <summary>
+        /// Purge the queue
+        /// </summary>
+        public void Purge()
+        {
+            _channelProvider.Use(ch => ch.QueuePurge(Name));
+        }
     }
 }
