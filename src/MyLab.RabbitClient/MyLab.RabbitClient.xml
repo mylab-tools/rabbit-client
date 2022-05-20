@@ -528,6 +528,11 @@
             Remove queue
             </summary>
         </member>
+        <member name="M:MyLab.RabbitClient.Model.RabbitQueue.Purge">
+            <summary>
+            Purge the queue
+            </summary>
+        </member>
         <member name="T:MyLab.RabbitClient.Model.RabbitQueueFactory">
             <summary>
             Creates queue
