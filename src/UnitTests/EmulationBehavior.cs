@@ -60,7 +60,7 @@ namespace UnitTests
             publisher
                 ?.IntoDefault()
                 .AndProperty(properties => properties.MessageId = messageId)
-                .SendString("data")
+                .SetStringContent("data")
                 .Publish();
 
             //Assert
@@ -107,7 +107,7 @@ namespace UnitTests
             publisher
                 ?.IntoDefault()
                 .AndProperty(properties => properties.MessageId = messageId)
-                .SendString("data")
+                .SetStringContent("data")
                 .Publish();
 
             //Assert
@@ -147,7 +147,7 @@ namespace UnitTests
             //Act
             publisher
                 ?.IntoDefault()
-                .SendString("data")
+                .SetStringContent("data")
                 .Publish();
 
             //Assert

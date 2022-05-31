@@ -104,7 +104,16 @@ namespace MyLab.RabbitClient.Publishing
         /// <summary>
         /// Use object as json as message content
         /// </summary>
+        [Obsolete("Use '" + nameof(SetJsonContent) + "' method instead")]
         public RabbitPublisherBuilder SendJson(object obj)
+        {
+            return SetJsonContent(obj);
+        }
+
+        /// <summary>
+        /// Set json object to message content
+        /// </summary>
+        public RabbitPublisherBuilder SetJsonContent(object obj)
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
 
@@ -123,7 +132,16 @@ namespace MyLab.RabbitClient.Publishing
         /// <summary>
         /// Use binary as message content
         /// </summary>
+        [Obsolete("Use '" + nameof(SetBinaryContent) + "' method instead")]
         public RabbitPublisherBuilder SendBinary(byte[] binData)
+        {
+            return SetBinaryContent(binData);
+        }
+
+        /// <summary>
+        /// Set binary to message content
+        /// </summary>
+        public RabbitPublisherBuilder SetBinaryContent(byte[] binData)
         {
             if (binData == null) throw new ArgumentNullException(nameof(binData));
 
@@ -136,7 +154,16 @@ namespace MyLab.RabbitClient.Publishing
         /// <summary>
         /// Use string as message content
         /// </summary>
+        [Obsolete("Use '" + nameof(SetStringContent) + "' method instead")]
         public RabbitPublisherBuilder SendString(string strData)
+        {
+            return SetStringContent(strData);
+        }
+
+        /// <summary>
+        /// Set string to message content
+        /// </summary>
+        public RabbitPublisherBuilder SetStringContent(string strData)
         {
             if (strData == null) throw new ArgumentNullException(nameof(strData));
 

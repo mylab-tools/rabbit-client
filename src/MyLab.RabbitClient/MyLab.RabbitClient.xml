@@ -698,14 +698,29 @@
             Use object as json as message content
             </summary>
         </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SetJsonContent(System.Object)">
+            <summary>
+            Set json object to message content
+            </summary>
+        </member>
         <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SendBinary(System.Byte[])">
             <summary>
             Use binary as message content
             </summary>
         </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SetBinaryContent(System.Byte[])">
+            <summary>
+            Set binary to message content
+            </summary>
+        </member>
         <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SendString(System.String)">
             <summary>
             Use string as message content
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.SetStringContent(System.String)">
+            <summary>
+            Set string to message content
             </summary>
         </member>
         <member name="M:MyLab.RabbitClient.Publishing.RabbitPublisherBuilder.Publish">

@@ -56,7 +56,7 @@ namespace LoadTest.Publisher
                     Value = index.ToString()
                 };
 
-                _pub.IntoDefault().SendJson(model).Publish();
+                _pub.IntoDefault().SetJsonContent(model).Publish();
 
                 index++;
             }
