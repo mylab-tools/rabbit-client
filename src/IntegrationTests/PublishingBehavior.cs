@@ -47,7 +47,7 @@ namespace IntegrationTests
             //Act
             publisher
                 .IntoQueue(queue.Name)
-                .SendJson(testEntity)
+                .SetJsonContent(testEntity)
                 .Publish();
 
             var gotMsg = queue.Listen<TestEntity>(TimeSpan.FromSeconds(1));
@@ -85,7 +85,7 @@ namespace IntegrationTests
             //Act
             publisher
                 .IntoQueue(queue.Name)
-                .SendJson(testEntity)
+                .SetJsonContent(testEntity)
                 .Publish();
 
             var gotMsg = queue.Listen<TestEntity>(TimeSpan.FromSeconds(1));
@@ -128,7 +128,7 @@ namespace IntegrationTests
             //Act
             publisher
                 .IntoQueue(queue.Name)
-                .SendJson(testEntity)
+                .SetJsonContent(testEntity)
                 .Publish();
 
             var gotMsg = queue.Listen<TestEntity>(TimeSpan.FromSeconds(1));

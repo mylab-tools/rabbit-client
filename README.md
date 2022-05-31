@@ -45,7 +45,7 @@ class Service
     public SendMessage(string msgContent)
     {
         _mq.IntoQueue("my-test-queue")	// 2
-           .SendString(msgContent)		// 3
+           .SetStringContent(msgContent)		// 3
            .Publish();					// 4
     }
 }
@@ -258,22 +258,22 @@ services.AddRabbitPublisher();
 
 * определение содержимого сообщения:
 
-  * `SendJson` - передача объекта в формате `json`:
+  * `SetJsonContent` - установка объекта в формате `json` в качестве содержательной части сообщения:
 
     ```c#
-    SendJson(object obj)
+    SetJsonContent(object obj)
     ```
 
-  * `SendBinary` - передача бинарных данных:
+  * `SetBinaryContent` - установка бинарных данных в качестве содержательной части сообщения:
 
     ```C#
-    SendBinary(byte[] binData)
+    SetBinaryContent(byte[] binData)
     ```
 
-  * `SendString` - передача строки:
+  * `SetStringContent` - установка строки в качестве содержательной части сообщения:
 
     ```C#
-    SendString(string strData)
+    SetStringContent(string strData)
     ```
 
 * `Publish` - непосредственно, публикация.

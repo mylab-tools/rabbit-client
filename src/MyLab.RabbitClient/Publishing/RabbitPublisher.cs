@@ -87,7 +87,7 @@ namespace MyLab.RabbitClient.Publishing
                 throw new InvalidOperationException("Message model should be marked by " + nameof(RabbitConfigIdAttribute))
                     .AndFactIs("msg-model", typeof(TMsg).FullName);
 
-            return Into(confIdAttr.ConfigId);
+            return Into(confIdAttr.ConfigId, routingKey);
         }
     }
 }
