@@ -109,7 +109,7 @@ namespace MyLab.RabbitClient.Consuming
 
         private async Task<RabbitChannelUsing> ProvideChannelAsync(CancellationToken cancellationToken)
         {
-            var hasBrokerUnreachableException = false;
+            bool hasBrokerUnreachableException;
             RabbitChannelUsing resChannel = null;
 
             do
@@ -117,6 +117,8 @@ namespace MyLab.RabbitClient.Consuming
                 try
                 {
                     resChannel = _channelProvider.Provide();
+
+                    hasBrokerUnreachableException = false;
                 }
                 catch (BrokerUnreachableException )
                 {

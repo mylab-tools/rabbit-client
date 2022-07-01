@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MyLab.Log;
+using MyLab.Log.Dsl;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -19,14 +21,17 @@ namespace MyLab.RabbitClient.Connection
 
         readonly Queue<ChannelUnit> _freeChannels = new Queue<ChannelUnit>();
         readonly List<ChannelUnit> _usedChannels = new List<ChannelUnit>();
+        private readonly IDslLogger _log;
 
         /// <summary>
         /// Initializes a new instance of <see cref="RabbitChannelProvider"/>
         /// </summary>
-        public RabbitChannelProvider(IRabbitConnectionProvider connectionProvider)
+        public RabbitChannelProvider(IRabbitConnectionProvider connectionProvider, ILogger<RabbitChannelProvider> logger = null)
         {
             _connectionProvider = connectionProvider;
             connectionProvider.Reconnected += Reconnected;
+
+            _log = logger?.Dsl();
         }
 
         /// <inheritdoc />
@@ -74,6 +79,10 @@ namespace MyLab.RabbitClient.Connection
                     try
                     {
                         newChannel = _connectionProvider.Provide().CreateModel();
+
+                        _log.Action("New Rabbit channel has created")
+                            .AndFactIs("channel-number", newChannel.ChannelNumber)
+                            .Write();
                     }
                     catch (ChannelAllocationException e)
                     {
