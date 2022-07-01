@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MyLab.Log;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace MyLab.RabbitClient.Connection
 {
@@ -68,7 +70,19 @@ namespace MyLab.RabbitClient.Connection
             {
                 if (!_freeChannels.TryDequeue(out var channel))
                 {
-                    var newChannel = _connectionProvider.Provide().CreateModel();
+                    IModel newChannel;
+                    try
+                    {
+                        newChannel = _connectionProvider.Provide().CreateModel();
+                    }
+                    catch (ChannelAllocationException e)
+                    {
+                        e.AndFactIs("concerned-chanel", e.Channel)
+                         .AndFactIs("used-channel-list-count", _usedChannels.Count);
+
+                        throw;
+                    }
+
                     newChannel.BasicQos(0, 1, false);
 
                     channel = new ChannelUnit(newChannel);
