@@ -2,10 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyLab.Log.Dsl;
 using MyLab.RabbitClient.Connection;
+using RabbitMQ.Client.Exceptions;
 
 namespace MyLab.RabbitClient.Consuming
 {
@@ -32,7 +35,7 @@ namespace MyLab.RabbitClient.Consuming
             _serviceProvider = serviceProvider;
             _channelProvider = channelProvider;
             _consumerRegistrarSource = consumerRegistrarSource.Value;
-            _log = logger.Dsl();
+            _log = logger?.Dsl();
 
             _exceptionReceiver = new RabbitChannelExceptionReceiver(logger);
 
@@ -46,7 +49,7 @@ namespace MyLab.RabbitClient.Consuming
                 Log = _log
             };
         }
-        public void Start()
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -54,7 +57,7 @@ namespace MyLab.RabbitClient.Consuming
 
                 if (_consumerRegistry.Count != 0)
                 {
-                    ConnectToQueues();
+                    await ConnectToQueuesAsync(cancellationToken);
                 }
                 else
                 {
@@ -63,12 +66,12 @@ namespace MyLab.RabbitClient.Consuming
             }
             catch (Exception e)
             {
-                _log.Error("Consuming starting error", e)
+                _log?.Error("Consuming starting error", e)
                     .Write();
             }
         }
 
-        public void Stop()
+        public Task StopAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -80,18 +83,20 @@ namespace MyLab.RabbitClient.Consuming
             }
             catch (Exception e)
             {
-                _log.Error("Consuming stopping error", e)
+                _log?.Error("Consuming stopping error", e)
                     .Write();
             }
+
+            return Task.CompletedTask;
         }
 
-        private void ConnectToQueues()
+        private async Task ConnectToQueuesAsync(CancellationToken cancellationToken)
         {
             var qList = _consumerRegistry.ToArray();
 
             foreach (var queue in qList)
             {
-                var channel = _channelProvider.Provide();
+                var channel = await ProvideChannelAsync(cancellationToken);
 
                 var exceptionHandlingDisposer = _exceptionReceiver.StartListen(channel.Channel);
                 var messageHandlingDisposer = _messageReceiver.StartListen(queue.Key, channel.Channel);
@@ -100,6 +105,31 @@ namespace MyLab.RabbitClient.Consuming
                 _listenDisposers.Add(messageHandlingDisposer);
                 _listenDisposers.Add(channel);
             }
+        }
+
+        private async Task<RabbitChannelUsing> ProvideChannelAsync(CancellationToken cancellationToken)
+        {
+            bool hasBrokerUnreachableException;
+            RabbitChannelUsing resChannel = null;
+
+            do
+            {
+                try
+                {
+                    resChannel = _channelProvider.Provide();
+
+                    hasBrokerUnreachableException = false;
+                }
+                catch (BrokerUnreachableException )
+                {
+                    _log?.Warning("Broker is not yet accessible. Retry after 5 sec...").Write();
+                    hasBrokerUnreachableException = true;
+
+                    await Task.Delay(5000, cancellationToken);
+                }
+            } while (hasBrokerUnreachableException && !cancellationToken.IsCancellationRequested);
+
+            return resChannel;
         }
     }
 }

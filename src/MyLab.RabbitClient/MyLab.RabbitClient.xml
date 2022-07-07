@@ -166,7 +166,7 @@
             Manages and provides Rabbit channels
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelProvider.#ctor(MyLab.RabbitClient.Connection.IRabbitConnectionProvider)">
+        <member name="M:MyLab.RabbitClient.Connection.RabbitChannelProvider.#ctor(MyLab.RabbitClient.Connection.IRabbitConnectionProvider,Microsoft.Extensions.Logging.ILogger{MyLab.RabbitClient.Connection.RabbitChannelProvider})">
             <summary>
             Initializes a new instance of <see cref="T:MyLab.RabbitClient.Connection.RabbitChannelProvider"/>
             </summary>

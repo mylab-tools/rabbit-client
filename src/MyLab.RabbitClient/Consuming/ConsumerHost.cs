@@ -17,36 +17,32 @@ namespace MyLab.RabbitClient.Consuming
             ILogger<ConsumerHost> logger = null)
         {
             _consumerHost = consumerHost ?? throw new ArgumentNullException(nameof(consumerHost));
-            _log = logger.Dsl();
+            _log = logger?.Dsl();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             try
             {
-                _consumerHost.Start();
+                await  _consumerHost.StartAsync(cancellationToken);
             }
             catch (Exception e)
             {
-                _log.Error("Error when starting consuming", e).Write();
+                _log?.Error("Error when starting consuming", e).Write();
             }
-
-            return Task.CompletedTask;
         }
 
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             try
             {
-                _consumerHost.Stop();
+                await _consumerHost.StopAsync(cancellationToken);
             }
             catch (Exception e)
             {
-                _log.Error("Error when stopping consuming", e).Write();
+                _log?.Error("Error when stopping consuming", e).Write();
             }
-
-            return Task.CompletedTask;
         }
     }
 }
