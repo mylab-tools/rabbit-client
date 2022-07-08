@@ -80,7 +80,7 @@ namespace MyLab.RabbitClient.Connection
                     {
                         newChannel = _connectionProvider.Provide().CreateModel();
 
-                        _log.Action("New Rabbit channel has created")
+                        _log?.Action("New Rabbit channel has created")
                             .AndFactIs("channel-number", newChannel.ChannelNumber)
                             .Write();
                     }
