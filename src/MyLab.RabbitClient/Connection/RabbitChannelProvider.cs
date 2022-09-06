@@ -78,10 +78,18 @@ namespace MyLab.RabbitClient.Connection
                     IModel newChannel;
                     try
                     {
-                        newChannel = _connectionProvider.Provide().CreateModel();
+                        var conn = _connectionProvider.Provide();
+
+                        if (conn == null)
+                            throw new InvalidOperationException("The Connection Provider returns the 'null' instead a connection");
+
+                        newChannel = conn.CreateModel();
+
+                        if (newChannel == null)
+                            throw new InvalidOperationException("The Connection creates the 'null' instead a new channel");
 
                         _log?.Action("New Rabbit channel has created")
-                            .AndFactIs("channel-number", newChannel.ChannelNumber)
+                            .AndFactIs("channel-number", newChannel?.ChannelNumber)
                             .Write();
                     }
                     catch (ChannelAllocationException e)
