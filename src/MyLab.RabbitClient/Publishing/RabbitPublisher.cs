@@ -51,7 +51,7 @@ namespace MyLab.RabbitClient.Publishing
 
             return IntoExchange(
                 _options.DefaultPub.Exchange,
-                _options.DefaultPub.RoutingKey);
+                routingKey ?? _options.DefaultPub.RoutingKey);
         }
 
         public RabbitPublisherBuilder IntoQueue(string queue)

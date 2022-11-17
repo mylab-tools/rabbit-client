@@ -9,6 +9,16 @@
             Contains extension methods for integration into application
             </summary>
         </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.ConsumerHostSrvDesc">
+            <summary>
+            Consumer host <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.ConsumerManagerSrvDesc">
+            <summary>
+            Consumer manager <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,MyLab.RabbitClient.Consuming.IRabbitConsumer)">
             <summary>
             Registers consumer for specified queue
@@ -42,6 +52,36 @@
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitCtx(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IConsumingContext)">
             <summary>
             Adds consumed message context
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.ChannelProviderSrvDesc">
+            <summary>
+            <see cref="T:MyLab.RabbitClient.Connection.IRabbitChannelProvider"/> <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.PublisherSrvDesc">
+            <summary>
+            <see cref="T:MyLab.RabbitClient.Publishing.IRabbitPublisher"/> <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.LazyConnProviderSrvDesc">
+            <summary>
+            Lazy implementation of <see cref="T:MyLab.RabbitClient.Connection.IRabbitConnectionProvider"/> <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.BgConnProviderSrvDesc">
+            <summary>
+            Background implementation of <see cref="T:MyLab.RabbitClient.Connection.IRabbitConnectionProvider"/> <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.BgConnManagerSrvDesc">
+            <summary>
+            Background connection manager <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
+            </summary>
+        </member>
+        <member name="F:Microsoft.Extensions.DependencyInjection.AppIntegration.BgConnStarterSrvDesc">
+            <summary>
+            Background connection starter <see cref="T:Microsoft.Extensions.DependencyInjection.ServiceDescriptor"/>
             </summary>
         </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbit(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.RabbitConnectionStrategy)">
