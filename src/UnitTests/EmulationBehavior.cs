@@ -153,5 +153,46 @@ namespace UnitTests
             //Assert
             consLogicStrategyMock.Verify(s => s.Nack(It.IsAny<ulong>()));
         }
+
+        [Fact]
+        public void ShouldRemoveRealConnectionServices()
+        {
+            //Arrange
+            var consumerMock = new Mock<IRabbitConsumer>();
+
+            var services = new ServiceCollection()
+                .AddLogging(l => l.AddFilter(_ => true).AddXUnit(_output))
+                .AddRabbit()
+                .ConfigureRabbit(options => options.DefaultPub =
+                    new PublishOptions
+                    {
+                        RoutingKey = "foo-queue"
+                    }
+                )
+                .AddRabbitConsumer("foo-queue", consumerMock.Object);
+
+            //Act
+            var emulationModeServices = services.AddRabbitEmulation();
+
+            //Assert
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.PublisherSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.ChannelProviderSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.ConsumerHostSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.ConsumerManagerSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.LazyConnProviderSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.BgConnManagerSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.BgConnProviderSrvDesc));
+            Assert.DoesNotContain(emulationModeServices, d => CompareDescriptors(d, AppIntegration.BgConnStarterSrvDesc));
+        }
+
+        bool CompareDescriptors(ServiceDescriptor desc1, ServiceDescriptor desc2)
+        {
+            if (desc1 == desc2) return true;
+            if(desc1 == null || desc2 == null) return false;
+
+            return desc1.ServiceType == desc2.ServiceType &&
+                   desc1.ImplementationType == desc2.ImplementationType &&
+                   desc1.Lifetime == desc2.Lifetime;
+        }
     }
 }

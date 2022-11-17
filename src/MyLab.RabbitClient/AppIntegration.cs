@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using MyLab.RabbitClient;
 using MyLab.RabbitClient.Connection;
 using MyLab.RabbitClient.Consuming;
@@ -13,25 +14,56 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class AppIntegration
     {
-        static readonly ServiceDescriptor RabbitPublisherServiceDescriptor = new ServiceDescriptor(typeof(IRabbitPublisher), typeof(DefaultRabbitPublisher), ServiceLifetime.Singleton);
+        /// <summary>
+        /// <see cref="IRabbitChannelProvider"/> <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor ChannelProviderSrvDesc = new ServiceDescriptor(typeof(IRabbitChannelProvider), typeof(RabbitChannelProvider), ServiceLifetime.Singleton);
+
+
+        /// <summary>
+        /// <see cref="IRabbitPublisher"/> <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor PublisherSrvDesc = new ServiceDescriptor(typeof(IRabbitPublisher), typeof(DefaultRabbitPublisher), ServiceLifetime.Singleton);
+
+        /// <summary>
+        /// Lazy implementation of <see cref="IRabbitConnectionProvider"/> <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor LazyConnProviderSrvDesc = new ServiceDescriptor(typeof(IRabbitConnectionProvider), typeof(LazyRabbitConnectionProvider), ServiceLifetime.Singleton);
+
+        /// <summary>
+        /// Background implementation of <see cref="IRabbitConnectionProvider"/> <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor BgConnProviderSrvDesc = new ServiceDescriptor(typeof(IRabbitConnectionProvider), typeof(BackgroundRabbitConnectionProvider), ServiceLifetime.Singleton);
+
+        /// <summary>
+        /// Background connection manager <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor BgConnManagerSrvDesc = new ServiceDescriptor(typeof(IBackgroundRabbitConnectionManager), typeof(BackgroundRabbitConnectionManager), ServiceLifetime.Singleton);
+
+        /// <summary>
+        /// Background connection starter <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor BgConnStarterSrvDesc = new ServiceDescriptor(typeof(IHostedService), typeof(RabbitConnectionStarter), ServiceLifetime.Singleton);
 
         /// <summary>
         /// Adds Rabbit services
         /// </summary>
         public static IServiceCollection AddRabbit(this IServiceCollection srv, RabbitConnectionStrategy connectionStrategy = RabbitConnectionStrategy.Lazy)
         {
-            srv.Add(RabbitPublisherServiceDescriptor);
-            srv.AddSingleton<IRabbitChannelProvider, RabbitChannelProvider>();
+            srv.Add(PublisherSrvDesc);
+            srv.Add(ChannelProviderSrvDesc);
             
             switch (connectionStrategy)
             {
                 case RabbitConnectionStrategy.Lazy:
-                    srv.AddSingleton<IRabbitConnectionProvider, LazyRabbitConnectionProvider>();
+                    srv.Add(LazyConnProviderSrvDesc);
                     break;
                 case RabbitConnectionStrategy.Background:
-                    srv.AddSingleton<IRabbitConnectionProvider, BackgroundRabbitConnectionProvider>()
-                        .AddSingleton<IBackgroundRabbitConnectionManager, BackgroundRabbitConnectionManager>()
-                        .AddHostedService<RabbitConnectionStarter>();
+                {
+                    srv.Add(BgConnManagerSrvDesc);
+                    srv.Add(BgConnProviderSrvDesc);
+                    srv.Add(BgConnStarterSrvDesc);
+                }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(connectionStrategy), "Rabbit connection strategy must be defined");
@@ -70,9 +102,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         public static IServiceCollection AddRabbitEmulation(this IServiceCollection srv, IConsumingLogicStrategy consumingLogicStrategy = null)
         {
-            srv.Remove(ConsumerHostServiceDescriptor);
-            srv.Remove(ConsumerManagerServiceDescriptor);
-            srv.Remove(RabbitPublisherServiceDescriptor);
+            srv.Remove(ChannelProviderSrvDesc);
+            srv.Remove(ConsumerHostSrvDesc);
+            srv.Remove(ConsumerManagerSrvDesc);
+            srv.Remove(PublisherSrvDesc);
+
+            srv.Remove(LazyConnProviderSrvDesc);
+            srv.Remove(BgConnManagerSrvDesc);
+            srv.Remove(BgConnProviderSrvDesc);
+            srv.Remove(BgConnStarterSrvDesc);
 
             srv.AddSingleton<IRabbitPublisher, EmulatorRabbitPublisher>();
             srv.AddSingleton<IConsumingLogicStrategy>(consumingLogicStrategy ?? new DefaultEmulatorConsumingLogicStrategy());

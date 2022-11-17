@@ -9,8 +9,15 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static partial class AppIntegration
     {
-        static readonly ServiceDescriptor ConsumerHostServiceDescriptor = new ServiceDescriptor(typeof(IHostedService), typeof(ConsumerHost), ServiceLifetime.Singleton);
-        static readonly ServiceDescriptor ConsumerManagerServiceDescriptor = new ServiceDescriptor(typeof(IConsumerManager), typeof(ConsumerManager), ServiceLifetime.Singleton);
+        /// <summary>
+        /// Consumer host <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor ConsumerHostSrvDesc = new ServiceDescriptor(typeof(IHostedService), typeof(ConsumerHost), ServiceLifetime.Singleton);
+
+        /// <summary>
+        /// Consumer manager <see cref="ServiceDescriptor"/>
+        /// </summary>
+        public static readonly ServiceDescriptor ConsumerManagerSrvDesc = new ServiceDescriptor(typeof(IConsumerManager), typeof(ConsumerManager), ServiceLifetime.Singleton);
 
         /// <summary>
         /// Registers consumer for specified queue
@@ -86,10 +93,10 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection TryAddConsuming(this IServiceCollection srvColl)
         {
             if(srvColl.All(d => d.ImplementationType != typeof(ConsumerHost)))
-                srvColl.Add(ConsumerHostServiceDescriptor);
+                srvColl.Add(ConsumerHostSrvDesc);
 
             if (srvColl.All(d => d.ImplementationType != typeof(ConsumerManager)))
-                srvColl.Add(ConsumerManagerServiceDescriptor);
+                srvColl.Add(ConsumerManagerSrvDesc);
 
             return srvColl;
         }
