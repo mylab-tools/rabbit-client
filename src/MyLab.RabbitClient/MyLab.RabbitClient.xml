@@ -34,6 +34,11 @@
             Registers consumer for queue which retrieve from options
             </summary>
         </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumer``2(Microsoft.Extensions.DependencyInjection.IServiceCollection,MyLab.RabbitClient.Consuming.IRabbitConsumer,System.Func{``0,System.String},System.Boolean)">
+            <summary>
+            Registers consumer for queue which retrieve from options
+            </summary>
+        </member>
         <member name="M:Microsoft.Extensions.DependencyInjection.AppIntegration.AddRabbitConsumers``1(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
             Adds consumer registrar which allow to registers several consumers depends on dependent options and services
@@ -348,19 +353,28 @@
             Registers consumer with specified logic for specified queue
             </summary>
         </member>
-        <member name="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2">
+        <member name="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1">
             <summary>
             Registers consumer with options
             </summary>
             <typeparam name="TOptions">options type</typeparam>
-            <typeparam name="TConsumer">consumer type</typeparam>
         </member>
-        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2.#ctor(System.Func{`0,System.String},System.Boolean)">
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1.Create``1(System.Func{`0,System.String},System.Boolean)">
             <summary>
-            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2"/>
+            Creates new instance of <see cref="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1"/> for generic type specified consumer
             </summary>
         </member>
-        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`2.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1.Create(MyLab.RabbitClient.Consuming.IRabbitConsumer,System.Func{`0,System.String},System.Boolean)">
+            <summary>
+            Creates new instance of <see cref="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1"/> for specified consumer
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1.#ctor(System.Func{`0,System.String},MyLab.RabbitClient.Consuming.IRabbitConsumerProvider,System.Boolean)">
+            <summary>
+            Initializes a new instance of <see cref="T:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1"/>
+            </summary>
+        </member>
+        <member name="M:MyLab.RabbitClient.Consuming.OptionsConsumerRegistrar`1.Register(MyLab.RabbitClient.Consuming.IRabbitConsumerRegistry,System.IServiceProvider)">
             <inheritdoc />
         </member>
         <member name="T:MyLab.RabbitClient.Consuming.RabbitConsumer`1">
