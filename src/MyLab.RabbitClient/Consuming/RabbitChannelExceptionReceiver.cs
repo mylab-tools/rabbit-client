@@ -10,9 +10,9 @@ namespace MyLab.RabbitClient.Consuming
     {
         private readonly IDslLogger _log;
         
-        public RabbitChannelExceptionReceiver(ILogger log)
+        public RabbitChannelExceptionReceiver(ILogger log = null)
         {
-            _log = log.Dsl();
+            _log = log?.Dsl();
         }
 
         public IDisposable StartListen(IModel channel)

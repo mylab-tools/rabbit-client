@@ -47,9 +47,25 @@ namespace Microsoft.Extensions.DependencyInjection
             where TOptions : class, new()
             where TConsumer : class, IRabbitConsumer
         {
+            var consumerRegistrar = OptionsConsumerRegistrar<TOptions>.Create<TConsumer>(queueProvider, optional);
+
             return srvColl
                 .TryAddConsuming()
-                .AddRabbitConsumers(new OptionsConsumerRegistrar<TOptions, TConsumer>(queueProvider, optional));
+                .AddRabbitConsumers(consumerRegistrar);
+        }
+
+        /// <summary>
+        /// Registers consumer for queue which retrieve from options
+        /// </summary>
+        public static IServiceCollection AddRabbitConsumer<TOptions, TConsumer>(this IServiceCollection srvColl, IRabbitConsumer consumer, Func<TOptions, string> queueProvider, bool optional = false)
+            where TOptions : class, new()
+            where TConsumer : class, IRabbitConsumer
+        {
+            var consumerRegistrar = OptionsConsumerRegistrar<TOptions>.Create(consumer, queueProvider, optional);
+
+            return srvColl
+                .TryAddConsuming()
+                .AddRabbitConsumers(consumerRegistrar);
         }
 
         /// <summary>
