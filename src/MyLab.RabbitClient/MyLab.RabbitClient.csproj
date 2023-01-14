@@ -5,15 +5,15 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Andrey O.</Authors>
     <Description>RabbitMQ client library for .NET  Core 3.1+</Description>
-    <Copyright>Copyright (c) 2022 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <Copyright>Copyright (c) 2023 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
     <PackageProjectUrl>https://github.com/mylab-tools/rebbit-client</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mylab-tools/rebbit-client.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageIcon>tools.png</PackageIcon>
     <PackageIconUrl />
-    <Version>2.11.25</Version>
-    <AssemblyVersion>2.11.25.2311</AssemblyVersion>
-    <FileVersion>2.11.25.2311</FileVersion>
+    <Version>2.11.26</Version>
+    <AssemblyVersion>2.11.26.1301</AssemblyVersion>
+    <FileVersion>2.11.26.1301</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
