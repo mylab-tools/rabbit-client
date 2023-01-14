@@ -31,21 +31,27 @@ namespace MyLab.RabbitClient.Consuming
             try
             {
                 Log?.Debug("Message received")
-                    .AndFactIs("consumer-tag", args.ConsumerTag)
-                    .AndFactIs("delivery-tag", args.DeliveryTag)
-                    .AndFactIs("RoutingKey", args.RoutingKey)
-                    .AndFactIs("Exchange", args.Exchange)
+                    .AndFactIs("delivery-args", args)
                     .Write();
 
                 if (!_consumerRegistry.TryGetValue(queue, out var consumerProvider))
                     throw new InvalidOperationException("Consumer not found");
 
                 cContexts = SetLogContexts(args);
-
+                
                 using var scope = _serviceProvider.CreateScope();
 
                 var consumer = consumerProvider.Provide(scope.ServiceProvider);
                 await consumer.ConsumeAsync(args);
+
+                if (consumer is IDisposable disposableConsumer)
+                {
+                    disposableConsumer.Dispose();
+                }
+                if (consumer is IAsyncDisposable asyncDisposableConsumer)
+                {
+                    await asyncDisposableConsumer.DisposeAsync();
+                }
 
                 strategy.Ack(args.DeliveryTag);
             }
