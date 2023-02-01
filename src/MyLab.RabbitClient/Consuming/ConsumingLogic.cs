@@ -56,6 +56,10 @@ namespace MyLab.RabbitClient.Consuming
                 }
 
                 strategy.Ack(args.DeliveryTag);
+
+                Log?.Debug("Ack")
+                    .AndFactIs("delivery-tag", args.DeliveryTag)
+                    .Write();
             }
             catch (Exception e)
             {
@@ -65,6 +69,10 @@ namespace MyLab.RabbitClient.Consuming
                     .Write();
 
                 strategy.Nack(args.DeliveryTag);
+
+                Log?.Debug("Nack")
+                    .AndFactIs("delivery-tag", args.DeliveryTag)
+                    .Write();
 
                 if (cContexts != null)
                 {
