@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MyLab.Log.Dsl;
 using RabbitMQ.Client.Events;
+using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace MyLab.RabbitClient.Consuming
 {
@@ -54,6 +56,10 @@ namespace MyLab.RabbitClient.Consuming
                 }
 
                 strategy.Ack(args.DeliveryTag);
+
+                Log?.Debug("Ack")
+                    .AndFactIs("delivery-tag", args.DeliveryTag)
+                    .Write();
             }
             catch (Exception e)
             {
@@ -63,6 +69,10 @@ namespace MyLab.RabbitClient.Consuming
                     .Write();
 
                 strategy.Nack(args.DeliveryTag);
+
+                Log?.Debug("Nack")
+                    .AndFactIs("delivery-tag", args.DeliveryTag)
+                    .Write();
 
                 if (cContexts != null)
                 {
