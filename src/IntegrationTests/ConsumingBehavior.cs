@@ -4,9 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MyLab.Log;
+using MyLab.RabbitClient.Model;
 using Xunit;
-using LogLabels = MyLab.RabbitClient.LogLabels;
 
 namespace IntegrationTests
 {
@@ -214,52 +213,72 @@ namespace IntegrationTests
             Assert.Equal(10, gotMsg.Content.Id);
         }
 
-        //todo
-        //[Fact]
-        //public async Task ShouldLogConsumingCtxWhenConsumingError()
-        //{
-        //    //Arrange
-        //    var testEntity = new TestEntity();
+        [Fact]
+        public async Task ShouldRedirectToDeadLetterWhenUnhandledException()
+        {
+            //Arrange
+            var deadLetterQueueFactory = new RabbitQueueFactory(TestTools.ChannelProvider)
+            {
+                AutoDelete = true,
+                Prefix = "test"
+            };
 
-        //    var queue = CreateQueue();
-        //    var consumer = new BrokenConsumer();
-        //    var logErrorCatcher = new LogErrorCatcher();
-        //    var logErrorCatcherProvider = new LogErrorCatcherProvider(logErrorCatcher);
+            var exchangeFactory = new RabbitExchangeFactory(RabbitExchangeType.Fanout, TestTools.ChannelProvider)
+            {
+                AutoDelete = true,
+                Prefix = "test"
+            };
 
-        //    var ctxKey = "ctxKey-" + Guid.NewGuid().ToString("N");
-        //    var ctxValue = "ctxValue-" + Guid.NewGuid().ToString("N");
+            string queueName = Guid.NewGuid().ToString("N");
 
-        //    var consumingContext = new AddHeaderConsumingCtx(ctxKey, ctxValue);
+            var deadLetterQueue = deadLetterQueueFactory.CreateWithId(queueName + ":dead-exchange");
+            var deadLetterExchange = exchangeFactory.CreateWithId(queueName + ":dead-exchange");
+            deadLetterQueue.BindToExchange(deadLetterExchange);
+
+            var queueFactory = new RabbitQueueFactory(TestTools.ChannelProvider)
+            {
+                AutoDelete = true,
+                Prefix = "test",
+                DeadLetterExchange = deadLetterExchange.Name
+            };
+
+            var queue = queueFactory.CreateWithName(queueName);
+
+            var brokenConsumer = new BrokenConsumer();
+            var deadLetterConsumer = new TestConsumer();
+
+            var host = CreateHost(queue.Name, brokenConsumer, srv => srv.AddRabbitConsumer(deadLetterQueue.Name, deadLetterConsumer));
+
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
+            await host.StartAsync(cancellationToken);
+
+            var testEntity = new TestEntity
+            {
+                Id = 1,
+                Value = "foo"
+            };
+
+            //Act
             
-        //    var host = CreateHost(queue.Name, consumer,
-        //        srv => srv.AddRabbitCtx(consumingContext),
-        //        l => l.AddProvider(logErrorCatcherProvider));
+            queue.Publish(testEntity);
 
-        //    var cancellationSource = new CancellationTokenSource();
-        //    var cancellationToken = cancellationSource.Token;
-        //    await host.StartAsync(cancellationToken);
+            await Task.Delay(500);
 
-        //    //Act
-        //    queue.Publish(testEntity);
+            cancellationSource.Cancel();
 
-        //    await Task.Delay(500);
+            await host.StopAsync();
 
-        //    cancellationSource.Cancel();
+            host.Dispose();
 
-        //    await host.StopAsync();
+            var gotMsg = deadLetterConsumer.LastMessages.Dequeue();
 
-        //    host.Dispose();
 
-        //    var log = logErrorCatcher.LastError;
+            //Assert
 
-        //    //Assert
-        //    Assert.NotNull(log);
-
-        //    Assert.NotNull(log.Facts);
-        //    Assert.Equal(ctxValue, log.Facts[ctxKey]);
-
-        //    Assert.NotNull(log.Labels);
-        //    Assert.True(log.Labels.ContainsKey(LogLabels.ConsumingError));
-        //}
+            Assert.NotNull(gotMsg);
+            Assert.Equal(1, gotMsg.Content.Id);
+            Assert.Equal("foo", gotMsg.Content.Value);
+        }
     }
 }

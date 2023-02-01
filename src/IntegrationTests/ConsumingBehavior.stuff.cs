@@ -139,9 +139,21 @@ namespace IntegrationTests
 
         private class BrokenConsumer : RabbitConsumer<TestEntity>
         {
+            private readonly Exception _exceptionToThrow;
+
+            public BrokenConsumer(Exception exceptionToThrow)
+            {
+                _exceptionToThrow = exceptionToThrow;
+            }
+            public BrokenConsumer()
+                :this(new Exception("Test exception"))
+            {
+                
+            }
+
             protected override Task ConsumeMessageAsync(ConsumedMessage<TestEntity> consumedMessage)
             {
-                throw new Exception("Test exception");
+                throw _exceptionToThrow;
             }
         }
 
